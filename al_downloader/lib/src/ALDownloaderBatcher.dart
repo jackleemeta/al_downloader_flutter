@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'ALDownloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderPersistentFileManager.dart';
+import 'ALDownloaderStatus.dart';
 
 /// ALDownloader拓展
 ///
@@ -26,6 +27,61 @@ class ALDownloaderBatcher {
 
     for (final url in aNonDuplicatedUrls)
       await ALDownloader.download(url, subDirectoryName: subDirectoryName);
+  }
+
+  /// 总结一组url的下载状态
+  ///
+  /// **parameters**
+  ///
+  /// [urls] 一组url
+  ///
+  /// **return**
+  ///
+  /// [ALDownloaderStatus] 下载状态
+  static ALDownloaderStatus getDownloadStatusForUrls(List<String> urls) {
+    final Map<String, ALDownloaderStatus> aMap = {};
+    for (final url in urls) {
+      final aStatus = ALDownloader.getDownloadStatusForUrl(url);
+
+      if (aStatus == ALDownloaderStatus.downloading) {
+        // 有正在下载的任务
+        return ALDownloaderStatus.downloading;
+      } else if (aStatus == ALDownloaderStatus.pausing) {
+        // 有暂停的任务
+        return ALDownloaderStatus.pausing;
+      }
+
+      aMap[url] = aStatus;
+    }
+
+    final allStatus = aMap.values.toSet();
+
+    if (allStatus.contains(ALDownloaderStatus.downloadFailed)) {
+      // 无正在下载的任务 && 无暂停的任务 && 有一个失败
+      return ALDownloaderStatus.downloadFailed;
+    } else if (allStatus == {ALDownloaderStatus.downloadSuccced}) {
+      // 无正在下载的任务 && 无暂停的任务 && 无失败 && 全都已成功
+      return ALDownloaderStatus.downloadSuccced;
+    }
+    // 无正在下载的任务 && 无失败 && 无暂停的任务 && 有一部分未成功 && 无暂停
+    return ALDownloaderStatus.unstarted;
+  }
+
+  /// 获取一组url的下载进度
+  ///
+  /// 下载成功条数/总条数
+  ///
+  /// **parameters**
+  ///
+  /// [urls] 一组url
+  ///
+  /// **return**
+  ///
+  /// [double] 下载进度
+  static double getProgressForUrls(List<String> urls) {
+    final binder = _ALDownloaderBatcherBinder._(urls);
+    final progress = binder.progress;
+    return progress;
   }
 
   /// 添加监听
