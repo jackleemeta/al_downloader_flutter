@@ -307,9 +307,11 @@ class _ALDownloaderFilePathManager {
     } catch (error) {
       debugPrint("tryCreateCustomDirectory error = $error");
     }
+    return null;
   }
 
   /// 获取[文档目录]
+  // ignore: unused_element
   static Future<String> get localDocumentPath async {
     String aPath;
     try {
@@ -324,6 +326,7 @@ class _ALDownloaderFilePathManager {
   }
 
   /// 获取[临时目录]
+  // ignore: unused_element
   static Future<String> get localTemporaryPath async {
     String aPath;
     try {
@@ -352,7 +355,4 @@ class _ALDownloaderFilePathManager {
     }
     return aPath;
   }
-
-  /// 创建[File对象]
-  localFile(path) => File('$path');
 }

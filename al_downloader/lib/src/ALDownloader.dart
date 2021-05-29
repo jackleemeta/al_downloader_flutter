@@ -427,6 +427,7 @@ class ALDownloader {
   }
 
   /// 根据url从自定义的下载事件列表中取taskId
+  // ignore: unused_element
   static String _getTaskIdFromUrl(String url) {
     var taskId;
     try {
@@ -452,6 +453,7 @@ class ALDownloader {
   }
 
   /// 根据taskId从自定义映射的下载事件列表中取url
+  // ignore: unused_element
   static String _getUrlWith(String taskId) {
     var url;
     try {

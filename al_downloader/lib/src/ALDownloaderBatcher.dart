@@ -182,6 +182,7 @@ class _ALDownloaderBatcherBinder {
   }
 
   /// 下载失败的url列表
+  // ignore: unused_element
   List<String> get _failedUrls {
     List<String> aList;
 
