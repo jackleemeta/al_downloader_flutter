@@ -154,11 +154,11 @@ class ALDownloader {
       final anALDownloadTask = _getALDownloadTaskFromUrl(url);
       final downloadTaskStatus = anALDownloadTask.status;
 
-      if (downloadTaskStatus == DownloadTaskStatus.canceled)
+      if (downloadTaskStatus == DownloadTaskStatus.canceled ||
+          downloadTaskStatus == DownloadTaskStatus.undefined ||
+          downloadTaskStatus == DownloadTaskStatus.enqueued)
         alDownloaderStatus = ALDownloaderStatus.unstarted;
-      else if (downloadTaskStatus == DownloadTaskStatus.undefined ||
-          downloadTaskStatus == DownloadTaskStatus.enqueued ||
-          downloadTaskStatus == DownloadTaskStatus.running)
+      else if (downloadTaskStatus == DownloadTaskStatus.running)
         alDownloaderStatus = ALDownloaderStatus.downloading;
       else if (downloadTaskStatus == DownloadTaskStatus.paused)
         alDownloaderStatus = ALDownloaderStatus.pausing;
@@ -369,16 +369,20 @@ class ALDownloader {
       debugPrint(
           "ALDownloader | _downloadCallback \n 下载成功 url = $url \nid = $id ");
       _alDownloaderBinders?.forEach((element) {
-        if (element.forUrl == url)
+        if (element.forUrl == url) {
+          element.downloaderHandlerHolder?.progressHandler(double_progress);
           element.downloaderHandlerHolder?.successHandler();
+        }
       });
       _alDownloaderBinders.removeWhere((element) => element.forUrl == url);
     } else if (status == DownloadTaskStatus.failed) {
       debugPrint(
           "ALDownloader | _downloadCallback \n 下载失败 url = $url \nid = $id ");
       _alDownloaderBinders?.forEach((element) {
-        if (element.forUrl == url)
+        if (element.forUrl == url) {
+          element.downloaderHandlerHolder?.progressHandler(double_progress);
           element.downloaderHandlerHolder?.failureHandler();
+        }
       });
     } else if (status == DownloadTaskStatus.running) {
       _alDownloaderBinders?.forEach((element) {

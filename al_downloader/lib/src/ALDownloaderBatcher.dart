@@ -40,7 +40,9 @@ class ALDownloaderBatcher {
   /// [ALDownloaderStatus] 下载状态
   static ALDownloaderStatus getDownloadStatusForUrls(List<String> urls) {
     final Map<String, ALDownloaderStatus> aMap = {};
-    for (final url in urls) {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+
+    for (final url in aNonDuplicatedUrls) {
       final aStatus = ALDownloader.getDownloadStatusForUrl(url);
 
       if (aStatus == ALDownloaderStatus.downloading) {
@@ -59,7 +61,9 @@ class ALDownloaderBatcher {
     if (allStatus.contains(ALDownloaderStatus.downloadFailed)) {
       // 无正在下载的任务 && 无暂停的任务 && 有一个失败
       return ALDownloaderStatus.downloadFailed;
-    } else if (allStatus == {ALDownloaderStatus.downloadSuccced}) {
+    } else if (allStatus
+            .difference({ALDownloaderStatus.downloadSuccced}).length ==
+        0) {
       // 无正在下载的任务 && 无暂停的任务 && 无失败 && 全都已成功
       return ALDownloaderStatus.downloadSuccced;
     }
@@ -79,7 +83,8 @@ class ALDownloaderBatcher {
   ///
   /// [double] 下载进度
   static double getProgressForUrls(List<String> urls) {
-    final binder = _ALDownloaderBatcherBinder._(urls);
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+    final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
     final progress = binder.progress;
     return progress;
   }
@@ -101,25 +106,21 @@ class ALDownloaderBatcher {
     for (final url in aNonDuplicatedUrls) {
       final aDownloaderHandlerInterface =
           ALDownloaderHandlerInterface(progressHandler: (progress) {
-        debugPrint("ALDownloaderProlongation | 正在下载， url = $url");
+        debugPrint("ALDownloaderBatcher | 正在下载， url = $url");
 
         downloaderHandlerInterface?.progressHandler(binder.progress);
       }, successHandler: () {
-        debugPrint("ALDownloaderProlongation | 下载成功， url = $url");
-
-        // 下载成功：ALDownloader中的下载成功个数 = targetUrls
-        downloaderHandlerInterface?.progressHandler(binder.progress);
+        debugPrint("ALDownloaderBatcher | 下载成功， url = $url");
 
         if (binder._isSuccess)
           _tryToCallBackForCompletion(binder, downloaderHandlerInterface);
       }, failureHandler: () {
-        debugPrint("ALDownloaderProlongation | 下载失败， url = $url");
+        debugPrint("ALDownloaderBatcher | 下载失败， url = $url");
 
-        // 下载失败： ALDownloader中的下载处理过的个数 = targetUrls， 成功的个数 < 总共的个数
         if (binder._isOver && !binder._isSuccess)
           downloaderHandlerInterface?.failureHandler();
       }, pausedHandler: () {
-        debugPrint("ALDownloaderProlongation | 已暂停， url = $url");
+        debugPrint("ALDownloaderBatcher | 已暂停， url = $url");
         downloaderHandlerInterface?.pausedHandler();
       });
 
@@ -134,7 +135,9 @@ class ALDownloaderBatcher {
   ///
   /// [urls] 资源远端地址列表
   static void removeALDownloaderHandlerInterfaceForUrls(List<String> urls) {
-    urls?.forEach((element) =>
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+
+    aNonDuplicatedUrls?.forEach((element) =>
         ALDownloader.removeALDownloaderHandlerInterfaceForUrl(element));
   }
 
@@ -144,7 +147,9 @@ class ALDownloaderBatcher {
   ///
   /// [urls] 资源远端地址列表
   static Future<void> pause(List<String> urls) async {
-    for (final url in urls) await ALDownloader.pause(url);
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+
+    for (final url in aNonDuplicatedUrls) await ALDownloader.pause(url);
   }
 
   /// 移除下载资源
@@ -155,7 +160,9 @@ class ALDownloaderBatcher {
   ///
   /// [urls] 资源远端地址列表
   static Future<void> clear(List<String> urls) async {
-    for (final url in urls) {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+
+    for (final url in aNonDuplicatedUrls) {
       await ALDownloader.cancel(url);
       await ALDownloader.remove(url);
     }
@@ -265,9 +272,13 @@ class _ALDownloaderBatcherBinder {
     double aDouble = 0;
 
     try {
-      dynamic result = _succeedUrls.length / _targetUrls.length;
-      result = result.toStringAsFixed(2);
-      aDouble = double.tryParse(result);
+      if (_targetUrls.length == 0) {
+        aDouble = 0;
+      } else {
+        dynamic result = _succeedUrls.length / _targetUrls.length;
+        result = result.toStringAsFixed(2);
+        aDouble = double.tryParse(result);
+      }
     } catch (error) {
       aDouble = 0;
       debugPrint("$error");
