@@ -1,4 +1,19 @@
+import 'package:al_downloader/al_downloader.dart';
 import 'package:flutter/material.dart';
+
+final kTestPNGs = [
+  "https://upload-images.jianshu.io/upload_images/9955565-51a4b4f35bd7973f.png",
+  "https://upload-images.jianshu.io/upload_images/9955565-e99b6bd33b388feb.png",
+  "https://upload-images.jianshu.io/upload_images/9955565-3aafbc20dd329e58.png"
+];
+
+final kTestVideos = [
+  "http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4",
+  "http://vfx.mtime.cn/Video/2019/03/21/mp4/190321153853126488.mp4",
+  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4",
+  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4",
+  "http://vfx.mtime.cn/Video/2019/03/18/mp4/190318231014076505.mp4"
+];
 
 void main() {
   runApp(MyApp());
@@ -56,6 +71,11 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+
+      testDownload();
+      testBatcherDownload();
+      testPath();
+      testStatus();
     });
   }
 
@@ -109,5 +129,94 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  /// [ALDownloader.download]
+  void testDownload() async {
+    final url = kTestPNGs.first;
+
+    ALDownloader.download(url,
+        downloaderHandlerInterface:
+            ALDownloaderHandlerInterface(progressHandler: (progress) {
+          debugPrint("ALDownloader | 正在下载， url = $url, progress = $progress");
+        }, successHandler: () {
+          debugPrint("ALDownloader | 下载成功， url = $url");
+        }, failureHandler: () {
+          debugPrint("ALDownloader | 下载失败， url = $url");
+        }, pausedHandler: () {
+          debugPrint("ALDownloader | 已暂停， url = $url");
+        }));
+  }
+
+  /// 批量下载
+  testBatcherDownload() async {
+    ALDownloaderBatcher.downloadUrls(kTestVideos,
+        downloaderHandlerInterface:
+            ALDownloaderHandlerInterface(progressHandler: (progress) {
+          debugPrint("ALDownloader | 正在下载, progress = $progress");
+        }, successHandler: () {
+          debugPrint("ALDownloader | 下载成功");
+        }, failureHandler: () {
+          debugPrint("ALDownloader | 下载失败");
+        }, pausedHandler: () {
+          debugPrint("ALDownloader | 已暂停");
+        }));
+  }
+
+  /// 路径
+  testPath() async {
+    final url = kTestPNGs.first;
+
+    final model = await ALDownloaderPersistentFileManager
+        .lazyGetALDownloaderPathModelFromUrl(url);
+
+    final path2 = await ALDownloaderPersistentFileManager
+        .getAbsolutePathOfDirectoryWithUrl(url);
+
+    final path3 = await ALDownloaderPersistentFileManager
+        .getAbsoluteVirtualPathOfFileWithUrl(url);
+
+    final path4 = await ALDownloaderPersistentFileManager
+        .getAbsolutePhysicalPathOfFileWithUrl(url);
+
+    final isExist = await ALDownloaderPersistentFileManager
+        .isExistAbsolutePhysicalPathOfFileForUrl(url);
+
+    final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
+
+    debugPrint("ALDownloader | 懒创建物理路径模型， url = $url, 路径模型 = $model\n");
+    debugPrint("ALDownloader | 获取文件夹绝对物理路径， url = $url, 路径 = $path2\n");
+    debugPrint("ALDownloader | 获取文件虚拟路径， url = $url, 路径 = $path3\n");
+    debugPrint("ALDownloader | 获取文件物理路径， url = $url, 路径 = $path4\n");
+    debugPrint("ALDownloader | 是否存在物理路径， url = $url, 是否存在 = $isExist\n");
+    debugPrint("ALDownloader | 获取虚拟/物理文件名， url = $url, 文件名 = $fileName\n");
+  }
+
+  testAddInterface() async {
+    final url = kTestPNGs.first;
+
+    ALDownloader.addALDownloaderHandlerInterface(
+        ALDownloaderHandlerInterface(progressHandler: (progress) {
+          debugPrint("ALDownloader | 正在下载， url = $url, progress = $progress");
+        }, successHandler: () {
+          debugPrint("ALDownloader | 下载成功， url = $url");
+        }, failureHandler: () {
+          debugPrint("ALDownloader | 下载失败， url = $url");
+        }, pausedHandler: () {
+          debugPrint("ALDownloader | 已暂停， url = $url");
+        }),
+        url);
+  }
+
+  testRemoveInterface() async {
+    final url = kTestPNGs.first;
+    ALDownloader.removeALDownloaderHandlerInterfaceForUrl(url);
+  }
+
+  testStatus() {
+    final url = kTestPNGs.first;
+
+    ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
+    debugPrint("ALDownloader | 获取下载状态， url = $url, status= $status\n");
   }
 }

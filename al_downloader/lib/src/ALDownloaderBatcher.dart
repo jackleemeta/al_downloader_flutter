@@ -16,17 +16,13 @@ class ALDownloaderBatcher {
   /// [urls] url列表
   ///
   /// [downloaderHandlerInterface] 回调句柄池
-  ///
-  /// [subDirectoryName] 子文件夹名称
   static Future<void> downloadUrls(List<String> urls,
-      {ALDownloaderHandlerInterface downloaderHandlerInterface,
-      String subDirectoryName}) async {
+      {ALDownloaderHandlerInterface downloaderHandlerInterface}) async {
     addALDownloaderHandlerInterface(downloaderHandlerInterface, urls);
 
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
 
-    for (final url in aNonDuplicatedUrls)
-      await ALDownloader.download(url, subDirectoryName: subDirectoryName);
+    for (final url in aNonDuplicatedUrls) await ALDownloader.download(url);
   }
 
   /// 总结一组url的下载状态
@@ -175,13 +171,10 @@ class ALDownloaderBatcher {
   /// **parameters**
   ///
   /// [aboutGeneralUrl] url
-  ///
-  /// [subDirectoryName] 子文件夹名称
   static void removeDirectory(
       String subDirectoryName, String aboutGeneralUrl) async {
     final pathOfDirctory = await ALDownloaderPersistentFileManager
-        .getAbsolutePathOfDirectoryWithUrl(aboutGeneralUrl,
-            subDirectoryName: subDirectoryName);
+        .getAbsolutePathOfDirectoryWithUrl(aboutGeneralUrl);
 
     debugPrint(
         "ALDownloaderProlongation removeDirectory | pathOfDirctory = $pathOfDirctory");

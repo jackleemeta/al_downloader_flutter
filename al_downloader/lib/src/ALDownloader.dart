@@ -41,11 +41,8 @@ class ALDownloader {
   /// [url] 资源远端地址
   ///
   /// [downloaderHandlerInterface] 下载句柄池
-  ///
-  /// [subDirectoryName] 子文件夹名称
   static download(String url,
-      {ALDownloaderHandlerInterface downloaderHandlerInterface,
-      String subDirectoryName}) async {
+      {ALDownloaderHandlerInterface downloaderHandlerInterface}) async {
     if (url == null) throw "ALDownloader download error = url为空";
 
     if (downloaderHandlerInterface != null) {
@@ -61,8 +58,7 @@ class ALDownloader {
       // 根据[url]获取文件的`物理目录路径`和`文件名`
       final alDownloaderPathComponentModel =
           await ALDownloaderPersistentFileManager
-              .lazyGetALDownloaderPathModelFromUrl(url,
-                  subDirectoryName: subDirectoryName);
+              .lazyGetALDownloaderPathModelFromUrl(url);
 
       // 加入任务队列
       final taskId = await FlutterDownloader.enqueue(
@@ -494,7 +490,6 @@ class _ALDownloadTask {
   final String url;
 
   String taskId;
-  String subDirectoryName;
   int progress = 0;
   DownloadTaskStatus status = DownloadTaskStatus.undefined;
 
