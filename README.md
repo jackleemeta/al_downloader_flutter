@@ -1,5 +1,15 @@
 # al_downloader
 
+## Import：
+
+```
+al_downloader:
+  git:
+    url: https://github.com/jackleemeta/al_downloader_flutter
+    ref: master
+    path: al_downloader
+```
+
 ## Usage
 
 ### ALDownloader - 下载
