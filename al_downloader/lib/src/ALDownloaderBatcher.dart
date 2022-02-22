@@ -171,8 +171,7 @@ class ALDownloaderBatcher {
   /// **parameters**
   ///
   /// [aboutGeneralUrl] url
-  static void removeDirectory(
-      String subDirectoryName, String aboutGeneralUrl) async {
+  static void removeDirectory(String aboutGeneralUrl) async {
     final pathOfDirctory = await ALDownloaderPersistentFileManager
         .getAbsolutePathOfDirectoryWithUrl(aboutGeneralUrl);
 
