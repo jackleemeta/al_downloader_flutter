@@ -6,21 +6,21 @@
     "configurations": [
         {
             "name": "debug_example",
-            "program": "example/lib/main.dart",
+            "program": "al_downloader/example/lib/main.dart",
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug"
         },
         {
             "name": "profile_example",
-            "program": "example/lib/main.dart",
+            "program": "al_downloader/example/lib/main.dart",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
             "name": "release_example",
-            "program": "example/lib/main.dart",
+            "program": "al_downloader/example/lib/main.dart",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
