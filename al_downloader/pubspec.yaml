@@ -2,6 +2,7 @@ name: al_downloader
 description: a downloader
 version: 0.0.1
 homepage: https://github.com/jackleemeta/al_downloader_flutter
+maintainer: jackleemeta (jackleemeta@outlook.com)
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
