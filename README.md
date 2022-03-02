@@ -11,16 +11,6 @@
 * 支持批量下载
 * 自动管理文件
 
-## Import
-
-```
-al_downloader:
-  git:
-    url: https://github.com/jackleemeta/al_downloader_flutter
-    ref: master
-    path: al_downloader
-```
-
 ## Usage
 
 ### ALDownloader - 下载
