@@ -1,6 +1,17 @@
 # al_downloader
 
-## Import：
+## Summary
+
+开箱即用的下载器，基于[flutter_downloader](https://pub.dev/packages/flutter_downloader)
+
+* 通过url管理下载任务，而不是taskId
+* 精简下载状态
+* I/O减少
+* 提供便利的下载句柄
+* 支持批量下载
+* 自动管理文件
+
+## Import
 
 ```
 al_downloader:
