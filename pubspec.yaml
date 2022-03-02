@@ -2,7 +2,7 @@ name: al_downloader
 description: >-
   A downloader that manages download tasks by url rather than task id, 
   simplifies download status, provides convenient download handler, and so on.
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/jackleemeta/al_downloader_flutter
 maintainer: jackleemeta (jackleemeta@outlook.com)
 

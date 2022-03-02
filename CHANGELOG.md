@@ -1,3 +1,7 @@
+## 1.0.3 - March 2, 2022
+
+- fixed error
+
 ## 1.0.2 - March 2, 2022
 
 - update readme
