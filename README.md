@@ -124,3 +124,11 @@ final isExist = await ALDownloaderPersistentFileManager.isExistAbsolutePhysicalP
 /// 获取虚拟/物理文件名
 final fileName = await ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
 ```
+
+## 原生配置
+- 即[flutter_downloader/Readme](https://pub.dev/packages/flutter_downloader)的原生配置
+
+## Demo（以iOS为例）
+- [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
+- [AppDelegate.swift](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/AppDelegate.swift)
+- [Info.plist](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/Info.plist)
