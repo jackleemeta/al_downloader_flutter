@@ -1,7 +1,6 @@
 name: al_downloader
-description: al_downloader.
+description: a downloader
 version: 0.0.1
-publish_to: none
 homepage: https://github.com/jackleemeta/al_downloader_flutter
 
 environment:
