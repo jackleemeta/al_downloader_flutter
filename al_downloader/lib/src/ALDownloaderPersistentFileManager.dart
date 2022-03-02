@@ -34,7 +34,7 @@ class ALDownloaderPersistentFileManager {
         ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFrom(url);
 
     // 1级文件夹 - 局部
-    final dir = _alDownloaderFileTypeDirKVs[model.type];
+    final dir = _alDownloaderFileTypeDirKVs[model.type]!;
 
     // 2级文件夹 - 局部
     final extensionResourcePath = dir + "/";
@@ -73,6 +73,8 @@ class ALDownloaderPersistentFileManager {
 
   /// 根据[url]获取`虚拟文件路径`
   ///
+  /// 返回值一定不为null
+  ///
   /// **parameters:**
   ///
   /// [url] 文件远端路径
@@ -81,29 +83,27 @@ class ALDownloaderPersistentFileManager {
   ///
   /// `虚拟文件路径`
   static Future<String> getAbsoluteVirtualPathOfFileWithUrl(String url) async {
-    String filePath;
+    String? filePath;
     // 根据url生成文件类型的数据模型
     final model =
         ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFrom(url);
 
     // 1级文件夹 - 局部
-    final aDirString = _alDownloaderFileTypeDirKVs[model.type];
+    final aDirString = _alDownloaderFileTypeDirKVs[model.type]!;
     final theRootDir = await _theRootDir;
     final dirForRootToFirstLevel = theRootDir + aDirString;
     final fileName = _assembleFileName(url, model); // 文件名
 
     try {
-      final aDir = Directory(dirForRootToFirstLevel);
-      final aList = aDir.listSync(recursive: true);
-      filePath =
-          aList.firstWhere((element) => element.path.endsWith(fileName)).path;
-
-      debugPrint("getAbsoluteVirtualPathOfFileWithUrlfilePath = $filePath");
+      filePath = dirForRootToFirstLevel + fileName;
+      debugPrint("getAbsoluteVirtualPathOfFileWithUrl | filePath = $filePath");
     } catch (error) {
       debugPrint("getAbsoluteVirtualPathOfFileWithUrl | error = $error");
     }
 
-    return filePath;
+    debugPrint("getAbsoluteVirtualPathOfFileWithUrl");
+
+    return filePath!;
   }
 
   /// 根据[url]获取`物理文件路径`
@@ -117,14 +117,15 @@ class ALDownloaderPersistentFileManager {
   /// **return**
   ///
   /// `物理文件路径`
-  static Future<String> getAbsolutePhysicalPathOfFileWithUrl(String url) async {
-    String filePath = await getAbsoluteVirtualPathOfFileWithUrl(url); // 文件路径
-
+  static Future<String?> getAbsolutePhysicalPathOfFileWithUrl(
+      String url) async {
+    String virtualfilePath =
+        await getAbsoluteVirtualPathOfFileWithUrl(url); // 文件路径
+    String? filePath;
     try {
-      File aFile = File(filePath); // 物理文件
-      if (!aFile.existsSync()) filePath = null;
+      File aFile = File(virtualfilePath); // 物理文件
+      if (aFile.existsSync()) filePath = virtualfilePath;
     } catch (error) {
-      filePath = null;
       debugPrint("getAbsolutePhysicalPathOfFileWithUrl | error = $error");
     }
 
@@ -132,7 +133,7 @@ class ALDownloaderPersistentFileManager {
   }
 
   /// 获取所有存储目录
-  static Future<List<String>> get dirs async {
+  static Future<List<String>?> get dirs async {
     try {
       final String theRootDir = await _theRootDir;
 
@@ -160,7 +161,7 @@ class ALDownloaderPersistentFileManager {
   /// bool `是否存在`
   static Future<bool> isExistAbsolutePhysicalPathOfFileForUrl(
           String url) async =>
-      getAbsolutePhysicalPathOfFileWithUrl(url) != null;
+      await getAbsolutePhysicalPathOfFileWithUrl(url) != null;
 
   /// 根据[url]获取`文件名`
   ///
@@ -256,7 +257,7 @@ class ALDownloaderPathComponentModel {
 
 class _ALDownloaderFilePathManager {
   /// 创建目录
-  static Future<Directory> tryCreateCustomDirectory(String path,
+  static Future<Directory?> tryCreateCustomDirectory(String path,
       {bool recursive = false}) async {
     var dir = Directory(path);
     try {
@@ -270,8 +271,8 @@ class _ALDownloaderFilePathManager {
 
   /// 获取[文档目录]
   // ignore: unused_element
-  static Future<String> get localDocumentDirectory async {
-    String aPath;
+  static Future<String?> get localDocumentDirectory async {
+    String? aPath;
     try {
       final aDir = await getApplicationDocumentsDirectory();
       aPath = aDir.path;
@@ -286,7 +287,7 @@ class _ALDownloaderFilePathManager {
   /// 获取[临时目录]
   // ignore: unused_element
   static Future<String> get localTemporaryDirectory async {
-    String aPath;
+    String? aPath;
     try {
       final aDir = await getTemporaryDirectory();
       aPath = aDir.path;
@@ -295,19 +296,24 @@ class _ALDownloaderFilePathManager {
     } catch (error) {
       debugPrint("localTemporaryPath error = $error");
     }
-    return aPath;
+    return aPath!;
   }
 
   /// 获取[外部存储目录]
   ///
   /// No iOS
-  static Future<String> get localExternalStorageDirectory async {
-    String aPath;
+  // ignore: unused_element
+  static Future<String?> get localExternalStorageDirectory async {
+    String? aPath;
     try {
       final aDir = await getExternalStorageDirectory();
-      aPath = aDir.path;
+      if (aDir != null) {
+        aPath = aDir.path;
 
-      debugPrint('外部存储目录: ' + aPath);
+        debugPrint('外部存储目录: ' + aPath);
+      } else {
+        debugPrint('外部存储目录: 无');
+      }
     } catch (error) {
       debugPrint("localExternalStorageDirectory error = $error");
     }

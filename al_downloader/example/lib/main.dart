@@ -72,9 +72,9 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
 
+      testPath();
       testDownload();
       testBatcherDownload();
-      testPath();
       testStatus();
     });
   }
@@ -138,13 +138,13 @@ class _MyHomePageState extends State<MyHomePage> {
     ALDownloader.download(url,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | 正在下载， url = $url, progress = $progress");
+          debugPrint("ALDownloader | 正在下载，url = $url, progress = $progress");
         }, successHandler: () {
-          debugPrint("ALDownloader | 下载成功， url = $url");
+          debugPrint("ALDownloader | 下载成功，url = $url");
         }, failureHandler: () {
-          debugPrint("ALDownloader | 下载失败， url = $url");
+          debugPrint("ALDownloader | 下载失败，url = $url");
         }, pausedHandler: () {
-          debugPrint("ALDownloader | 已暂停， url = $url");
+          debugPrint("ALDownloader | 已暂停，url = $url");
         }));
   }
 
@@ -184,12 +184,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
 
-    debugPrint("ALDownloader | 懒创建物理路径模型， url = $url, 路径模型 = $model\n");
-    debugPrint("ALDownloader | 获取文件夹绝对物理路径， url = $url, 路径 = $path2\n");
-    debugPrint("ALDownloader | 获取文件虚拟路径， url = $url, 路径 = $path3\n");
-    debugPrint("ALDownloader | 获取文件物理路径， url = $url, 路径 = $path4\n");
-    debugPrint("ALDownloader | 是否存在物理路径， url = $url, 是否存在 = $isExist\n");
-    debugPrint("ALDownloader | 获取虚拟/物理文件名， url = $url, 文件名 = $fileName\n");
+    debugPrint("ALDownloader | 懒创建物理路径模型，url = $url, 路径模型 = $model\n");
+    debugPrint("ALDownloader | 获取文件夹绝对物理路径，url = $url, 路径 = $path2\n");
+    debugPrint("ALDownloader | 获取文件虚拟路径，url = $url, 路径 = $path3\n");
+    debugPrint("ALDownloader | 获取文件物理路径，url = $url, 路径 = $path4\n");
+    debugPrint("ALDownloader | 是否存在物理路径，url = $url, 是否存在 = $isExist\n");
+    debugPrint("ALDownloader | 获取虚拟/物理文件名，url = $url, 文件名 = $fileName\n");
   }
 
   testAddInterface() async {
@@ -197,13 +197,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
     ALDownloader.addALDownloaderHandlerInterface(
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | 正在下载， url = $url, progress = $progress");
+          debugPrint("ALDownloader | 正在下载，url = $url, progress = $progress");
         }, successHandler: () {
-          debugPrint("ALDownloader | 下载成功， url = $url");
+          debugPrint("ALDownloader | 下载成功，url = $url");
         }, failureHandler: () {
-          debugPrint("ALDownloader | 下载失败， url = $url");
+          debugPrint("ALDownloader | 下载失败，url = $url");
         }, pausedHandler: () {
-          debugPrint("ALDownloader | 已暂停， url = $url");
+          debugPrint("ALDownloader | 已暂停，url = $url");
         }),
         url);
   }
@@ -217,6 +217,6 @@ class _MyHomePageState extends State<MyHomePage> {
     final url = kTestPNGs.first;
 
     ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
-    debugPrint("ALDownloader | 获取下载状态， url = $url, status= $status\n");
+    debugPrint("ALDownloader | 获取下载状态，url = $url, status= $status\n");
   }
 }

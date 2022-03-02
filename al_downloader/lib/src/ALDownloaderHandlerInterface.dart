@@ -5,10 +5,10 @@ class ALDownloaderHandlerInterface {
       this.successHandler,
       this.failureHandler,
       this.pausedHandler});
-  final ALDownloaderProgressHandler progressHandler;
-  final ALDownloaderSuccessHandler successHandler;
-  final ALDownloaderFailureHandler failureHandler;
-  final ALDownloaderPasusedHandler pausedHandler;
+  final ALDownloaderProgressHandler? progressHandler;
+  final ALDownloaderSuccessHandler? successHandler;
+  final ALDownloaderFailureHandler? failureHandler;
+  final ALDownloaderPasusedHandler? pausedHandler;
 }
 
 /// 下载进度

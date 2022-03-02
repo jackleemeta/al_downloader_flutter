@@ -41,9 +41,9 @@ class ALDownloader {
   /// [url] 资源远端地址
   ///
   /// [downloaderHandlerInterface] 下载句柄池
-  static download(String url,
-      {ALDownloaderHandlerInterface downloaderHandlerInterface}) async {
-    if (url == null) throw "ALDownloader download error = url为空";
+  static download(String? url,
+      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
+    if (url == null) throw "ALDownloader | download error = url为空";
 
     if (downloaderHandlerInterface != null) {
       final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface);
@@ -68,10 +68,11 @@ class ALDownloader {
           showNotification: false,
           openFileFromNotification: false);
 
-      _addALDownloadTaskOrReplaceALDownloadTaskId(
-          url, taskId, DownloadTaskStatus.enqueued);
+      if (taskId != null)
+        _addALDownloadTaskOrReplaceALDownloadTaskId(
+            url, taskId, DownloadTaskStatus.enqueued);
 
-      debugPrint("ALDownloader | 生成了一个下载任务, 下载状态 = enquued， taskId = $taskId");
+      debugPrint("ALDownloader | 生成了一个下载任务, 下载状态 = enqueued，taskId = $taskId");
     } else if (anALDownloadTask.status == DownloadTaskStatus.failed ||
         anALDownloadTask.status == DownloadTaskStatus.canceled) {
       final newTaskIdForRetry =
@@ -90,9 +91,11 @@ class ALDownloader {
     } else if (anALDownloadTask.status == DownloadTaskStatus.complete) {
       debugPrint(
           "ALDownloader | try to download downloadtaskOfUrl = $url, url is complete");
-      _alDownloaderBinders?.forEach((element) {
-        if (element.forUrl == url)
-          element.downloaderHandlerHolder?.successHandler();
+      _alDownloaderBinders.forEach((element) {
+        if (element.forUrl == url) {
+          final successHandler = element.downloaderHandlerHolder.successHandler;
+          if (successHandler != null) successHandler();
+        }
       });
       _alDownloaderBinders.removeWhere((element) => element.forUrl == url);
     } else if (anALDownloadTask.status == DownloadTaskStatus.running) {
@@ -115,11 +118,11 @@ class ALDownloader {
   ///
   /// [url] 绑定的资源远端地址
   static void addALDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
-    if (downloaderHandlerInterface != null) {
-      final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface);
-      _alDownloaderBinders.add(aBinder);
-    }
+      ALDownloaderHandlerInterface? downloaderHandlerInterface,
+      String? forUrl) {
+    if (downloaderHandlerInterface == null || forUrl == null) return;
+    final aBinder = _ALDownloaderBinder(forUrl, downloaderHandlerInterface);
+    _alDownloaderBinders.add(aBinder);
   }
 
   /// 移除下载句柄池
@@ -148,7 +151,7 @@ class ALDownloader {
 
     try {
       final anALDownloadTask = _getALDownloadTaskFromUrl(url);
-      final downloadTaskStatus = anALDownloadTask.status;
+      final downloadTaskStatus = anALDownloadTask?.status;
 
       if (downloadTaskStatus == DownloadTaskStatus.canceled ||
           downloadTaskStatus == DownloadTaskStatus.undefined ||
@@ -202,6 +205,9 @@ class ALDownloader {
   /// [url] 资源远端地址
   static cancel(String url) async {
     final alDownloadTask = _getALDownloadTaskFromUrl(url);
+
+    if (alDownloadTask == null) return;
+
     if (alDownloadTask.status == DownloadTaskStatus.running) {
       final taskId = alDownloadTask.taskId;
       await FlutterDownloader.cancel(taskId: taskId);
@@ -215,9 +221,8 @@ class ALDownloader {
   static cancelAll() async {
     await FlutterDownloader.cancelAll();
     for (final downloadTask in _alDownloadTasks) {
-      if (downloadTask.status == DownloadTaskStatus.running) {
+      if (downloadTask.status == DownloadTaskStatus.running)
         downloadTask.status = DownloadTaskStatus.canceled;
-      }
     }
   }
 
@@ -233,8 +238,15 @@ class ALDownloader {
   static pause(String url) async {
     try {
       final alDownloadTask = _getALDownloadTaskFromUrl(url);
+
+      if (alDownloadTask == null) {
+        debugPrint(
+            "ALDownloader | pause 将要暂停的url = $url, 但url的alDownloadTask为空");
+        return;
+      }
+
       debugPrint(
-          "ALDownloader | pause 将要暂停的url = url = $url, alDownloadTask.status = ${alDownloadTask.status}");
+          "ALDownloader | pause 将要暂停的url = $url, alDownloadTask.status = ${alDownloadTask.status}");
 
       final taskId = alDownloadTask.taskId;
       if (alDownloadTask.status == DownloadTaskStatus.undefined ||
@@ -269,6 +281,13 @@ class ALDownloader {
   static remove(String url) async {
     try {
       final alDownloaderTask = _getALDownloadTaskFromUrl(url);
+
+      if (alDownloaderTask == null) {
+        debugPrint(
+            "ALDownloader | remove alDownloaderTask of url = $url, url的_ALDownloadTask为空");
+        return;
+      }
+
       await FlutterDownloader.remove(
           taskId: alDownloaderTask.taskId,
           shouldDeleteContent:
@@ -293,14 +312,14 @@ class ALDownloader {
   ///
   /// 添加一个新的自定义任务 或 更新[url]映射的已有任务的taskId
   static void _addALDownloadTaskOrReplaceALDownloadTaskId(
-      String url, String taskId, DownloadTaskStatus status) {
+      String? url, String taskId, DownloadTaskStatus status) {
     if (url == null) {
       debugPrint(
           "_addALDownloadTaskOrReplaceALDownloadTaskId error url == null");
       return;
     }
 
-    _ALDownloadTask anALDownloadTask;
+    _ALDownloadTask? anALDownloadTask;
 
     try {
       anALDownloadTask =
@@ -338,9 +357,9 @@ class ALDownloader {
   /// 被[FlutterDownloader]绑定的回调
   static void _downloadCallback(
       String id, DownloadTaskStatus status, int progress) {
-    final SendPort send =
+    final SendPort? send =
         IsolateNameServer.lookupPortByName(_kDownloaderSendPort);
-    send.send([id, status, progress]);
+    send?.send([id, status, progress]);
   }
 
   /// 处理[FlutterDownloader]回调数据
@@ -359,36 +378,49 @@ class ALDownloader {
 
     // ignore: non_constant_identifier_names
     final double_progress =
-        double.tryParse(((progress / 100).toStringAsFixed(2)));
+        double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
 
     if (status == DownloadTaskStatus.complete) {
       debugPrint(
           "ALDownloader | _downloadCallback \n 下载成功 url = $url \nid = $id ");
-      _alDownloaderBinders?.forEach((element) {
+      _alDownloaderBinders.forEach((element) {
         if (element.forUrl == url) {
-          element.downloaderHandlerHolder?.progressHandler(double_progress);
-          element.downloaderHandlerHolder?.successHandler();
+          final progressHandler =
+              element.downloaderHandlerHolder.progressHandler;
+          if (progressHandler != null) progressHandler(double_progress);
+
+          final successHandler = element.downloaderHandlerHolder.successHandler;
+          if (successHandler != null) successHandler();
         }
       });
       _alDownloaderBinders.removeWhere((element) => element.forUrl == url);
     } else if (status == DownloadTaskStatus.failed) {
       debugPrint(
           "ALDownloader | _downloadCallback \n 下载失败 url = $url \nid = $id ");
-      _alDownloaderBinders?.forEach((element) {
+      _alDownloaderBinders.forEach((element) {
         if (element.forUrl == url) {
-          element.downloaderHandlerHolder?.progressHandler(double_progress);
-          element.downloaderHandlerHolder?.failureHandler();
+          final progressHandler =
+              element.downloaderHandlerHolder.progressHandler;
+          if (progressHandler != null) progressHandler(double_progress);
+
+          final failureHandler = element.downloaderHandlerHolder.failureHandler;
+          if (failureHandler != null) failureHandler();
         }
       });
     } else if (status == DownloadTaskStatus.running) {
-      _alDownloaderBinders?.forEach((element) {
-        if (element.forUrl == url)
-          element.downloaderHandlerHolder?.progressHandler(double_progress);
+      _alDownloaderBinders.forEach((element) {
+        if (element.forUrl == url) {
+          final progressHandler =
+              element.downloaderHandlerHolder.progressHandler;
+          if (progressHandler != null) progressHandler(double_progress);
+        }
       });
     } else if (status == DownloadTaskStatus.paused) {
-      _alDownloaderBinders?.forEach((element) {
-        if (element.forUrl == url)
-          element.downloaderHandlerHolder?.pausedHandler();
+      _alDownloaderBinders.forEach((element) {
+        if (element.forUrl == url) {
+          final pausedHandler = element.downloaderHandlerHolder.pausedHandler;
+          if (pausedHandler != null) pausedHandler();
+        }
       });
     }
 
@@ -399,24 +431,28 @@ class ALDownloader {
   /// 加载[FlutterDownloader]本地数据库任务到内存缓存 & 尝试执行任务
   static _loadAndTryToRunTask() async {
     final tasks = await FlutterDownloader.loadTasks();
-    tasks.forEach((element) {
+    if (tasks != null) {
+      tasks.forEach((element) {
+        debugPrint(
+            "_loadAndTryToRunTask element url = ${element.url}, status = ${element.status}, element url = ${element.taskId}");
+      });
+
       debugPrint(
-          "_loadAndTryToRunTask element url = ${element.url}, status = ${element.status}, element url = ${element.taskId}");
-    });
-    debugPrint(
-        "ALDownloader | _loadAndTryToRunTask tasks.length = ${tasks.length}");
-    final aList = tasks.map((element) {
-      final anALDownloadTask = _ALDownloadTask(element.url);
-      anALDownloadTask.taskId = element.taskId;
-      anALDownloadTask.status = element.status;
-      return anALDownloadTask;
-    }).toList();
-    _alDownloadTasks.addAll(aList);
+          "ALDownloader | _loadAndTryToRunTask tasks.length = ${tasks.length}");
+
+      final aList = tasks.map((element) {
+        final anALDownloadTask = _ALDownloadTask(element.url);
+        anALDownloadTask.taskId = element.taskId;
+        anALDownloadTask.status = element.status;
+        return anALDownloadTask;
+      }).toList();
+      _alDownloadTasks.addAll(aList);
+    }
   }
 
   /// 根据url从自定义映射的下载事件列表中取[_ALDownloadTask]
-  static _ALDownloadTask _getALDownloadTaskFromUrl(String url) {
-    var anALDownloadTask;
+  static _ALDownloadTask? _getALDownloadTaskFromUrl(String url) {
+    _ALDownloadTask? anALDownloadTask;
     try {
       anALDownloadTask =
           _alDownloadTasks.firstWhere((element) => url == element.url);
@@ -428,8 +464,8 @@ class ALDownloader {
 
   /// 根据url从自定义的下载事件列表中取taskId
   // ignore: unused_element
-  static String _getTaskIdFromUrl(String url) {
-    var taskId;
+  static String? _getTaskIdFromUrl(String url) {
+    String? taskId;
     try {
       taskId =
           _alDownloadTasks.firstWhere((element) => url == element.url).taskId;
@@ -441,8 +477,8 @@ class ALDownloader {
 
   /// 根据url从自定义的下载事件列表中取[_ALDownloadTask]
   // ignore: unused_element
-  static _ALDownloadTask _getALDownloadTaskFromTaskId(String taskId) {
-    var anALDownloadTask;
+  static _ALDownloadTask? _getALDownloadTaskFromTaskId(String taskId) {
+    _ALDownloadTask? anALDownloadTask;
     try {
       anALDownloadTask =
           _alDownloadTasks.firstWhere((element) => taskId == element.taskId);
@@ -454,14 +490,14 @@ class ALDownloader {
 
   /// 根据taskId从自定义映射的下载事件列表中取url
   // ignore: unused_element
-  static String _getUrlWith(String taskId) {
-    var url;
+  static String? _getUrlWithTaskId(String taskId) {
+    String? url;
     try {
       url = _alDownloadTasks
           .firstWhere((element) => taskId == element.taskId)
           .url;
     } catch (error) {
-      debugPrint("ALDownloader | _getUrlWith, error = $error");
+      debugPrint("ALDownloader | _getUrlWithTaskId, error = $error");
     }
     return url;
   }
@@ -489,7 +525,7 @@ class ALDownloader {
 class _ALDownloadTask {
   final String url;
 
-  String taskId;
+  String taskId = "";
   int progress = 0;
   DownloadTaskStatus status = DownloadTaskStatus.undefined;
 

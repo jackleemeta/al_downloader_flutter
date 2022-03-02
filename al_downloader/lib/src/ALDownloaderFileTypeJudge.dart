@@ -18,7 +18,8 @@ class ALDownloaderFileTypeJudge {
       final value = anEntry.value;
 
       try {
-        final element = value.firstWhere((element) => url.endsWith(element));
+        final String? element =
+            value.firstWhere((element) => url.endsWith(element));
         if (element != null) return ALDownloaderFileTypeModel(type, element);
       } catch (error) {
         debugPrint(
@@ -101,6 +102,6 @@ enum ALDownloaderFileType {
 /// 文件类型的数据模型
 class ALDownloaderFileTypeModel {
   ALDownloaderFileTypeModel(this.type, this.description);
-  ALDownloaderFileType type;
-  String description; // e.g. mp4、json、webp、wav
+  ALDownloaderFileType type = ALDownloaderFileType.unknown;
+  String? description; // e.g. mp4、json、webp、wav
 }

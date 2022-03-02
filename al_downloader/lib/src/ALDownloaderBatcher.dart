@@ -17,7 +17,7 @@ class ALDownloaderBatcher {
   ///
   /// [downloaderHandlerInterface] 回调句柄池
   static Future<void> downloadUrls(List<String> urls,
-      {ALDownloaderHandlerInterface downloaderHandlerInterface}) async {
+      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
     addALDownloaderHandlerInterface(downloaderHandlerInterface, urls);
 
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
@@ -93,7 +93,7 @@ class ALDownloaderBatcher {
   ///
   /// [urls] url列表
   static void addALDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface downloaderHandlerInterface,
+      ALDownloaderHandlerInterface? downloaderHandlerInterface,
       List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
 
@@ -104,7 +104,8 @@ class ALDownloaderBatcher {
           ALDownloaderHandlerInterface(progressHandler: (progress) {
         debugPrint("ALDownloaderBatcher | 正在下载， url = $url");
 
-        downloaderHandlerInterface?.progressHandler(binder.progress);
+        final progressHandler = downloaderHandlerInterface?.progressHandler;
+        if (progressHandler != null) progressHandler(binder.progress);
       }, successHandler: () {
         debugPrint("ALDownloaderBatcher | 下载成功， url = $url");
 
@@ -113,11 +114,14 @@ class ALDownloaderBatcher {
       }, failureHandler: () {
         debugPrint("ALDownloaderBatcher | 下载失败， url = $url");
 
-        if (binder._isOver && !binder._isSuccess)
-          downloaderHandlerInterface?.failureHandler();
+        if (binder._isOver && !binder._isSuccess) {
+          final failureHandler = downloaderHandlerInterface?.failureHandler;
+          if (failureHandler != null) failureHandler();
+        }
       }, pausedHandler: () {
         debugPrint("ALDownloaderBatcher | 已暂停， url = $url");
-        downloaderHandlerInterface?.pausedHandler();
+        final pausedHandler = downloaderHandlerInterface?.pausedHandler;
+        if (pausedHandler != null) pausedHandler();
       });
 
       ALDownloader.addALDownloaderHandlerInterface(
@@ -133,7 +137,7 @@ class ALDownloaderBatcher {
   static void removeALDownloaderHandlerInterfaceForUrls(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
 
-    aNonDuplicatedUrls?.forEach((element) =>
+    aNonDuplicatedUrls.forEach((element) =>
         ALDownloader.removeALDownloaderHandlerInterfaceForUrl(element));
   }
 
@@ -189,11 +193,13 @@ class ALDownloaderBatcher {
   /// ------------------------------------ Private API ------------------------------------
 
   static void _tryToCallBackForCompletion(_ALDownloaderBatcherBinder binder,
-      ALDownloaderHandlerInterface downloaderHandlerInterface) {
+      ALDownloaderHandlerInterface? downloaderHandlerInterface) {
     if (binder._isSuccess) {
-      downloaderHandlerInterface?.successHandler();
+      final successHandler = downloaderHandlerInterface?.successHandler;
+      if (successHandler != null) successHandler();
     } else {
-      downloaderHandlerInterface?.failureHandler();
+      final failureHandler = downloaderHandlerInterface?.failureHandler;
+      if (failureHandler != null) failureHandler();
     }
   }
 
@@ -269,7 +275,7 @@ class _ALDownloaderBatcherBinder {
       } else {
         dynamic result = _succeedUrls.length / _targetUrls.length;
         result = result.toStringAsFixed(2);
-        aDouble = double.tryParse(result);
+        aDouble = double.tryParse(result) ?? 0;
       }
     } catch (error) {
       aDouble = 0;
