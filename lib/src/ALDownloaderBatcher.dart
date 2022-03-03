@@ -168,28 +168,6 @@ class ALDownloaderBatcher {
     }
   }
 
-  /// 删除[aboutGeneralUrl]对应资源所在的整个文件夹和文件夹内容
-  ///
-  /// 由于[clear]方法不能完全确保持久化数据被删除，所以需要调用此方法删除文件夹
-  ///
-  /// **parameters**
-  ///
-  /// [aboutGeneralUrl] url
-  static void removeDirectory(String aboutGeneralUrl) async {
-    final pathOfDirctory = await ALDownloaderPersistentFileManager
-        .getAbsolutePathOfDirectoryWithUrl(aboutGeneralUrl);
-
-    debugPrint(
-        "ALDownloaderProlongation removeDirectory | pathOfDirctory = $pathOfDirctory");
-
-    try {
-      final directory = Directory(pathOfDirctory);
-      directory.deleteSync(recursive: true);
-    } catch (error) {
-      debugPrint("ALDownloaderProlongation removeDirectory | error = $error");
-    }
-  }
-
   /// ------------------------------------ Private API ------------------------------------
 
   static void _tryToCallBackForCompletion(_ALDownloaderBatcherBinder binder,
@@ -207,9 +185,8 @@ class ALDownloaderBatcher {
   static List<String> _getNonDuplicatedUrlsFrom(List<String> urls) {
     final aNonDuplicatedUrls = <String>[];
     for (final element in urls) {
-      if (!aNonDuplicatedUrls.contains(element)) {
+      if (!aNonDuplicatedUrls.contains(element))
         aNonDuplicatedUrls.add(element);
-      }
     }
     return aNonDuplicatedUrls;
   }
