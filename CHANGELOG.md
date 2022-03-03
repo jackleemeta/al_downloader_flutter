@@ -1,3 +1,7 @@
+## 1.0.4 - March 3, 2022
+
+- delete api
+
 ## 1.0.3 - March 2, 2022
 
 - fixed error
