@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'ALDownloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
-import 'ALDownloaderPersistentFileManager.dart';
 import 'ALDownloaderStatus.dart';
 
 /// ALDownloader拓展
