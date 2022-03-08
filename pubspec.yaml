@@ -1,7 +1,7 @@
 name: al_downloader
 description: >-
   A URL-based downloader that supports downloading any type of file and automatically manages a lot of things.
-version: 1.0.5
+version: 1.0.6
 homepage: https://github.com/jackleemeta/al_downloader_flutter
 maintainer: jackleemeta (jackleemeta@outlook.com)
 
