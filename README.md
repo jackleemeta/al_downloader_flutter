@@ -2,133 +2,146 @@
 
 ## Summary
 
-开箱即用的下载器，基于[flutter_downloader](https://pub.dev/packages/flutter_downloader)
+A URL-based downloader that supports downloading any type of file and automatically manages a lot of things.
 
-* 通过url管理下载任务，而不是taskId
-* 精简下载状态
-* I/O减少
-* 提供便利的下载句柄
-* 支持批量下载
-* 自动管理文件
+* manage download tasks by url
+* simplify download status
+* reduced I/O
+* provide convenient download handle
+* support batch download
+* automatically manages files without requiring to be specified a download path
+* based on [flutter_downloader](https://pub.dev/packages/flutter_downloader)
 
 ## Usage
 
-### ALDownloader - 下载
+### ALDownloader
 
 ```
-/// 下载
+/// download
 ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | 正在下载， url = $url, progress $progress");
+      debugPrint(
+          "ALDownloader | downloading, the url = $url, progress = $progress");
     }, successHandler: () {
-      debugPrint("ALDownloader | 下载成功， url = $url");
+      debugPrint("ALDownloader | download successfully, the url = $url");
     }, failureHandler: () {
-      debugPrint("ALDownloader | 下载失败， url = $url");
+      debugPrint("ALDownloader | download failed, the url = $url");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 已暂停， url = $url");
+      debugPrint("ALDownloader | download paused, the url = $url");
     }));
 ```
 
 ```
-/// 注册句柄池
+/// add a download handle interface
 ALDownloader.addALDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | 正在下载， url = $url, progress = $progress");
+      debugPrint(
+              "ALDownloader | downloading, the url = $url, progress = $progress");
     }, successHandler: () {
-      debugPrint("ALDownloader | 下载成功， url = $url");
+      debugPrint("ALDownloader | download successfully, the url = $url");
     }, failureHandler: () {
-      debugPrint("ALDownloader | 下载失败， url = $url");
+      debugPrint("ALDownloader | download failed, the url = $url");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 已暂停， url = $url");
+      debugPrint("ALDownloader | download paused, the url = $url");
     }),
     url);
 ```
 
 ```
-/// 反注册句柄池
+/// remove a download handle interface
 ALDownloader.removeALDownloaderHandlerInterfaceForUrl(url);
 ALDownloader.removeALDownloaderHandlerInterfaceForAll;
 ```
 
 ```
-/// 获取下载状态
+/// get the download status of [url]
 ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
-debugPrint("ALDownloader | 获取下载状态， url = $url, status= $status\n";
 ```
 
 ```
-/// 取消
+/// cancel
 ///
-/// 详细含义见接口说明
+/// for details, see interface description
 ALDownloader.cancel(url);
 ALDownloader.cancelAll;
 ```
 
 ```
-/// 暂停
+/// pause
 ///
-/// 详细含义见接口说明
+/// for details, see interface description
 ALDownloader.pause(url);
 ALDownloader.pauseAll;
 ```
 
 ```
-/// 移除
+/// remove
 ///
-/// 详细含义见接口说明
+/// for details, see interface description
 ALDownloader.remove(url);
 ALDownloader.removeAll;
 ```
 
-### ALDownloaderBatcher - 批量下载
+### ALDownloaderBatcher
 
 ```
-/// 批量下载
+/// batch downlaod
 ALDownloaderBatcher.downloadUrls(kTestVideos,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-     debugPrint("ALDownloader | 正在下载, progress = $progress");
-   }, successHandler: () {
-     debugPrint("ALDownloader | 下载成功");
-   }, failureHandler: () {
-     debugPrint("ALDownloader | 下载失败");
-   }, pausedHandler: () {
-     debugPrint("ALDownloader | 已暂停");
-   }));
+      debugPrint("ALDownloader | downloading, progress = $progress");
+    }, successHandler: () {
+      debugPrint("ALDownloader | download successfully");
+    }, failureHandler: () {
+      debugPrint("ALDownloader | download failed");
+    }, pausedHandler: () {
+      debugPrint("ALDownloader | download paused");
+    }));
 ```
 
 ```
-/// 总结一组url的下载状态
+/// summarize the download status of a set of urls
 final status = ALDownloader.getDownloadStatusForUrls(urls);
 ```
 
-### ALDownloaderPersistentFileManager - 磁盘路径管理
+### ALDownloaderPersistentFileManager - disk path management by url
 
 ```
-/// 懒创建物理路径模型
-final model = await ALDownloaderPersistentFileManager.lazyGetALDownloaderPathModelFromUrl(url);
+final model = await ALDownloaderPersistentFileManager
+    .lazyGetALDownloaderPathModelFromUrl(url);
+debugPrint(
+    "ALDownloader | get the 'physical directory path' and 'vitual/physical file name' of the file by [url], url = $url, path model = $model\n");
 
-/// 获取文件夹绝对物理路径
-final path2 = await ALDownloaderPersistentFileManager.getAbsolutePathOfDirectoryWithUrl(url);
+final path2 = await ALDownloaderPersistentFileManager
+    .getAbsolutePathOfDirectoryWithUrl(url);
+debugPrint(
+    "ALDownloader | get 'directory path' by [url], url = $url, path = $path2\n");
 
-/// 获取文件虚拟路径
-final path3 = await ALDownloaderPersistentFileManager.getAbsoluteVirtualPathOfFileWithUrl(url);
+final path3 = await ALDownloaderPersistentFileManager
+    .getAbsoluteVirtualPathOfFileWithUrl(url);
+debugPrint(
+    "ALDownloader | get 'virtual file path' by [url], url = $url, path = $path3\n");
 
-/// 获取文件物理路径
-final path4 = await ALDownloaderPersistentFileManager.getAbsolutePhysicalPathOfFileWithUrl(url);
+final path4 = await ALDownloaderPersistentFileManager
+    .getAbsolutePhysicalPathOfFileWithUrl(url);
+debugPrint(
+    "ALDownloader | get 'physical file path' by [url], url = $url, path = $path4\n");
 
-/// 是否存在物理路径
-final isExist = await ALDownloaderPersistentFileManager.isExistAbsolutePhysicalPathOfFileForUrl(url);
+final isExist = await ALDownloaderPersistentFileManager
+    .isExistAbsolutePhysicalPathOfFileForUrl(url);
+debugPrint(
+    "ALDownloader | check whether [url] corresponds to physical path, url = $url, is Exist = $isExist\n");
 
-/// 获取虚拟/物理文件名
-final fileName = await ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
+final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
+debugPrint(
+    "ALDownloader | get virtual/physical 'file name' by [url], url = $url, file name = $fileName\n");
 ```
 
-## 原生配置
-- 即[flutter_downloader/Readme](https://pub.dev/packages/flutter_downloader)的原生配置
+## Native Config
+- same as [flutter_downloader](https://pub.dev/packages/flutter_downloader) native config
 
-## Demo（以iOS为例）
+## Demo For iOS
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AppDelegate.swift](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/AppDelegate.swift)
 - [Info.plist](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/Info.plist)

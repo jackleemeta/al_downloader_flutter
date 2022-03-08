@@ -6,40 +6,40 @@ import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
 
-/// 磁盘路径管理(根据url)
+/// disk path management by url
 ///
-/// 1. 获取虚拟/物理目录路径
+/// 1. gets the virtual/physical directory path
 ///
-/// 2. 获取虚拟/物理文件路径
+/// 2. get the virtual/physical file path
 ///
-/// 3. 获取文件名
+/// 3. get file name
 class ALDownloaderPersistentFileManager {
   /// -------------------------------- Public API --------------------------------
 
-  /// 根据[url]获取文件的`物理目录路径`和`文件名`
+  /// get the 'physical directory path' and 'vitual/physical file name' of the file by [url]
   ///
-  /// 当没有`物理目录路径`时，根据[url]`懒创建`磁盘的`物理目录路径`
+  /// when there is no 'physical directory path', create the 'physical directory path' of the disk by [url] 'lazily
   ///
   /// **parameters**
   ///
-  /// [url] 远端资源路径
+  /// [url] url
   ///
   /// **return**
   ///
-  /// `物理目录路径`和`文件名`
+  /// 'physical directory path' and 'vitual/physical file name'
   static Future<ALDownloaderPathComponentModel>
       lazyGetALDownloaderPathModelFromUrl(String url) async {
-    // 根据url生成文件类型的数据模型
+    // generate data models of file types based on urls
     final model =
         ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFrom(url);
 
-    // 1级文件夹 - 局部
+    // level 1 folder - component
     final dir = _alDownloaderFileTypeDirKVs[model.type]!;
 
-    // 2级文件夹 - 局部
+    // level 2 folder - component
     final extensionResourcePath = dir + "/";
 
-    // 文件名
+    // file name
     final fileName = _assembleFileName(url, model);
 
     final theRootDir = await _theRootDir;
@@ -49,46 +49,46 @@ class ALDownloaderPersistentFileManager {
         dirForRootToFinalLevel,
         recursive: true);
 
-    // 2级文件夹
+    // level 2 folder - complete
     final dirForRootToFirstLevel = theRootDir + dir;
     return ALDownloaderPathComponentModel(dirForRootToFirstLevel, fileName);
   }
 
-  /// 根据[url]获取`目录路径`
+  /// get 'directory path' by [url]
   ///
   /// **parameters:**
   ///
-  /// [url] 文件远端路径
+  /// [url] url
   ///
   /// **return**
   ///
-  /// `目录路径`
+  /// directory path
   static Future<String> getAbsolutePathOfDirectoryWithUrl(String url) async {
     final alDownloaderPathComponentModel =
         await lazyGetALDownloaderPathModelFromUrl(url); // model
-    final dirPath = alDownloaderPathComponentModel.dir; // 目录路径
+    final dirPath = alDownloaderPathComponentModel.dir;
 
     return dirPath;
   }
 
-  /// 根据[url]获取`虚拟文件路径`
+  /// get 'virtual file path' by [url]
   ///
-  /// 返回值一定不为null
+  /// the return value must not be null
   ///
   /// **parameters:**
   ///
-  /// [url] 文件远端路径
+  /// [url] url
   ///
   /// **return**
   ///
-  /// `虚拟文件路径`
+  /// 'virtual file path'
   static Future<String> getAbsoluteVirtualPathOfFileWithUrl(String url) async {
     String? filePath;
-    // 根据url生成文件类型的数据模型
+    // generate data models of file types by url
     final model =
         ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFrom(url);
 
-    // 1级文件夹 - 局部
+    // level 1 folder - component
     final aDirString = _alDownloaderFileTypeDirKVs[model.type]!;
     final theRootDir = await _theRootDir;
     final dirForRootToFirstLevel = theRootDir + aDirString;
@@ -106,17 +106,17 @@ class ALDownloaderPersistentFileManager {
     return filePath!;
   }
 
-  /// 根据[url]获取`物理文件路径`
+  /// get 'physical file path' by [url]
   ///
-  /// 如果`物理文件路径`不存在，返回null
+  /// if 'physical file path' does not exist, null is returned
   ///
   /// **parameters:**
   ///
-  /// [url] 文件远端路径
+  /// [url] url
   ///
   /// **return**
   ///
-  /// `物理文件路径`
+  /// 'physical file path'
   static Future<String?> getAbsolutePhysicalPathOfFileWithUrl(
       String url) async {
     String virtualfilePath =
@@ -132,7 +132,7 @@ class ALDownloaderPersistentFileManager {
     return filePath;
   }
 
-  /// 获取所有存储目录
+  /// get all storage directories
   static Future<List<String>?> get dirs async {
     try {
       final String theRootDir = await _theRootDir;
@@ -149,46 +149,43 @@ class ALDownloaderPersistentFileManager {
     return null;
   }
 
-  /// 是否存在[url]对应`物理路径`
-  ///
+  /// check whether [url] corresponds to physical path
   ///
   /// **parameters:**
   ///
-  /// [url] 文件远端路径
+  /// [url] url
   ///
   /// **return**
   ///
-  /// bool `是否存在`
+  /// Whether exists
   static Future<bool> isExistAbsolutePhysicalPathOfFileForUrl(
           String url) async =>
       await getAbsolutePhysicalPathOfFileWithUrl(url) != null;
 
-  /// 根据[url]获取`文件名`
+  /// get virtual/physical 'file name' by [url]
   ///
   /// **parameters**
   ///
-  /// [url] 文件远端路径
+  /// [url] url
   ///
   /// **return**
   ///
-  /// `文件名`
+  /// `file name`
   static String getFileNameFromUrl(String url) {
-    // 文件类型的数据模型
     final model =
         ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFrom(url);
 
-    // 文件名
     final fileName = _assembleFileName(url, model);
     return fileName;
   }
 
   /// -------------------------------- Private API --------------------------------
 
-  /// 根路径
+  /// root path
   static Future<String> get _theRootDir async =>
       await _ALDownloaderFilePathManager.localTemporaryDirectory;
 
-  /// 根据[url]和[model]组装文件名
+  /// assemble file name based on [url] and [model]
   static String _assembleFileName(String url, ALDownloaderFileTypeModel model) {
     final StringBuffer sb = StringBuffer();
 
@@ -202,7 +199,7 @@ class ALDownloaderPersistentFileManager {
     return sb.toString();
   }
 
-  // 类型和类型列表键值
+  // type and type list key value pairs
   static final _alDownloaderFileTypeDirKVs = {
     ALDownloaderFileType.common: _kExtensionCommonFilePath,
     ALDownloaderFileType.image: _kExtensionImageFilePath,
@@ -217,30 +214,30 @@ class ALDownloaderPersistentFileManager {
     return hex.encode(digest.bytes);
   }
 
-  // 普通文件路径
+  /// common file folder path
   static final _kExtensionCommonFilePath = _kSuperiorPath + "al_common" + "/";
 
-  // 图片文件路径
+  /// image file folder path
   static final _kExtensionImageFilePath = _kSuperiorPath + "al_image" + "/";
 
-  // 音频文件路径
+  /// audio file folder path
   static final _kExtensionAudioFilePath = _kSuperiorPath + "al_audio" + "/";
 
-  // 视频文件路径
+  /// video file folder path
   static final _kExtensionVideoFilePath = _kSuperiorPath + "al_video" + "/";
 
-  // 未知类型文件路径
+  /// unknown type file folder path
   static final _kExtensionUnknownFilePath = _kSuperiorPath + "al_unknown" + "/";
 
-  // 父路径
+  /// parent path
   static final _kSuperiorPath = "/" + "flutter" + "/";
 }
 
-/// `目录路径`和`文件名` 组合类
+/// combination class of 'directory path' and 'file name'
 ///
-/// [dir] 目录
+/// [dir] directory
 ///
-/// [fileName] [dir]下的文件名
+/// [fileName] name of the file in [dir]
 class ALDownloaderPathComponentModel {
   ALDownloaderPathComponentModel(this.dir, this.fileName);
   final String dir; // file:/a/b
@@ -256,7 +253,7 @@ class ALDownloaderPathComponentModel {
 }
 
 class _ALDownloaderFilePathManager {
-  /// 创建目录
+  /// try to create a directory
   static Future<Directory?> tryCreateCustomDirectory(String path,
       {bool recursive = false}) async {
     var dir = Directory(path);
@@ -269,7 +266,7 @@ class _ALDownloaderFilePathManager {
     return null;
   }
 
-  /// 获取[文档目录]
+  /// get `document directory`
   // ignore: unused_element
   static Future<String?> get localDocumentDirectory async {
     String? aPath;
@@ -277,14 +274,14 @@ class _ALDownloaderFilePathManager {
       final aDir = await getApplicationDocumentsDirectory();
       aPath = aDir.path;
 
-      debugPrint('文档目录: ' + aPath);
+      debugPrint('document directory: ' + aPath);
     } catch (error) {
-      debugPrint("localDocumentPath error = $error");
+      debugPrint("get document directory error = $error");
     }
     return aPath;
   }
 
-  /// 获取[临时目录]
+  /// get `temporary directory`
   // ignore: unused_element
   static Future<String> get localTemporaryDirectory async {
     String? aPath;
@@ -292,14 +289,14 @@ class _ALDownloaderFilePathManager {
       final aDir = await getTemporaryDirectory();
       aPath = aDir.path;
 
-      debugPrint('临时目录: ' + aPath);
+      debugPrint('temporary directory: ' + aPath);
     } catch (error) {
-      debugPrint("localTemporaryPath error = $error");
+      debugPrint("get temporary directory error = $error");
     }
     return aPath!;
   }
 
-  /// 获取[外部存储目录]
+  /// get `external storage directory`
   ///
   /// No iOS
   // ignore: unused_element
@@ -310,12 +307,12 @@ class _ALDownloaderFilePathManager {
       if (aDir != null) {
         aPath = aDir.path;
 
-        debugPrint('外部存储目录: ' + aPath);
+        debugPrint('external storage directory: ' + aPath);
       } else {
-        debugPrint('外部存储目录: 无');
+        debugPrint('external storage directory: 无');
       }
     } catch (error) {
-      debugPrint("localExternalStorageDirectory error = $error");
+      debugPrint("get external storage directory error = $error");
     }
     return aPath;
   }

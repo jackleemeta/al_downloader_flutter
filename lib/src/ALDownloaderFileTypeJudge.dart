@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-/// 文件类型判断工具
+/// file type judgment tool
 class ALDownloaderFileTypeJudge {
-  /// 从url中获取文件类型
+  /// get file type from the URL
   ///
   /// **parameters**
   ///
@@ -10,7 +10,7 @@ class ALDownloaderFileTypeJudge {
   ///
   /// **return**
   ///
-  /// 文件类型数据模型 [ALDownloaderFileTypeModel]
+  /// file type model [ALDownloaderFileTypeModel]
   static ALDownloaderFileTypeModel getALDownloaderFileTypeModelFrom(
       String url) {
     for (final anEntry in _allALDownloaderFileTypeFilesEntries) {
@@ -90,16 +90,10 @@ class ALDownloaderFileTypeJudge {
   ];
 }
 
-/// 文件类型枚举
-enum ALDownloaderFileType {
-  common, // 普通类型
-  image, // 图片
-  audio, // 音频
-  video, //视频
-  unknown // 未知类型
-}
+/// file type enumeration
+enum ALDownloaderFileType { common, image, audio, video, unknown }
 
-/// 文件类型的数据模型
+/// class of file type model
 class ALDownloaderFileTypeModel {
   ALDownloaderFileTypeModel(this.type, this.description);
   ALDownloaderFileType type = ALDownloaderFileType.unknown;

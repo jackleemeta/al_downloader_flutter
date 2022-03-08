@@ -4,16 +4,16 @@ import 'ALDownloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderStatus.dart';
 
-/// ALDownloader拓展
+/// ALDownloaderBatcher
 ///
-/// 批量下载
-/// 进度 = 单个已成功的任务 / 所有任务
+/// batch download
+/// progress = number of successful tasks / number of all tasks
 class ALDownloaderBatcher {
-  /// 下载
+  /// download
   ///
-  /// [urls] url列表
+  /// [urls] urls
   ///
-  /// [downloaderHandlerInterface] 回调句柄池
+  /// [downloaderHandlerInterface] the download handle interface
   static Future<void> downloadUrls(List<String> urls,
       {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
     addALDownloaderHandlerInterface(downloaderHandlerInterface, urls);
@@ -23,15 +23,15 @@ class ALDownloaderBatcher {
     for (final url in aNonDuplicatedUrls) await ALDownloader.download(url);
   }
 
-  /// 总结一组url的下载状态
+  /// summarize the download status of a set of urls
   ///
   /// **parameters**
   ///
-  /// [urls] 一组url
+  /// [urls] s set of url
   ///
   /// **return**
   ///
-  /// [ALDownloaderStatus] 下载状态
+  /// [ALDownloaderStatus] download status
   static ALDownloaderStatus getDownloadStatusForUrls(List<String> urls) {
     final Map<String, ALDownloaderStatus> aMap = {};
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
@@ -40,10 +40,10 @@ class ALDownloaderBatcher {
       final aStatus = ALDownloader.getDownloadStatusForUrl(url);
 
       if (aStatus == ALDownloaderStatus.downloading) {
-        // 有正在下载的任务
+        // contain tasks that are being downloaded
         return ALDownloaderStatus.downloading;
       } else if (aStatus == ALDownloaderStatus.pausing) {
-        // 有暂停的任务
+        // contain paused tasks
         return ALDownloaderStatus.pausing;
       }
 
@@ -53,29 +53,29 @@ class ALDownloaderBatcher {
     final allStatus = aMap.values.toSet();
 
     if (allStatus.contains(ALDownloaderStatus.downloadFailed)) {
-      // 无正在下载的任务 && 无暂停的任务 && 有一个失败
+      // not contain task that are being downloaded && not contain paused task && contain one failed task at least
       return ALDownloaderStatus.downloadFailed;
     } else if (allStatus
             .difference({ALDownloaderStatus.downloadSuccced}).length ==
         0) {
-      // 无正在下载的任务 && 无暂停的任务 && 无失败 && 全都已成功
+      // not contain task that are being downloaded && not contain paused task && not contain failed task && tasks is all successful
       return ALDownloaderStatus.downloadSuccced;
     }
-    // 无正在下载的任务 && 无失败 && 无暂停的任务 && 有一部分未成功 && 无暂停
+    // not contain task that are being downloaded && 无失败 && 无暂停的任务 && 有一部分未成功 && 无暂停
     return ALDownloaderStatus.unstarted;
   }
 
-  /// 获取一组url的下载进度
+  /// get download progress of a set of urls
   ///
-  /// 下载成功条数/总条数
+  /// number of successful tasks / number of all tasks
   ///
   /// **parameters**
   ///
-  /// [urls] 一组url
+  /// [urls] urls
   ///
   /// **return**
   ///
-  /// [double] 下载进度
+  /// [double] download progress of urls
   static double getProgressForUrls(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
     final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
@@ -83,13 +83,13 @@ class ALDownloaderBatcher {
     return progress;
   }
 
-  /// 添加监听
+  /// add a download handle interface
   ///
   /// **parameters**
   ///
-  /// [downloaderHandlerInterface] 回调句柄池
+  /// [downloaderHandlerInterface] download handle interface
   ///
-  /// [urls] url列表
+  /// [urls] urls
   static void addALDownloaderHandlerInterface(
       ALDownloaderHandlerInterface? downloaderHandlerInterface,
       List<String> urls) {
@@ -100,24 +100,25 @@ class ALDownloaderBatcher {
     for (final url in aNonDuplicatedUrls) {
       final aDownloaderHandlerInterface =
           ALDownloaderHandlerInterface(progressHandler: (progress) {
-        debugPrint("ALDownloaderBatcher | 正在下载， url = $url");
+        debugPrint("ALDownloaderBatcher | downloading, the url = $url");
 
         final progressHandler = downloaderHandlerInterface?.progressHandler;
         if (progressHandler != null) progressHandler(binder.progress);
       }, successHandler: () {
-        debugPrint("ALDownloaderBatcher | 下载成功， url = $url");
+        debugPrint(
+            "ALDownloaderBatcher | download successfully, the url = $url");
 
         if (binder._isSuccess)
           _tryToCallBackForCompletion(binder, downloaderHandlerInterface);
       }, failureHandler: () {
-        debugPrint("ALDownloaderBatcher | 下载失败， url = $url");
+        debugPrint("ALDownloaderBatcher | download failed, the url = $url");
 
         if (binder._isOver && !binder._isSuccess) {
           final failureHandler = downloaderHandlerInterface?.failureHandler;
           if (failureHandler != null) failureHandler();
         }
       }, pausedHandler: () {
-        debugPrint("ALDownloaderBatcher | 已暂停， url = $url");
+        debugPrint("ALDownloaderBatcher | download paused, the url = $url");
         final pausedHandler = downloaderHandlerInterface?.pausedHandler;
         if (pausedHandler != null) pausedHandler();
       });
@@ -127,11 +128,11 @@ class ALDownloaderBatcher {
     }
   }
 
-  /// 移除监听
+  /// remove a download handle interface
   ///
   /// **parameters**
   ///
-  /// [urls] 资源远端地址列表
+  /// [urls] urls
   static void removeALDownloaderHandlerInterfaceForUrls(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
 
@@ -139,24 +140,24 @@ class ALDownloaderBatcher {
         ALDownloader.removeALDownloaderHandlerInterfaceForUrl(element));
   }
 
-  /// 暂停下载一组url
+  /// pause downloading a set of urls
   ///
   /// **parameters**
   ///
-  /// [urls] 资源远端地址列表
+  /// [urls] urls
   static Future<void> pause(List<String> urls) async {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
 
     for (final url in aNonDuplicatedUrls) await ALDownloader.pause(url);
   }
 
-  /// 移除下载资源
+  /// clear download
   ///
-  /// 包括1. ALDownloader内存缓存 2.Flutterdownloader数据库索引 3.持久化文件数据
+  /// including: 1.ALDownloader memory cache 2.Flutterdownloader database index 3.Persist file data
   ///
   /// **parameters**
   ///
-  /// [urls] 资源远端地址列表
+  /// [urls] urls
   static Future<void> clear(List<String> urls) async {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
 
@@ -179,7 +180,7 @@ class ALDownloaderBatcher {
     }
   }
 
-  // 去重
+  // remove duplication of urls
   static List<String> _getNonDuplicatedUrlsFrom(List<String> urls) {
     final aNonDuplicatedUrls = <String>[];
     for (final element in urls) {
@@ -192,12 +193,10 @@ class ALDownloaderBatcher {
   ALDownloaderBatcher._();
 }
 
-/// 下载拓展类涉及的元素的绑定器
+/// a binder for binding element of url and download ininterface for ALDownloaderBatcher
 class _ALDownloaderBatcherBinder {
-  /// 是否成功
   bool get _isSuccess => _succeedUrls.length == _targetUrls.length;
 
-  /// 下载成功的url列表
   List<String> get _succeedUrls {
     List<String> aList;
 
@@ -217,7 +216,6 @@ class _ALDownloaderBatcherBinder {
     return aList;
   }
 
-  /// 下载失败的url列表
   // ignore: unused_element
   List<String> get _failedUrls {
     List<String> aList;
@@ -238,9 +236,9 @@ class _ALDownloaderBatcherBinder {
     return aList;
   }
 
-  /// 进度
+  /// process
   ///
-  /// 已下载条数 / 总条数
+  /// progress = number of successful tasks / number of all tasks
   double get progress {
     double aDouble = 0;
 
@@ -260,18 +258,19 @@ class _ALDownloaderBatcherBinder {
     return aDouble;
   }
 
-  /// 所有下载任务已收到回调
+  /// all download tasks are completed
+  /// just completed，it may be successful or failed
   bool get _isOver => _alDownloaderUrlDownloadedKVs.keys
       .toSet()
       .containsAll(_targetUrls.toSet());
 
-  /// ALDownloader中的下载状态
+  /// download status for ALDownloader
   static Map<String, bool> get _alDownloaderUrlDownloadedKVs =>
       ALDownloader.urlResults;
 
-  /// 此次需要下载的url
+  /// need to download urls
   final List<String> _targetUrls;
 
-  /// 初始化方法
+  /// privatize constructor
   _ALDownloaderBatcherBinder._(this._targetUrls);
 }

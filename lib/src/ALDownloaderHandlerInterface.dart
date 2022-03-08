@@ -1,4 +1,4 @@
-/// 句柄池子类
+/// ALDownloader handler interface
 class ALDownloaderHandlerInterface {
   ALDownloaderHandlerInterface(
       {this.progressHandler,
@@ -11,14 +11,14 @@ class ALDownloaderHandlerInterface {
   final ALDownloaderPasusedHandler? pausedHandler;
 }
 
-/// 下载进度
+/// download progress handle
 typedef ALDownloaderProgressHandler = void Function(double progress);
 
-/// 下载成功
+/// download successfully handle
 typedef ALDownloaderSuccessHandler = void Function();
 
-/// 下载失败
+/// download failed handle
 typedef ALDownloaderFailureHandler = void Function();
 
-/// 下载暂停
+/// download paused handle
 typedef ALDownloaderPasusedHandler = void Function();

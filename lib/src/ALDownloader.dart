@@ -6,44 +6,44 @@ import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderPersistentFileManager.dart';
 import 'ALDownloaderStatus.dart';
 
-/// 下载器
+/// ALDownloader
 class ALDownloader {
   /// ---------------------- Public API ----------------------
 
-  /// 初始化
+  /// initialize
   ///
-  /// 可以主动调用，也可以懒调用
+  /// called or lazy call
   ///
-  /// 懒调用：调用[download]方法时
+  /// lazy call：when call [download]
   static initialize() async {
     if (!_isInitial) {
-      // 一个保证这个作用域只执行一次的脏标记
+      // a dirty flag that guarantees that this scope is executed only once
       _isInitial = true;
 
-      // 初始化
+      // FlutterDownloader initialize
       await FlutterDownloader.initialize(debug: false);
 
-      // 注册回调
+      // register FlutterDownloader callback
       FlutterDownloader.registerCallback(_downloadCallback);
 
-      // 注册isolate通信服务
+      // register the isolate communication service
       _addIsolateNameServerPortService();
 
-      // 从database取出当前所有任务，并执行需要执行的任务
+      // extract all current tasks from database and execute the tasks that need to be executed
       await _loadAndTryToRunTask();
     }
   }
 
-  /// 下载资源
+  /// download
   ///
   /// **parameters**
   ///
-  /// [url] 资源远端地址
+  /// [url] url
   ///
-  /// [downloaderHandlerInterface] 下载句柄池
+  /// [downloaderHandlerInterface] the download handle interface
   static download(String? url,
       {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
-    if (url == null) throw "ALDownloader | download error = url为空";
+    if (url == null) throw "ALDownloader | download error = url is null";
 
     if (downloaderHandlerInterface != null) {
       final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface);
@@ -55,12 +55,12 @@ class ALDownloader {
     final anALDownloadTask = _getALDownloadTaskFromUrl(url);
 
     if (anALDownloadTask == null) {
-      // 根据[url]获取文件的`物理目录路径`和`文件名`
+      // get the 'physical directory path' and 'file name' of the file by URL
       final alDownloaderPathComponentModel =
           await ALDownloaderPersistentFileManager
               .lazyGetALDownloaderPathModelFromUrl(url);
 
-      // 加入任务队列
+      // equeued a task
       final taskId = await FlutterDownloader.enqueue(
           url: url,
           savedDir: alDownloaderPathComponentModel.dir,
@@ -72,13 +72,14 @@ class ALDownloader {
         _addALDownloadTaskOrReplaceALDownloadTaskId(
             url, taskId, DownloadTaskStatus.enqueued);
 
-      debugPrint("ALDownloader | 生成了一个下载任务, 下载状态 = enqueued，taskId = $taskId");
+      debugPrint(
+          "ALDownloader | a download task was generated, download status = enqueued，taskId = $taskId");
     } else if (anALDownloadTask.status == DownloadTaskStatus.failed ||
         anALDownloadTask.status == DownloadTaskStatus.canceled) {
       final newTaskIdForRetry =
           await FlutterDownloader.retry(taskId: anALDownloadTask.taskId);
       if (newTaskIdForRetry != null) {
-        debugPrint("ALDownloader | newTaskIdForRetry不会空");
+        debugPrint("ALDownloader | newTaskIdForRetry = $newTaskIdForRetry");
         _addALDownloadTaskOrReplaceALDownloadTaskId(
             url, newTaskIdForRetry, DownloadTaskStatus.undefined);
       }
@@ -110,13 +111,13 @@ class ALDownloader {
     }
   }
 
-  /// 添加下载句柄池
+  /// add a download handle interface
   ///
   /// **parameters**
   ///
-  /// [downloaderHandlerInterface] 下载句柄池
+  /// [downloaderHandlerInterface] download handle interface
   ///
-  /// [url] 绑定的资源远端地址
+  /// [url] url
   static void addALDownloaderHandlerInterface(
       ALDownloaderHandlerInterface? downloaderHandlerInterface,
       String? forUrl) {
@@ -125,27 +126,27 @@ class ALDownloader {
     _alDownloaderBinders.add(aBinder);
   }
 
-  /// 移除下载句柄池
+  /// remove a download handle interface
   ///
   /// **parameters**
   ///
-  /// [url] 资源远端地址
+  /// [url] url
   static void removeALDownloaderHandlerInterfaceForUrl(String url) =>
       _alDownloaderBinders.removeWhere((element) => url == element.forUrl);
 
-  /// 移除所有句柄
+  /// remove all download handle interfaces
   static void removeALDownloaderHandlerInterfaceForAll() =>
       _alDownloaderBinders.clear();
 
-  /// 获取[url]的下载状态
+  /// get the download status of [url]
   ///
   /// **parameters**
   ///
-  /// [url] 资源远端地址
+  /// [url] url
   ///
   ///  **return**
   ///
-  /// 下载状态[ALDownloaderStatus]
+  /// download status [ALDownloaderStatus]
   static ALDownloaderStatus getDownloadStatusForUrl(String url) {
     ALDownloaderStatus alDownloaderStatus;
 
@@ -173,13 +174,13 @@ class ALDownloader {
     return alDownloaderStatus;
   }
 
-  /// 获取已完结的url
+  /// get the completed URLS
   ///
-  /// 下载成功或下载失败的资源url会添加到这个池子里
+  /// urls for resources that download successfully or fail are added to the pool
   ///
   /// **return**
   ///
-  /// 已经完结的url[url: bool]
+  /// completed urls - [url: bool]
   static Map<String, bool> get urlResults {
     final Map<String, bool> aMap = {};
     try {
@@ -196,13 +197,13 @@ class ALDownloader {
     return aMap;
   }
 
-  /// 取消下载
+  /// cancel download
   ///
-  /// 已下载的字节数会删除
+  /// the bytes downloaded will be deleted
   ///
   /// **parameters**
   ///
-  /// [url] 资源远端地址
+  /// [url] url
   static cancel(String url) async {
     final alDownloadTask = _getALDownloadTaskFromUrl(url);
 
@@ -215,9 +216,9 @@ class ALDownloader {
     }
   }
 
-  /// 取消所有正在下载的任务
+  /// cancel all tasks that are downloading
   ///
-  /// 已下载的字节数会删除
+  /// the bytes downloaded will be deleted
   static cancelAll() async {
     await FlutterDownloader.cancelAll();
     for (final downloadTask in _alDownloadTasks) {
@@ -226,27 +227,27 @@ class ALDownloader {
     }
   }
 
-  /// 暂停下载
+  /// pause download
   ///
-  /// 已下载的字节数不会删除
+  /// the bytes downloaded will not be deleted
   ///
-  /// 状态为undefined/enqueued/failed会移除下载队列
+  /// status of undefined/enqueued/failed will remove the download queue
   ///
   /// **parameters**
   ///
-  /// [url] 资源远端地址
+  /// [url] url
   static pause(String url) async {
     try {
       final alDownloadTask = _getALDownloadTaskFromUrl(url);
 
       if (alDownloadTask == null) {
         debugPrint(
-            "ALDownloader | pause 将要暂停的url = $url, 但url的alDownloadTask为空");
+            "ALDownloader | pause, to be suspended url = $url, but url's alDownloadTask is null");
         return;
       }
 
       debugPrint(
-          "ALDownloader | pause 将要暂停的url = $url, alDownloadTask.status = ${alDownloadTask.status}");
+          "ALDownloader | pause, to be suspended url = $url, alDownloadTask.status = ${alDownloadTask.status}");
 
       final taskId = alDownloadTask.taskId;
       if (alDownloadTask.status == DownloadTaskStatus.undefined ||
@@ -263,7 +264,7 @@ class ALDownloader {
     }
   }
 
-  /// 暂停所有正在下载的任务；移除正在队列的任务
+  /// pause all tasks that are downloading and remove a enqueued task
   static pauseAll() async {
     final aTemp = [];
     aTemp.addAll(_alDownloadTasks);
@@ -273,18 +274,18 @@ class ALDownloader {
     }
   }
 
-  /// 移除[url]对应的ALDownloader资源
+  /// remove the ALDownloader data corresponding to [url]
   ///
   /// **parameters**
   ///
-  /// [url] 资源远端地址
+  /// [url] url
   static remove(String url) async {
     try {
       final alDownloaderTask = _getALDownloadTaskFromUrl(url);
 
       if (alDownloaderTask == null) {
         debugPrint(
-            "ALDownloader | remove alDownloaderTask of url = $url, url的_ALDownloadTask为空");
+            "ALDownloader | remove alDownloaderTask of url = $url, url's  _ALDownloadTask is null");
         return;
       }
 
@@ -299,18 +300,18 @@ class ALDownloader {
     }
   }
 
-  /// 移除所有`url`对应的ALDownloader资源
+  /// remove ALDownloader data corresponding to all urls
   static removeAll() async {
     for (final alDownloadTask in _alDownloadTasks) remove(alDownloadTask.url);
   }
 
   /// ---------------------- Private API ----------------------
 
-  /// 维护 自定义下载任务列表
+  /// maintain custom download tasks
   ///
-  /// 目的：避免频繁I/O
+  /// purpose: avoid frequent I/O
   ///
-  /// 添加一个新的自定义任务 或 更新[url]映射的已有任务的taskId
+  /// add a new custom task or update the [url] mapping of the existing task's taskId
   static void _addALDownloadTaskOrReplaceALDownloadTaskId(
       String? url, String taskId, DownloadTaskStatus status) {
     if (url == null) {
@@ -340,9 +341,9 @@ class ALDownloader {
     }
   }
 
-  /// 向 [IsolateNameServer] 注册 [registerPortWithName]服务
+  /// register send port and receive port for [IsolateNameServer]
   ///
-  /// 用于下载isolate和主isolate间的通信
+  /// used for communication between download isolate and the main isolate
   static void _addIsolateNameServerPortService() {
     IsolateNameServer.registerPortWithName(
         _receivePort.sendPort, _kDownloaderSendPort);
@@ -354,7 +355,7 @@ class ALDownloader {
     });
   }
 
-  /// 被[FlutterDownloader]绑定的回调
+  /// the callback binded by [FlutterDownloader]
   static void _downloadCallback(
       String id, DownloadTaskStatus status, int progress) {
     final SendPort? send =
@@ -362,13 +363,13 @@ class ALDownloader {
     send?.send([id, status, progress]);
   }
 
-  /// 处理[FlutterDownloader]回调数据
+  /// process the [FlutterDownloader]'s callback
   static void _processDataFromPort(
       String id, DownloadTaskStatus status, int progress) {
     final alDownloadTask = _getALDownloadTaskFromTaskId(id);
 
     if (alDownloadTask == null) {
-      debugPrint("没有找到内存中的alDownloadTask， id = $id");
+      debugPrint("not found alDownloadTask， id = $id");
       return;
     }
 
@@ -396,7 +397,7 @@ class ALDownloader {
       _alDownloaderBinders.removeWhere((element) => element.forUrl == url);
     } else if (status == DownloadTaskStatus.failed) {
       debugPrint(
-          "ALDownloader | _downloadCallback \n 下载失败 url = $url \nid = $id ");
+          "ALDownloader | _downloadCallback \n download failed url = $url \nid = $id ");
       _alDownloaderBinders.forEach((element) {
         if (element.forUrl == url) {
           final progressHandler =
@@ -428,7 +429,7 @@ class ALDownloader {
         "ALDownloader | _downloadCallback \nid = $id \nurl = $url \nstatus = $status \nprogress = $progress \ndouble_progress = $double_progress");
   }
 
-  /// 加载[FlutterDownloader]本地数据库任务到内存缓存 & 尝试执行任务
+  /// load [FlutterDownloader] local database task to the memory cache, and attempt to execute the tasks
   static _loadAndTryToRunTask() async {
     final tasks = await FlutterDownloader.loadTasks();
     if (tasks != null) {
@@ -450,7 +451,7 @@ class ALDownloader {
     }
   }
 
-  /// 根据url从自定义映射的下载事件列表中取[_ALDownloadTask]
+  /// by on the [url], get [_ALDownloadTask] from custom download tasks
   static _ALDownloadTask? _getALDownloadTaskFromUrl(String url) {
     _ALDownloadTask? anALDownloadTask;
     try {
@@ -462,7 +463,7 @@ class ALDownloader {
     return anALDownloadTask;
   }
 
-  /// 根据url从自定义的下载事件列表中取taskId
+  /// by on the [url], get task id from custom download tasks
   // ignore: unused_element
   static String? _getTaskIdFromUrl(String url) {
     String? taskId;
@@ -475,7 +476,7 @@ class ALDownloader {
     return taskId;
   }
 
-  /// 根据url从自定义的下载事件列表中取[_ALDownloadTask]
+  /// by on the [taskId], get task id from custom download tasks
   // ignore: unused_element
   static _ALDownloadTask? _getALDownloadTaskFromTaskId(String taskId) {
     _ALDownloadTask? anALDownloadTask;
@@ -488,7 +489,7 @@ class ALDownloader {
     return anALDownloadTask;
   }
 
-  /// 根据taskId从自定义映射的下载事件列表中取url
+  /// by the [taskId], get url from custom download tasks
   // ignore: unused_element
   static String? _getUrlWithTaskId(String taskId) {
     String? url;
@@ -502,26 +503,26 @@ class ALDownloader {
     return url;
   }
 
-  // 是否初始化本下载器
+  /// a dirty flag that guarantees that this scope is executed only once
   static bool _isInitial = false;
 
-  // 下载任务自定义列表
+  /// custom download tasks
   static final List<_ALDownloadTask> _alDownloadTasks = [];
 
-  // 绑定器池
+  /// a binder list for binding element of url and download ininterface
   static final List<_ALDownloaderBinder> _alDownloaderBinders = [];
 
-  // 发送端口key
+  /// send port key
   static final _kDownloaderSendPort = "al_downloader_send_port";
 
-  // 接收端口对象
+  /// receive port
   static final ReceivePort _receivePort = ReceivePort();
 
-  // 私有化创建方法
+  /// privatize constructor
   ALDownloader._();
 }
 
-/// 自定义下载任务
+/// class of custom download task
 class _ALDownloadTask {
   final String url;
 
@@ -532,7 +533,8 @@ class _ALDownloadTask {
   _ALDownloadTask(this.url);
 }
 
-/// 下载涉及的元素的绑定器
+/// a binder for binding element of url and download ininterface
+/// it may bind more elements in the future
 class _ALDownloaderBinder {
   _ALDownloaderBinder(this.forUrl, this.downloaderHandlerHolder);
   final String forUrl;
