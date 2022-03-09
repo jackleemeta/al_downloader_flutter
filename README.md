@@ -25,10 +25,10 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.1.0
+  al_downloader: ^1.1.1
 ```
 
-run the following line with your commmand line
+run the following line with your command line
 ```
 flutter packages get
 ```

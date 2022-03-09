@@ -1,3 +1,7 @@
+## 1.1.1 - March 9, 2022
+
+- fixed clerical error
+
 ## 1.1.0 - March 9, 2022
 
 - update document
