@@ -1,8 +1,10 @@
 # al_downloader
 
-## Summary
+[![pub package](https://img.shields.io/pub/v/al_downloader.svg)](https://pub.dartlang.org/packages/al_downloader)
 
-A URL-based downloader that supports downloading any type of file and automatically manages a lot of things.
+A URL-based flutter downloader that supports to download any type of file and automatically manages a lot of things.
+
+## Features
 
 * manage download tasks by url
 * simplify download status
@@ -11,6 +13,26 @@ A URL-based downloader that supports downloading any type of file and automatica
 * support batch download
 * automatically manages files without requiring to be specified a download path
 * based on [flutter_downloader](https://pub.dev/packages/flutter_downloader)
+
+
+## Installing
+
+add the line to your pubspec.yaml
+
+```
+dependencies:
+  al_downloader: ^1.0.7
+```
+
+run the line with your commmand line
+```
+flutter packages get
+```
+
+import the line, then you can use al_downlaoder
+```
+import 'package:al_downloader/al_downloader.dart';
+```
 
 ## Usage
 
@@ -145,3 +167,5 @@ debugPrint(
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AppDelegate.swift](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/AppDelegate.swift)
 - [Info.plist](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/Info.plist)
+
+> Maintainer: jackleemeta (jackleemeta@outlook.com)

@@ -1,3 +1,7 @@
+## 1.0.7 - March 9, 2022
+
+- update document
+
 ## 1.0.6 - March 8, 2022
 
 - update document
