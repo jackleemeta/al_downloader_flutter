@@ -29,7 +29,7 @@ run the line with your commmand line
 flutter packages get
 ```
 
-import the line, then you can use al_downlaoder
+import the line, then you can use al_downloader
 ```
 import 'package:al_downloader/al_downloader.dart';
 ```
