@@ -154,13 +154,13 @@ class _MyHomePageState extends State<MyHomePage> {
     ALDownloaderBatcher.downloadUrls(kTestVideos,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | downloading, progress = $progress");
+          debugPrint("ALDownloader | batch |downloading, progress = $progress");
         }, successHandler: () {
-          debugPrint("ALDownloader | download successfully");
+          debugPrint("ALDownloader | batch | download successfully");
         }, failureHandler: () {
-          debugPrint("ALDownloader | download failed");
+          debugPrint("ALDownloader | batch | download failed");
         }, pausedHandler: () {
-          debugPrint("ALDownloader | download paused");
+          debugPrint("ALDownloader | batch | download paused");
         }));
   }
 

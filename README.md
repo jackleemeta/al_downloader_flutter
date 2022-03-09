@@ -4,6 +4,9 @@
 
 A URL-based flutter downloader that supports to download any type of file and automatically manages a lot of things.
 
+## [Chinese Document](README_CN.md)
+If you need Chinese Document, click the section title.
+
 ## Features
 
 * manage download tasks by url
@@ -14,22 +17,23 @@ A URL-based flutter downloader that supports to download any type of file and au
 * automatically manages files without requiring to be specified a download path
 * based on [flutter_downloader](https://pub.dev/packages/flutter_downloader)
 
+## Integration
 
-## Installing
+> Native Config: same as [flutter_downloader](https://pub.dev/packages/flutter_downloader) native config
 
-add the line to your pubspec.yaml
+add the following line to your pubspec.yaml
 
 ```
 dependencies:
   al_downloader: ^1.0.9
 ```
 
-run the line with your commmand line
+run the following line with your commmand line
 ```
 flutter packages get
 ```
 
-import the line, then you can use al_downloader
+import the following line, then you can use al_downloader
 ```
 import 'package:al_downloader/al_downloader.dart';
 ```
@@ -112,13 +116,13 @@ ALDownloader.removeAll;
 ALDownloaderBatcher.downloadUrls(kTestVideos,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | downloading, progress = $progress");
+      debugPrint("ALDownloader | batch | downloading, progress = $progress");
     }, successHandler: () {
-      debugPrint("ALDownloader | download successfully");
+      debugPrint("ALDownloader | batch | download successfully");
     }, failureHandler: () {
-      debugPrint("ALDownloader | download failed");
+      debugPrint("ALDownloader | batch | download failed");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused");
+      debugPrint("ALDownloader | batch | download paused");
     }));
 ```
 
@@ -159,9 +163,6 @@ final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
 debugPrint(
     "ALDownloader | get virtual/physical 'file name' by [url], url = $url, file name = $fileName\n");
 ```
-
-## Native Config
-- same as [flutter_downloader](https://pub.dev/packages/flutter_downloader) native config
 
 ## Demo For iOS
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
