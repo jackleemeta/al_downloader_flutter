@@ -24,7 +24,7 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.1.5
+  al_downloader: ^1.1.6
 ```
 
 run the following line with your command line
@@ -156,7 +156,7 @@ debugPrint(
 final isExist = await ALDownloaderPersistentFileManager
     .isExistAbsolutePhysicalPathOfFileForUrl(url);
 debugPrint(
-    "ALDownloader | check whether [url] corresponds to physical path, url = $url, is Exist = $isExist\n");
+    "ALDownloader | check whether [url] has a physical path, url = $url, is Exist = $isExist\n");
 
 final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
 debugPrint(

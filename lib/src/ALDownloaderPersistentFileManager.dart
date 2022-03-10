@@ -149,7 +149,7 @@ class ALDownloaderPersistentFileManager {
     return null;
   }
 
-  /// check whether [url] corresponds to physical path
+  /// check whether [url] has a physical path
   ///
   /// **parameters:**
   ///

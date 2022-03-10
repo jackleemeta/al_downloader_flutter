@@ -22,7 +22,7 @@
 
 ```
 dependencies:
-  al_downloader: ^1.1.5
+  al_downloader: ^1.1.6
 ```
 
 使用命令行运行下面这行代码
@@ -154,7 +154,7 @@ debugPrint(
 final isExist = await ALDownloaderPersistentFileManager
     .isExistAbsolutePhysicalPathOfFileForUrl(url);
 debugPrint(
-    "ALDownloader | 检查[url]是否对应物理路径, url = $url, is Exist = $isExist\n");
+    "ALDownloader | 检查[url]是否存在对应物理路径, url = $url, is Exist = $isExist\n");
 
 final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
 debugPrint(
