@@ -1,5 +1,5 @@
-import 'package:al_downloader/al_downloader.dart';
 import 'package:flutter/material.dart';
+import 'package:al_downloader/al_downloader.dart';
 
 final kTestPNGs = [
   "https://upload-images.jianshu.io/upload_images/9955565-51a4b4f35bd7973f.png",
@@ -16,10 +16,12 @@ final kTestVideos = [
 ];
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -37,13 +39,13 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -57,25 +59,13 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-
-      testPath();
-      testDownload();
-      testBatchDownload();
-      testStatus();
+      test();
     });
   }
 
@@ -112,30 +102,34 @@ class _MyHomePageState extends State<MyHomePage> {
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: const <Widget>[
             Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+              'tap the floating action button to test al_downloader',
+            )
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  /// download
-  void testDownload() async {
-    final url = kTestPNGs.first;
+  /// when executing the following methods together, try to keep them serial
+  test() async {
+    await testPath();
+    await testDownload();
+    await testBatchDownload();
+    await testStatus();
+  }
 
-    ALDownloader.download(url,
+  /// download
+  testDownload() async {
+    final url = kTestVideos.first;
+
+    await ALDownloader.download(url,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint(
@@ -151,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// batch download
   testBatchDownload() async {
-    ALDownloaderBatcher.downloadUrls(kTestVideos,
+    await ALDownloaderBatcher.downloadUrls(kTestVideos,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint("ALDownloader | batch |downloading, progress = $progress");

@@ -16,5 +16,4 @@ import flutter_downloader
         }
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
-    
 }

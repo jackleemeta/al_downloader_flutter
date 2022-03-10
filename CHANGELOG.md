@@ -1,3 +1,7 @@
+## 1.1.4 - March 10, 2022
+
+- optimize example
+
 ## 1.1.3 - March 10, 2022
 
 - update document

@@ -7,8 +7,8 @@
 ## 特性
 
 * 通过url管理下载任务
-* 简化下载状态
-* 减少I/O
+* 简单的下载状态
+* 不频繁地I/O
 * 提供便利的下载句柄
 * 支持批量下载
 * 自动管理文件，不需要指定下载路径
@@ -22,7 +22,7 @@
 
 ```
 dependencies:
-  al_downloader: ^1.1.3
+  al_downloader: ^1.1.4
 ```
 
 使用命令行运行下面这行代码
@@ -41,7 +41,7 @@ import 'package:al_downloader/al_downloader.dart';
 
 ```
 /// 下载
-ALDownloader.download(url,
+await ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -110,7 +110,7 @@ ALDownloader.removeAll;
 
 ```
 /// 批量下载
-ALDownloaderBatcher.downloadUrls(kTestVideos,
+await ALDownloaderBatcher.downloadUrls(kTestVideos,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint("ALDownloader | 批量 | 正在下载, progress = $progress");
@@ -161,7 +161,7 @@ debugPrint(
     "ALDownloader | 通过[url]获取虚拟/物理的“文件名”, url = $url, file name = $fileName\n");
 ```
 
-## Demo For iOS
+## iOS的Demo的主要文件
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AppDelegate.swift](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/AppDelegate.swift)
 - [Info.plist](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/Info.plist)

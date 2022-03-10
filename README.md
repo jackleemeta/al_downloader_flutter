@@ -9,11 +9,11 @@ If you need Chinese Document, click [here](README_CN.md).
 ## Features
 
 * manage download tasks by url
-* simplify download status
-* reduced I/O
+* simple download status
+* I/O infrequently
 * provide convenient download handle
 * support batch download
-* automatically manages files without requiring to be specified a download path
+* manage automatically files without requiring to be specified a download path
 * based on [flutter_downloader](https://pub.dev/packages/flutter_downloader)
 
 ## Integration
@@ -24,7 +24,7 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.1.3
+  al_downloader: ^1.1.4
 ```
 
 run the following line with your command line
@@ -43,7 +43,7 @@ import 'package:al_downloader/al_downloader.dart';
 
 ```
 /// download
-ALDownloader.download(url,
+await ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -112,7 +112,7 @@ ALDownloader.removeAll;
 
 ```
 /// batch downlaod
-ALDownloaderBatcher.downloadUrls(kTestVideos,
+await ALDownloaderBatcher.downloadUrls(kTestVideos,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint("ALDownloader | batch | downloading, progress = $progress");
@@ -163,7 +163,7 @@ debugPrint(
     "ALDownloader | get virtual/physical 'file name' by [url], url = $url, file name = $fileName\n");
 ```
 
-## Demo For iOS
+## Key File Of Demo For iOS
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AppDelegate.swift](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/AppDelegate.swift)
 - [Info.plist](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/Info.plist)
