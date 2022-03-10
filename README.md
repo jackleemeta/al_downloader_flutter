@@ -24,7 +24,7 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.1.4
+  al_downloader: ^1.1.5
 ```
 
 run the following line with your command line
@@ -111,7 +111,7 @@ ALDownloader.removeAll;
 ### ALDownloaderBatcher
 
 ```
-/// batch downlaod
+/// batch download
 await ALDownloaderBatcher.downloadUrls(kTestVideos,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {

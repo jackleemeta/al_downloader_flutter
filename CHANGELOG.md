@@ -1,3 +1,7 @@
+## 1.1.5 - March 10, 2022
+
+- fixed clerical error
+
 ## 1.1.4 - March 10, 2022
 
 - optimize example
