@@ -451,7 +451,7 @@ class ALDownloader {
     }
   }
 
-  /// get [_ALDownloadTask] from custom download tasks by [url]
+  /// get task from custom download tasks by [url]
   static _ALDownloadTask? _getALDownloadTaskFromUrl(String url) {
     _ALDownloadTask? anALDownloadTask;
     try {
@@ -476,7 +476,7 @@ class ALDownloader {
     return taskId;
   }
 
-  /// get task id from custom download tasks by [taskId]
+  /// get task from custom download tasks by [taskId]
   // ignore: unused_element
   static _ALDownloadTask? _getALDownloadTaskFromTaskId(String taskId) {
     _ALDownloadTask? anALDownloadTask;
