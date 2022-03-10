@@ -23,7 +23,7 @@ class ALDownloaderFileTypeJudge {
         if (element != null) return ALDownloaderFileTypeModel(type, element);
       } catch (error) {
         debugPrint(
-            "ALDownloader | getALDownloaderFileTypeModelFrom， type = $type，error = $error");
+            "ALDownloader | getALDownloaderFileTypeModelFrom, type = $type, error = $error");
       }
     }
     return ALDownloaderFileTypeModel(ALDownloaderFileType.unknown, null);

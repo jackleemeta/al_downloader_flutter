@@ -14,7 +14,6 @@ dependencies:
     sdk: flutter
   flutter_downloader: ^1.7.2
   path_provider: ^2.0.9
-  uuid: ^3.0.6
   convert: ^3.0.1
   crypto: ^3.0.1
 

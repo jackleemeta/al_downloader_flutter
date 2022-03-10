@@ -92,7 +92,7 @@ class ALDownloaderPersistentFileManager {
     final aDirString = _alDownloaderFileTypeDirKVs[model.type]!;
     final theRootDir = await _theRootDir;
     final dirForRootToFirstLevel = theRootDir + aDirString;
-    final fileName = _assembleFileName(url, model); // 文件名
+    final fileName = _assembleFileName(url, model); // assembled file name
 
     try {
       filePath = dirForRootToFirstLevel + fileName;
@@ -120,10 +120,10 @@ class ALDownloaderPersistentFileManager {
   static Future<String?> getAbsolutePhysicalPathOfFileWithUrl(
       String url) async {
     String virtualfilePath =
-        await getAbsoluteVirtualPathOfFileWithUrl(url); // 文件路径
+        await getAbsoluteVirtualPathOfFileWithUrl(url); // virtual file path
     String? filePath;
     try {
-      File aFile = File(virtualfilePath); // 物理文件
+      File aFile = File(virtualfilePath); // physical file
       if (aFile.existsSync()) filePath = virtualfilePath;
     } catch (error) {
       debugPrint("getAbsolutePhysicalPathOfFileWithUrl | error = $error");
@@ -199,7 +199,7 @@ class ALDownloaderPersistentFileManager {
     return sb.toString();
   }
 
-  // type and type list key value pairs
+  /// type and type list key value pairs
   static final _alDownloaderFileTypeDirKVs = {
     ALDownloaderFileType.common: _kExtensionCommonFilePath,
     ALDownloaderFileType.image: _kExtensionImageFilePath,
@@ -309,7 +309,7 @@ class _ALDownloaderFilePathManager {
 
         debugPrint('external storage directory: ' + aPath);
       } else {
-        debugPrint('external storage directory: 无');
+        debugPrint('external storage directory: none');
       }
     } catch (error) {
       debugPrint("get external storage directory error = $error");

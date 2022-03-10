@@ -73,7 +73,7 @@ class ALDownloader {
             url, taskId, DownloadTaskStatus.enqueued);
 
       debugPrint(
-          "ALDownloader | a download task was generated, download status = enqueued，taskId = $taskId");
+          "ALDownloader | a download task was generated, download status = enqueued, taskId = $taskId");
     } else if (anALDownloadTask.status == DownloadTaskStatus.failed ||
         anALDownloadTask.status == DownloadTaskStatus.canceled) {
       final newTaskIdForRetry =
@@ -369,7 +369,7 @@ class ALDownloader {
     final alDownloadTask = _getALDownloadTaskFromTaskId(id);
 
     if (alDownloadTask == null) {
-      debugPrint("not found alDownloadTask， id = $id");
+      debugPrint("not found alDownloadTask, id = $id");
       return;
     }
 
@@ -451,7 +451,7 @@ class ALDownloader {
     }
   }
 
-  /// by on the [url], get [_ALDownloadTask] from custom download tasks
+  /// get [_ALDownloadTask] from custom download tasks by [url]
   static _ALDownloadTask? _getALDownloadTaskFromUrl(String url) {
     _ALDownloadTask? anALDownloadTask;
     try {
@@ -463,7 +463,7 @@ class ALDownloader {
     return anALDownloadTask;
   }
 
-  /// by on the [url], get task id from custom download tasks
+  /// get task id from custom download tasks by [url]
   // ignore: unused_element
   static String? _getTaskIdFromUrl(String url) {
     String? taskId;
@@ -476,7 +476,7 @@ class ALDownloader {
     return taskId;
   }
 
-  /// by on the [taskId], get task id from custom download tasks
+  /// get task id from custom download tasks by [taskId]
   // ignore: unused_element
   static _ALDownloadTask? _getALDownloadTaskFromTaskId(String taskId) {
     _ALDownloadTask? anALDownloadTask;
@@ -489,7 +489,7 @@ class ALDownloader {
     return anALDownloadTask;
   }
 
-  /// by the [taskId], get url from custom download tasks
+  /// get url from custom download tasks by [taskId]
   // ignore: unused_element
   static String? _getUrlWithTaskId(String taskId) {
     String? url;

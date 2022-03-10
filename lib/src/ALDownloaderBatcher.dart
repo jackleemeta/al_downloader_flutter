@@ -40,10 +40,10 @@ class ALDownloaderBatcher {
       final aStatus = ALDownloader.getDownloadStatusForUrl(url);
 
       if (aStatus == ALDownloaderStatus.downloading) {
-        // contain tasks that are being downloaded
+        // contain downloading task
         return ALDownloaderStatus.downloading;
       } else if (aStatus == ALDownloaderStatus.pausing) {
-        // contain paused tasks
+        // contain paused task
         return ALDownloaderStatus.pausing;
       }
 
@@ -53,15 +53,15 @@ class ALDownloaderBatcher {
     final allStatus = aMap.values.toSet();
 
     if (allStatus.contains(ALDownloaderStatus.downloadFailed)) {
-      // not contain task that are being downloaded && not contain paused task && contain one failed task at least
+      // not contain downloaded task && not contain paused task && contain one failed task at least
       return ALDownloaderStatus.downloadFailed;
     } else if (allStatus
             .difference({ALDownloaderStatus.downloadSuccced}).length ==
         0) {
-      // not contain task that are being downloaded && not contain paused task && not contain failed task && tasks is all successful
+      // not contain downloading task && not contain paused task && not contain failed task && task is all successful
       return ALDownloaderStatus.downloadSuccced;
     }
-    // not contain task that are being downloaded && 无失败 && 无暂停的任务 && 有一部分未成功 && 无暂停
+    // not contain downloading task && not contain failed task && not contain paused task && contain unsuccessful task
     return ALDownloaderStatus.unstarted;
   }
 
@@ -259,7 +259,7 @@ class _ALDownloaderBatcherBinder {
   }
 
   /// all download tasks are completed
-  /// just completed，it may be successful or failed
+  /// just completed, it may be successful or failed
   bool get _isOver => _alDownloaderUrlDownloadedKVs.keys
       .toSet()
       .containsAll(_targetUrls.toSet());

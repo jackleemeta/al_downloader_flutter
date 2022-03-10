@@ -4,8 +4,7 @@
 
 A URL-based flutter downloader that supports to download any type of file and automatically manages a lot of things.
 
-## [Chinese Document](README_CN.md)
-If you need Chinese Document, click the section title.
+If you need Chinese Document, click [here](README_CN.md).
 
 ## Features
 
