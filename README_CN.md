@@ -161,13 +161,13 @@ debugPrint(
     "ALDownloader | 通过[url]获取虚拟/物理的“文件名”, url = $url, file name = $fileName\n");
 ```
 
-## iOS的Demo的主要文件
+## iOS的Example的主要文件
 
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AppDelegate.swift](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/AppDelegate.swift)
 - [Info.plist](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/Info.plist)
 
-## Android的Demo的主要文件
+## Android的Example的主要文件
 
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AndroidManifest.xml](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/android/app/src/main/AndroidManifest.xml)
