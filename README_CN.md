@@ -22,7 +22,7 @@
 
 ```
 dependencies:
-  al_downloader: ^1.1.1
+  al_downloader: ^1.1.2
 ```
 
 使用命令行运行下面这行代码

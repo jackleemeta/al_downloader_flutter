@@ -1,3 +1,8 @@
+## 1.1.2 - March 10, 2022
+
+- remove a dependency - uuid
+- update document
+
 ## 1.1.1 - March 9, 2022
 
 - fixed clerical error
