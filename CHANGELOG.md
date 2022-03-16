@@ -1,3 +1,7 @@
+## 1.1.7 - March 16, 2022
+
+- fixed error about unknown file persistence
+
 ## 1.1.6 - March 10, 2022
 
 - update document
