@@ -15,6 +15,8 @@ final kTestVideos = [
   "http://vfx.mtime.cn/Video/2019/03/18/mp4/190318231014076505.mp4"
 ];
 
+final kTestOthers = ["https://www.orimi.com/pdf-test.pdf"];
+
 void main() {
   runApp(const MyApp());
 }
@@ -127,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// download
   testDownload() async {
-    final url = kTestVideos.first;
+    final url = kTestPNGs.first;
 
     await ALDownloader.download(url,
         downloaderHandlerInterface:

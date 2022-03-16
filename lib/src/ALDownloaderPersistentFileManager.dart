@@ -31,7 +31,7 @@ class ALDownloaderPersistentFileManager {
       lazyGetALDownloaderPathModelFromUrl(String url) async {
     // generate data models of file types based on urls
     final model =
-        ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFrom(url);
+        ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFromUrl(url);
 
     // level 1 folder - component
     final dir = _alDownloaderFileTypeDirKVs[model.type]!;
@@ -86,13 +86,13 @@ class ALDownloaderPersistentFileManager {
     String? filePath;
     // generate data models of file types by url
     final model =
-        ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFrom(url);
+        ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFromUrl(url);
 
     // level 1 folder - component
     final aDirString = _alDownloaderFileTypeDirKVs[model.type]!;
     final theRootDir = await _theRootDir;
     final dirForRootToFirstLevel = theRootDir + aDirString;
-    final fileName = _assembleFileName(url, model); // assembled file name
+    final fileName = _assembleFileName(url, model); // assemble file name
 
     try {
       filePath = dirForRootToFirstLevel + fileName;
@@ -100,8 +100,6 @@ class ALDownloaderPersistentFileManager {
     } catch (error) {
       debugPrint("getAbsoluteVirtualPathOfFileWithUrl | error = $error");
     }
-
-    debugPrint("getAbsoluteVirtualPathOfFileWithUrl");
 
     return filePath!;
   }
@@ -173,7 +171,7 @@ class ALDownloaderPersistentFileManager {
   /// `file name`
   static String getFileNameFromUrl(String url) {
     final model =
-        ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFrom(url);
+        ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFromUrl(url);
 
     final fileName = _assembleFileName(url, model);
     return fileName;
@@ -192,10 +190,8 @@ class ALDownloaderPersistentFileManager {
     final md5String = _getMd5StringFor(url);
     sb.write(md5String);
 
-    if (model.type != ALDownloaderFileType.unknown) {
-      sb.write(".");
-      sb.write(model.description);
-    }
+    final description = model.description;
+    if (description != null && description.length > 0) sb.write(description);
     return sb.toString();
   }
 
@@ -205,7 +201,8 @@ class ALDownloaderPersistentFileManager {
     ALDownloaderFileType.image: _kExtensionImageFilePath,
     ALDownloaderFileType.audio: _kExtensionAudioFilePath,
     ALDownloaderFileType.video: _kExtensionVideoFilePath,
-    ALDownloaderFileType.unknown: _kExtensionUnknownFilePath,
+    ALDownloaderFileType.other: _kExtensionOtherFilePath,
+    ALDownloaderFileType.unknown: _kExtensionUnknownFilePath
   };
 
   static String _getMd5StringFor(String aString) {
@@ -226,7 +223,10 @@ class ALDownloaderPersistentFileManager {
   /// video file folder path
   static final _kExtensionVideoFilePath = _kSuperiorPath + "al_video" + "/";
 
-  /// unknown type file folder path
+  /// other file folder path
+  static final _kExtensionOtherFilePath = _kSuperiorPath + "al_other" + "/";
+
+  /// unknown file folder path
   static final _kExtensionUnknownFilePath = _kSuperiorPath + "al_unknown" + "/";
 
   /// parent path
