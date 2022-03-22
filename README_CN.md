@@ -22,7 +22,7 @@
 
 ```
 dependencies:
-  al_downloader: ^1.1.8
+  al_downloader: ^1.1.9
 ```
 
 使用命令行运行下面这行代码
@@ -83,6 +83,11 @@ ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
 ```
 
 ```
+/// 获取[url]的下载进度
+double progress = ALDownloader.getDownloadProgressForUrl(url);
+```
+
+```
 /// 取消
 ///
 /// 详情查看接口描述
@@ -125,7 +130,7 @@ await ALDownloaderBatcher.downloadUrls(kTestVideos,
 
 ```
 /// 总结一组url的下载状态
-final status = ALDownloader.getDownloadStatusForUrls(urls);
+final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```
 
 ### ALDownloaderPersistentFileManager - 基于url管理磁盘路径

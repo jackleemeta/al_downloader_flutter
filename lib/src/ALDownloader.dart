@@ -15,7 +15,7 @@ class ALDownloader {
   /// called or lazy call
   ///
   /// lazy call：when call [download]
-  static initialize() async {
+  static Future<void> initialize() async {
     if (!_isInitial) {
       // a dirty flag that guarantees that this scope is executed only once
       _isInitial = true;
@@ -41,7 +41,7 @@ class ALDownloader {
   /// [url] url
   ///
   /// [downloaderHandlerInterface] the download handle interface
-  static download(String? url,
+  static Future<void> download(String? url,
       {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
     if (url == null) throw "ALDownloader | download error = url is null";
 
@@ -94,6 +94,16 @@ class ALDownloader {
           "ALDownloader | try to download downloadtaskOfUrl = $url, url is complete");
       _alDownloaderBinders.forEach((element) {
         if (element.forUrl == url) {
+          final progressHandler =
+              element.downloaderHandlerHolder.progressHandler;
+          if (progressHandler != null) {
+            // ignore: non_constant_identifier_names
+            final double_progress = double.tryParse(
+                    ((anALDownloadTask.progress / 100).toStringAsFixed(2))) ??
+                0;
+            progressHandler(double_progress);
+          }
+
           final successHandler = element.downloaderHandlerHolder.successHandler;
           if (successHandler != null) successHandler();
         }
@@ -144,7 +154,7 @@ class ALDownloader {
   ///
   /// [url] url
   ///
-  ///  **return**
+  /// **return**
   ///
   /// download status [ALDownloaderStatus]
   static ALDownloaderStatus getDownloadStatusForUrl(String url) {
@@ -174,7 +184,35 @@ class ALDownloader {
     return alDownloaderStatus;
   }
 
-  /// get the completed URLS
+  /// get the download progress of [url]
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  ///
+  /// **return**
+  ///
+  /// download progress
+  static double getDownloadProgressForUrl(String url) {
+    double alDownloaderProgress;
+
+    try {
+      final anALDownloadTask = _getALDownloadTaskFromUrl(url);
+
+      int progress = (anALDownloadTask == null ? 0 : anALDownloadTask.progress);
+
+      // ignore: non_constant_identifier_names
+      alDownloaderProgress =
+          double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
+    } catch (error) {
+      alDownloaderProgress = 0;
+      debugPrint(
+          "ALDownloader | getDownloadProgressForUrl = $url, error = $error");
+    }
+    return alDownloaderProgress;
+  }
+
+  /// get the completed urls
   ///
   /// urls for resources that download successfully or fail are added to the pool
   ///
@@ -204,7 +242,7 @@ class ALDownloader {
   /// **parameters**
   ///
   /// [url] url
-  static cancel(String url) async {
+  static Future<void> cancel(String url) async {
     final alDownloadTask = _getALDownloadTaskFromUrl(url);
 
     if (alDownloadTask == null) return;
@@ -219,7 +257,7 @@ class ALDownloader {
   /// cancel all tasks that are downloading
   ///
   /// the bytes downloaded will be deleted
-  static cancelAll() async {
+  static Future<void> cancelAll() async {
     await FlutterDownloader.cancelAll();
     for (final downloadTask in _alDownloadTasks) {
       if (downloadTask.status == DownloadTaskStatus.running)
@@ -236,7 +274,7 @@ class ALDownloader {
   /// **parameters**
   ///
   /// [url] url
-  static pause(String url) async {
+  static Future<void> pause(String url) async {
     try {
       final alDownloadTask = _getALDownloadTaskFromUrl(url);
 
@@ -265,7 +303,7 @@ class ALDownloader {
   }
 
   /// pause all tasks that are downloading and remove a enqueued task
-  static pauseAll() async {
+  static Future<void> pauseAll() async {
     final aTemp = [];
     aTemp.addAll(_alDownloadTasks);
     for (final alDownloadTask in aTemp) {
@@ -279,7 +317,7 @@ class ALDownloader {
   /// **parameters**
   ///
   /// [url] url
-  static remove(String url) async {
+  static Future<void> remove(String url) async {
     try {
       final alDownloaderTask = _getALDownloadTaskFromUrl(url);
 
@@ -301,7 +339,7 @@ class ALDownloader {
   }
 
   /// remove ALDownloader data corresponding to all urls
-  static removeAll() async {
+  static Future<void> removeAll() async {
     for (final alDownloadTask in _alDownloadTasks) remove(alDownloadTask.url);
   }
 
@@ -445,6 +483,7 @@ class ALDownloader {
         final anALDownloadTask = _ALDownloadTask(element.url);
         anALDownloadTask.taskId = element.taskId;
         anALDownloadTask.status = element.status;
+        anALDownloadTask.progress = element.progress;
         return anALDownloadTask;
       }).toList();
       _alDownloadTasks.addAll(aList);

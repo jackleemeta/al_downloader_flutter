@@ -1,22 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:al_downloader/al_downloader.dart';
 
-final kTestPNGs = [
-  "https://upload-images.jianshu.io/upload_images/9955565-51a4b4f35bd7973f.png",
-  "https://upload-images.jianshu.io/upload_images/9955565-e99b6bd33b388feb.png",
-  "https://upload-images.jianshu.io/upload_images/9955565-3aafbc20dd329e58.png"
-];
-
-final kTestVideos = [
-  "http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/21/mp4/190321153853126488.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/18/mp4/190318231014076505.mp4"
-];
-
-final kTestOthers = ["https://www.orimi.com/pdf-test.pdf"];
-
 void main() {
   runApp(const MyApp());
 }
@@ -24,40 +8,20 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'al_downloader',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'al_downloader'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -65,71 +29,156 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void _incrementCounter() {
-    setState(() {
-      test();
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    // initialize downloader and get initial download status/progress
+    initialize();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
-            Text(
-              'tap the floating action button to test al_downloader',
-            )
-          ],
+        appBar: AppBar(
+          title: Text(widget.title),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        body: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+          const SizedBox(height: 10),
+          const Text(
+            "You are testing batch download",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black),
+          ),
+          theListview
+        ]),
+        floatingActionButton: MaterialButton(
+          child: const Text('download'),
+          color: Colors.blue,
+          textTheme: ButtonTextTheme.primary,
+          onPressed: _downloadAction,
+        ));
+  }
+
+  /// core data in listView
+  get theListview => ListView.separated(
+        padding: const EdgeInsets.only(top: 30),
+        shrinkWrap: true,
+        itemCount: models.length,
+        itemBuilder: (BuildContext context, int index) {
+          final model = models[index];
+          return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "url = ${model.url!}",
+                      style: const TextStyle(fontSize: 11, color: Colors.black),
+                    )),
+                SizedBox(
+                    height: 50,
+                    child: Stack(fit: StackFit.expand, children: [
+                      LinearProgressIndicator(
+                        value: model.progress,
+                        backgroundColor: Colors.grey,
+                        valueColor:
+                            const AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "progress = ${model.progressForPercent}",
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.white),
+                        ),
+                      ),
+                    ]))
+              ]);
+        },
+        separatorBuilder: (BuildContext context, int index) => const Divider(
+          height: 20.0,
+        ),
+      );
+
+  void initialize() {
+    ALDownloader.initialize().then((value) {
+      for (final model in models) {
+        final status = ALDownloader.getDownloadStatusForUrl(model.url!);
+        final progress = ALDownloader.getDownloadProgressForUrl(model.url!);
+        model.isSuccess = status == ALDownloaderStatus.downloadSuccced;
+        model.progress = progress;
+      }
+
+      setState(() {});
+    });
+  }
+
+  void _downloadAction() {
+    test();
   }
 
   /// when executing the following methods together, try to keep them serial
   test() async {
-    await testPath();
-    await testDownload();
+    await testAddInterface();
     await testBatchDownload();
-    await testStatus();
+    // await testPath();
+    // await testDownload();
+    // await testStatus();
+  }
+
+  /// add download handle interface
+  testAddInterface() async {
+    for (final model in models) {
+      final url = model.url;
+      ALDownloader.addALDownloaderHandlerInterface(
+          ALDownloaderHandlerInterface(progressHandler: (progress) {
+            model.progress = progress;
+            setState(() {});
+
+            debugPrint(
+                "ALDownloader | downloading, the url = $url, progress = $progress");
+          }, successHandler: () {
+            debugPrint("ALDownloader | download successfully, the url = $url");
+
+            model.isSuccess = true;
+            setState(() {});
+          }, failureHandler: () {
+            debugPrint("ALDownloader | download failed, the url = $url");
+
+            model.isSuccess = false;
+            setState(() {});
+          }, pausedHandler: () {
+            debugPrint("ALDownloader | download paused, the url = $url");
+
+            model.isSuccess = false;
+            setState(() {});
+          }),
+          url);
+    }
+  }
+
+  /// batch download
+  testBatchDownload() async {
+    final urls = models.map((e) => e.url!).toList();
+    await ALDownloaderBatcher.downloadUrls(urls,
+        downloaderHandlerInterface:
+            ALDownloaderHandlerInterface(progressHandler: (progress) {
+          debugPrint("ALDownloader | batch |downloading, progress = $progress");
+        }, successHandler: () {
+          debugPrint("ALDownloader | batch | download successfully");
+        }, failureHandler: () {
+          debugPrint("ALDownloader | batch | download failed");
+        }, pausedHandler: () {
+          debugPrint("ALDownloader | batch | download paused");
+        }));
   }
 
   /// download
   testDownload() async {
-    final url = kTestPNGs.first;
+    final urls = models.map((e) => e.url!).toList();
+    final url = urls.first;
 
     await ALDownloader.download(url,
         downloaderHandlerInterface:
@@ -145,24 +194,10 @@ class _MyHomePageState extends State<MyHomePage> {
         }));
   }
 
-  /// batch download
-  testBatchDownload() async {
-    await ALDownloaderBatcher.downloadUrls(kTestVideos,
-        downloaderHandlerInterface:
-            ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | batch |downloading, progress = $progress");
-        }, successHandler: () {
-          debugPrint("ALDownloader | batch | download successfully");
-        }, failureHandler: () {
-          debugPrint("ALDownloader | batch | download failed");
-        }, pausedHandler: () {
-          debugPrint("ALDownloader | batch | download paused");
-        }));
-  }
-
   /// path
   testPath() async {
-    final url = kTestPNGs.first;
+    final urls = models.map((e) => e.url!).toList();
+    final url = urls.first;
 
     final model = await ALDownloaderPersistentFileManager
         .lazyGetALDownloaderPathModelFromUrl(url);
@@ -194,33 +229,54 @@ class _MyHomePageState extends State<MyHomePage> {
         "ALDownloader | get virtual/physical 'file name' by [url], url = $url, file name = $fileName\n");
   }
 
-  testAddInterface() async {
-    final url = kTestPNGs.first;
-
-    ALDownloader.addALDownloaderHandlerInterface(
-        ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint(
-              "ALDownloader | downloading, the url = $url, progress = $progress");
-        }, successHandler: () {
-          debugPrint("ALDownloader | download successfully, the url = $url");
-        }, failureHandler: () {
-          debugPrint("ALDownloader | download failed, the url = $url");
-        }, pausedHandler: () {
-          debugPrint("ALDownloader | download paused, the url = $url");
-        }),
-        url);
-  }
-
   testRemoveInterface() async {
-    final url = kTestPNGs.first;
+    final urls = models.map((e) => e.url!).toList();
+    final url = urls.first;
     ALDownloader.removeALDownloaderHandlerInterfaceForUrl(url);
   }
 
   testStatus() {
-    final url = kTestPNGs.first;
+    final urls = models.map((e) => e.url!).toList();
+    final url = urls.first;
 
     ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
     debugPrint(
         "ALDownloader | get the download status, url = $url, status= $status\n");
   }
 }
+
+/// model class for test
+class DownloadModel {
+  final String? url;
+
+  double progress = 0;
+
+  bool isSuccess = false;
+
+  String get progressForPercent {
+    int aProgress = (progress * 100).toInt();
+    return "$aProgress%";
+  }
+
+  DownloadModel(this.url);
+}
+
+///  ----------------------data for test----------------------
+
+final models = kTestVideos.map((e) => DownloadModel(e)).toList();
+
+final kTestPNGs = [
+  "https://upload-images.jianshu.io/upload_images/9955565-51a4b4f35bd7973f.png",
+  "https://upload-images.jianshu.io/upload_images/9955565-e99b6bd33b388feb.png",
+  "https://upload-images.jianshu.io/upload_images/9955565-3aafbc20dd329e58.png"
+];
+
+final kTestVideos = [
+  "http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4",
+  "http://vfx.mtime.cn/Video/2019/03/21/mp4/190321153853126488.mp4",
+  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4",
+  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4",
+  "http://vfx.mtime.cn/Video/2019/03/18/mp4/190318231014076505.mp4"
+];
+
+final kTestOthers = ["https://www.orimi.com/pdf-test.pdf"];

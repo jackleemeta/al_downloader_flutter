@@ -24,7 +24,7 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.1.8
+  al_downloader: ^1.1.9
 ```
 
 run the following line with your command line
@@ -85,6 +85,11 @@ ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
 ```
 
 ```
+/// get the download progress of [url]
+double progress = ALDownloader.getDownloadProgressForUrl(url);
+```
+
+```
 /// cancel
 ///
 /// for details, see interface description
@@ -127,7 +132,7 @@ await ALDownloaderBatcher.downloadUrls(kTestVideos,
 
 ```
 /// summarize the download status of a set of urls
-final status = ALDownloader.getDownloadStatusForUrls(urls);
+final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```
 
 ### ALDownloaderPersistentFileManager - disk path management by url

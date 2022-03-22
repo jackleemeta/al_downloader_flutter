@@ -1,3 +1,8 @@
+## 1.1.9 - March 21, 2022
+
+- optimize download progress service
+- optimize example
+
 ## 1.1.8 - March 16, 2022
 
 - update document
