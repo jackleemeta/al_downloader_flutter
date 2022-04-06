@@ -237,7 +237,7 @@ class ALDownloader {
 
   /// cancel download
   ///
-  /// the bytes downloaded will be deleted
+  /// the incomplete bytes will be deleted
   ///
   /// **parameters**
   ///
@@ -256,7 +256,7 @@ class ALDownloader {
 
   /// cancel all tasks that are downloading
   ///
-  /// the bytes downloaded will be deleted
+  /// the incomplete bytes will be deleted
   static Future<void> cancelAll() async {
     await FlutterDownloader.cancelAll();
     for (final downloadTask in _alDownloadTasks) {
@@ -267,9 +267,9 @@ class ALDownloader {
 
   /// pause download
   ///
-  /// the bytes downloaded will not be deleted
+  /// the incomplete bytes will not be deleted
   ///
-  /// status of undefined/enqueued/failed will remove the download queue
+  /// task of undefined/enqueued/failed will be removed from the download queue
   ///
   /// **parameters**
   ///
@@ -302,7 +302,9 @@ class ALDownloader {
     }
   }
 
-  /// pause all tasks that are downloading and remove a enqueued task
+  /// pause all tasks
+  ///
+  /// this is a multiple of [pause], see [pause]
   static Future<void> pauseAll() async {
     final aTemp = [];
     aTemp.addAll(_alDownloadTasks);
@@ -421,7 +423,7 @@ class ALDownloader {
 
     if (status == DownloadTaskStatus.complete) {
       debugPrint(
-          "ALDownloader | _downloadCallback \n 下载成功 url = $url \nid = $id ");
+          "ALDownloader | _downloadCallback \n download successfully url = $url \nid = $id ");
       _alDownloaderBinders.forEach((element) {
         if (element.forUrl == url) {
           final progressHandler =
