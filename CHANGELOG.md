@@ -1,3 +1,7 @@
+## 1.2.3 - April 9, 2022
+
+- fixed clerical error
+
 ## 1.2.2 - April 9, 2022
 
 - fixed clerical error
