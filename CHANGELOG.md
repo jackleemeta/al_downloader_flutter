@@ -6,8 +6,8 @@
 
 - fix some bugs that occur in abnormal situations, e.g. download failed, process killed suddenly
 - special note: to be more stable, modify file storage directory 
-  - Android: from temporary eirectory to external storage directory or document directory
-  - iOS: from temporary eirectory to document directory
+  - Android: from temporary directory to external storage directory or document directory
+  - iOS: from temporary directory to document directory
 - verify the data on disk, memory, and databases to ensure data consistency
 - optimize demo
 
