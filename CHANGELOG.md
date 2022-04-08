@@ -1,3 +1,7 @@
+## 1.2.2 - April 9, 2022
+
+- fixed clerical error
+
 ## 1.2.1 - April 8, 2022
 
 - fix some bugs that occur in abnormal situations, e.g. download failed, process killed suddenly

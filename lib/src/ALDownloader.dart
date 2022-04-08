@@ -501,15 +501,15 @@ class ALDownloader {
       }
     }
 
-    // final aTemp = [];
-    // aTemp.addAll(_alDownloadTasks);
-    // for (final element in aTemp) {
-    //   final url = element.url;
-    //   final isExist = await ALDownloaderPersistentFileManager
-    //       .isExistAbsolutePhysicalPathOfFileForUrl(url);
-    //   if (!isExist && element.status == DownloadTaskStatus.complete)
-    //     await _innerRemove(url);
-    // }
+    final aTemp = [];
+    aTemp.addAll(_alDownloadTasks);
+    for (final element in aTemp) {
+      final url = element.url;
+      final isExist = await ALDownloaderPersistentFileManager
+          .isExistAbsolutePhysicalPathOfFileForUrl(url);
+      if (!isExist && element.status == DownloadTaskStatus.complete)
+        await _innerRemove(url);
+    }
 
     debugPrint(
         "ALDownloader | _loadAndTryToRunTask `ALDownloader` tasks length = ${_alDownloadTasks.length}");
