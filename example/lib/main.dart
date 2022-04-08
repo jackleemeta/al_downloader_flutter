@@ -5,6 +5,8 @@ void main() {
   runApp(const MyApp());
 }
 
+/* ----------------------------------------------UI---------------------------------------------- */
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
@@ -43,16 +45,21 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           title: Text(widget.title),
         ),
-        body: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-          const SizedBox(height: 10),
-          const Text(
-            "You are testing batch download",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black),
-          ),
-          Expanded(child: theListview)
-        ]),
+        body: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 10),
+              const Text(
+                "You are testing batch download",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+              Expanded(child: theListview)
+            ]),
         floatingActionButton: MaterialButton(
           child: const Text('download'),
           color: Colors.blue,
@@ -64,22 +71,32 @@ class _MyHomePageState extends State<MyHomePage> {
   /// core data in listView
   get theListview => ListView.separated(
         padding: EdgeInsets.only(
-            top: 30, bottom: MediaQuery.of(context).padding.bottom + 75),
+            top: 20, bottom: MediaQuery.of(context).padding.bottom + 75),
         shrinkWrap: true,
         itemCount: models.length,
         itemBuilder: (BuildContext context, int index) {
           final model = models[index];
+          final order = index + 1;
           return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "url = ${model.url!}",
+                      "$order",
+                      style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
+                    )),
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      model.url!,
                       style: const TextStyle(fontSize: 11, color: Colors.black),
                     )),
                 SizedBox(
-                    height: 50,
+                    height: 30,
                     child: Stack(fit: StackFit.expand, children: [
                       LinearProgressIndicator(
                         value: model.progress,
@@ -98,39 +115,42 @@ class _MyHomePageState extends State<MyHomePage> {
                     ]))
               ]);
         },
-        separatorBuilder: (BuildContext context, int index) => const Divider(
-          height: 20.0,
-        ),
+        separatorBuilder: (BuildContext context, int index) =>
+            const Divider(height: 10, color: Colors.transparent),
       );
 
-  void initialize() {
-    ALDownloader.initialize().then((value) {
-      for (final model in models) {
-        final status = ALDownloader.getDownloadStatusForUrl(model.url!);
-        final progress = ALDownloader.getDownloadProgressForUrl(model.url!);
-        model.isSuccess = status == ALDownloaderStatus.downloadSuccced;
-        model.progress = progress;
-      }
+  /* ----------------------------------------------method for test---------------------------------------------- */
 
-      setState(() {});
-    });
+  /// initialize
+  Future<void> initialize() async {
+    await ALDownloader.initialize();
+
+    for (final model in models) {
+      final status = ALDownloader.getDownloadStatusForUrl(model.url!);
+      final progress = ALDownloader.getDownloadProgressForUrl(model.url!);
+      model.isSuccess = status == ALDownloaderStatus.downloadSuccced;
+      model.progress = progress;
+    }
+
+    setState(() {});
   }
 
+  /// action
   void _downloadAction() {
     test();
   }
 
   /// when executing the following methods together, try to keep them serial
-  test() async {
-    await testAddInterface();
+  Future<void> test() async {
+    testAddInterface();
     await testBatchDownload();
-    // await testPath();
-    // await testDownload();
-    // await testStatus();
+    await testPath();
+    await testDownload();
+    testStatus();
   }
 
   /// add download handle interface
-  testAddInterface() async {
+  void testAddInterface() {
     for (final model in models) {
       final url = model.url;
       ALDownloader.addALDownloaderHandlerInterface(
@@ -161,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// batch download
-  testBatchDownload() async {
+  Future<void> testBatchDownload() async {
     final urls = models.map((e) => e.url!).toList();
     await ALDownloaderBatcher.downloadUrls(urls,
         downloaderHandlerInterface:
@@ -177,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// download
-  testDownload() async {
+  Future<void> testDownload() async {
     final urls = models.map((e) => e.url!).toList();
     final url = urls.first;
 
@@ -196,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// path
-  testPath() async {
+  Future<void> testPath() async {
     final urls = models.map((e) => e.url!).toList();
     final url = urls.first;
 
@@ -230,13 +250,13 @@ class _MyHomePageState extends State<MyHomePage> {
         "ALDownloader | get virtual/physical 'file name' by [url], url = $url, file name = $fileName\n");
   }
 
-  testRemoveInterface() async {
+  void testRemoveInterface() {
     final urls = models.map((e) => e.url!).toList();
     final url = urls.first;
     ALDownloader.removeALDownloaderHandlerInterfaceForUrl(url);
   }
 
-  testStatus() {
+  void testStatus() {
     final urls = models.map((e) => e.url!).toList();
     final url = urls.first;
 
@@ -246,7 +266,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-/// model class for test
+/* ----------------------------------------------model class for test---------------------------------------------- */
+
 class DownloadModel {
   final String? url;
 
@@ -262,7 +283,7 @@ class DownloadModel {
   DownloadModel(this.url);
 }
 
-///  ----------------------data for test----------------------
+/* ----------------------------------------------data for test---------------------------------------------- */
 
 final models = kTestVideos.map((e) => DownloadModel(e)).toList();
 

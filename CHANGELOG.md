@@ -1,3 +1,12 @@
+## 1.2.1 - April 8, 2022
+
+- fix some bugs that occur in abnormal situations, e.g. download failed, process killed suddenly
+- special note: to be more stable, modify file storage directory 
+  - Android: from temporary eirectory to external storage directory or document directory
+  - iOS: from temporary eirectory to document directory
+- verify the data on disk, memory, and databases to ensure data consistency
+- optimize demo
+
 ## 1.2.0 - April 6, 2022
 
 - update document

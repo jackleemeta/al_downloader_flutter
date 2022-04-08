@@ -180,8 +180,22 @@ class ALDownloaderPersistentFileManager {
   /// -------------------------------- Private API --------------------------------
 
   /// root path
-  static Future<String> get _theRootDir async =>
-      await _ALDownloaderFilePathManager.localTemporaryDirectory;
+  static Future<String> get _theRootDir async {
+    String? aDir;
+    if (Platform.isIOS) {
+      aDir = await _ALDownloaderFilePathManager.localDocumentDirectory;
+    } else if (Platform.isAndroid) {
+      aDir = await _ALDownloaderFilePathManager.localExternalStorageDirectory;
+      if (aDir == null)
+        aDir = await _ALDownloaderFilePathManager.localDocumentDirectory;
+    } else {
+      throw "ALDownloaderPersistentFileManager get theRootDir error: ALDownloader can not operate on current platform ${Platform.operatingSystem}";
+    }
+
+    return aDir;
+  }
+
+  // static Future<String> get _theRootDir async => await _ALDownloaderFilePathManager.localTemporaryDirectory;
 
   /// assemble file name based on [url] and [model]
   static String _assembleFileName(String url, ALDownloaderFileTypeModel model) {
@@ -230,7 +244,7 @@ class ALDownloaderPersistentFileManager {
   static final _kExtensionUnknownFilePath = _kSuperiorPath + "al_unknown" + "/";
 
   /// parent path
-  static final _kSuperiorPath = "/" + "flutter" + "/";
+  static final _kSuperiorPath = "/" + "al_flutter" + "/";
 }
 
 /// combination class of 'directory path' and 'file name'
@@ -268,7 +282,7 @@ class _ALDownloaderFilePathManager {
 
   /// get `document directory`
   // ignore: unused_element
-  static Future<String?> get localDocumentDirectory async {
+  static Future<String> get localDocumentDirectory async {
     String? aPath;
     try {
       final aDir = await getApplicationDocumentsDirectory();
@@ -278,7 +292,7 @@ class _ALDownloaderFilePathManager {
     } catch (error) {
       debugPrint("get document directory error = $error");
     }
-    return aPath;
+    return aPath!;
   }
 
   /// get `temporary directory`

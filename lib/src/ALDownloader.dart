@@ -17,9 +17,6 @@ class ALDownloader {
   /// lazy call：when call [download]
   static Future<void> initialize() async {
     if (!_isInitial) {
-      // a dirty flag that guarantees that this scope is executed only once
-      _isInitial = true;
-
       // FlutterDownloader initialize
       await FlutterDownloader.initialize(debug: false);
 
@@ -31,6 +28,9 @@ class ALDownloader {
 
       // extract all current tasks from database and execute the tasks that need to be executed
       await _loadAndTryToRunTask();
+
+      // a dirty flag that guarantees that this scope is executed only once
+      _isInitial = true;
     }
   }
 
@@ -52,7 +52,16 @@ class ALDownloader {
 
     await initialize();
 
-    final anALDownloadTask = _getALDownloadTaskFromUrl(url);
+    var anALDownloadTask = _getALDownloadTaskFromUrl(url);
+
+    final isExist = await ALDownloaderPersistentFileManager
+        .isExistAbsolutePhysicalPathOfFileForUrl(url);
+    if (!isExist &&
+        anALDownloadTask != null &&
+        anALDownloadTask.status == DownloadTaskStatus.complete) {
+      await _innerRemove(url);
+      anALDownloadTask = null;
+    }
 
     if (anALDownloadTask == null) {
       // get the 'physical directory path' and 'file name' of the file by URL
@@ -70,7 +79,7 @@ class ALDownloader {
 
       if (taskId != null)
         _addALDownloadTaskOrReplaceALDownloadTaskId(
-            url, taskId, DownloadTaskStatus.enqueued);
+            url, taskId, DownloadTaskStatus.enqueued, 0);
 
       debugPrint(
           "ALDownloader | a download task was generated, download status = enqueued, taskId = $taskId");
@@ -80,15 +89,15 @@ class ALDownloader {
           await FlutterDownloader.retry(taskId: anALDownloadTask.taskId);
       if (newTaskIdForRetry != null) {
         debugPrint("ALDownloader | newTaskIdForRetry = $newTaskIdForRetry");
-        _addALDownloadTaskOrReplaceALDownloadTaskId(
-            url, newTaskIdForRetry, DownloadTaskStatus.undefined);
+        _addALDownloadTaskOrReplaceALDownloadTaskId(url, newTaskIdForRetry,
+            DownloadTaskStatus.undefined, anALDownloadTask.progress);
       }
     } else if (anALDownloadTask.status == DownloadTaskStatus.paused) {
       final newTaskIdForResume =
           await FlutterDownloader.resume(taskId: anALDownloadTask.taskId);
       if (newTaskIdForResume != null)
-        _addALDownloadTaskOrReplaceALDownloadTaskId(
-            url, newTaskIdForResume, DownloadTaskStatus.undefined);
+        _addALDownloadTaskOrReplaceALDownloadTaskId(url, newTaskIdForResume,
+            DownloadTaskStatus.undefined, anALDownloadTask.progress);
     } else if (anALDownloadTask.status == DownloadTaskStatus.complete) {
       debugPrint(
           "ALDownloader | try to download downloadtaskOfUrl = $url, url is complete");
@@ -98,9 +107,11 @@ class ALDownloader {
               element.downloaderHandlerHolder.progressHandler;
           if (progressHandler != null) {
             // ignore: non_constant_identifier_names
-            final double_progress = double.tryParse(
-                    ((anALDownloadTask.progress / 100).toStringAsFixed(2))) ??
-                0;
+            final int_progress =
+                anALDownloadTask == null ? 0 : anALDownloadTask.progress;
+            // ignore: non_constant_identifier_names
+            final double_progress =
+                double.tryParse(((int_progress / 100).toStringAsFixed(2))) ?? 0;
             progressHandler(double_progress);
           }
 
@@ -275,6 +286,9 @@ class ALDownloader {
   ///
   /// [url] url
   static Future<void> pause(String url) async {
+    assert(_isInitial,
+        "ALDownloader.initialize or ALDownloader.download must be called first");
+
     try {
       final alDownloadTask = _getALDownloadTaskFromUrl(url);
 
@@ -316,28 +330,16 @@ class ALDownloader {
 
   /// remove the ALDownloader data corresponding to [url]
   ///
+  /// it will automatically cancel the downloading url
+  ///
   /// **parameters**
   ///
   /// [url] url
   static Future<void> remove(String url) async {
-    try {
-      final alDownloaderTask = _getALDownloadTaskFromUrl(url);
+    assert(_isInitial,
+        "ALDownloader.initialize or ALDownloader.download must be called first");
 
-      if (alDownloaderTask == null) {
-        debugPrint(
-            "ALDownloader | remove alDownloaderTask of url = $url, url's  _ALDownloadTask is null");
-        return;
-      }
-
-      await FlutterDownloader.remove(
-          taskId: alDownloaderTask.taskId,
-          shouldDeleteContent:
-              true); // Delete a download task from DB & delete file
-      _alDownloadTasks.remove(alDownloaderTask);
-    } catch (error) {
-      debugPrint(
-          "ALDownloader | remove alDownloaderTask of url = $url, error = $error");
-    }
+    await _innerRemove(url);
   }
 
   /// remove ALDownloader data corresponding to all urls
@@ -353,7 +355,7 @@ class ALDownloader {
   ///
   /// add a new custom task or update the [url] mapping of the existing task's taskId
   static void _addALDownloadTaskOrReplaceALDownloadTaskId(
-      String? url, String taskId, DownloadTaskStatus status) {
+      String? url, String taskId, DownloadTaskStatus status, int progress) {
     if (url == null) {
       debugPrint(
           "_addALDownloadTaskOrReplaceALDownloadTaskId error url == null");
@@ -367,6 +369,7 @@ class ALDownloader {
           _alDownloadTasks.firstWhere((element) => element.url == url);
       anALDownloadTask.taskId = taskId;
       anALDownloadTask.status = status;
+      anALDownloadTask.progress = progress;
     } catch (error) {
       debugPrint(
           "ALDownloader | _addALDownloadTaskOrReplaceALDownloadTaskId error = $error");
@@ -376,6 +379,7 @@ class ALDownloader {
       anALDownloadTask = _ALDownloadTask(url);
       anALDownloadTask.taskId = taskId;
       anALDownloadTask.status = status;
+      anALDownloadTask.progress = progress;
 
       _alDownloadTasks.add(anALDownloadTask);
     }
@@ -415,7 +419,7 @@ class ALDownloader {
 
     final url = alDownloadTask.url;
 
-    _addALDownloadTaskOrReplaceALDownloadTaskId(url, id, status);
+    _addALDownloadTaskOrReplaceALDownloadTaskId(url, id, status, progress);
 
     // ignore: non_constant_identifier_names
     final double_progress =
@@ -469,27 +473,51 @@ class ALDownloader {
         "ALDownloader | _downloadCallback \nid = $id \nurl = $url \nstatus = $status \nprogress = $progress \ndouble_progress = $double_progress");
   }
 
-  /// load [FlutterDownloader] local database task to the memory cache, and attempt to execute the tasks
-  static _loadAndTryToRunTask() async {
+  /// load [FlutterDownloader]'s local database task to the memory cache, and attempt to execute the tasks
+  static Future<void> _loadAndTryToRunTask() async {
     final tasks = await FlutterDownloader.loadTasks();
     if (tasks != null) {
+      debugPrint(
+          "ALDownloader | _loadAndTryToRunTask `Flutterdownloader` tasks length = ${tasks.length}");
+
       tasks.forEach((element) {
         debugPrint(
-            "_loadAndTryToRunTask element url = ${element.url}, status = ${element.status}, element url = ${element.taskId}");
+            "_loadAndTryToRunTask `Flutterdownloader` task element url = ${element.url}, status = ${element.status}, element url = ${element.taskId}");
       });
 
-      debugPrint(
-          "ALDownloader | _loadAndTryToRunTask tasks.length = ${tasks.length}");
-
-      final aList = tasks.map((element) {
-        final anALDownloadTask = _ALDownloadTask(element.url);
-        anALDownloadTask.taskId = element.taskId;
-        anALDownloadTask.status = element.status;
-        anALDownloadTask.progress = element.progress;
-        return anALDownloadTask;
-      }).toList();
-      _alDownloadTasks.addAll(aList);
+      for (var element in tasks) {
+        if (element.savedDir.contains("/flutter/al_")) {
+          await FlutterDownloader.remove(
+              taskId: element.taskId,
+              shouldDeleteContent:
+                  true); // Delete a download task from DB & delete file
+        } else {
+          final anALDownloadTask = _ALDownloadTask(element.url);
+          anALDownloadTask.taskId = element.taskId;
+          anALDownloadTask.status = element.status;
+          anALDownloadTask.progress = element.progress;
+          _alDownloadTasks.add(anALDownloadTask);
+        }
+      }
     }
+
+    // final aTemp = [];
+    // aTemp.addAll(_alDownloadTasks);
+    // for (final element in aTemp) {
+    //   final url = element.url;
+    //   final isExist = await ALDownloaderPersistentFileManager
+    //       .isExistAbsolutePhysicalPathOfFileForUrl(url);
+    //   if (!isExist && element.status == DownloadTaskStatus.complete)
+    //     await _innerRemove(url);
+    // }
+
+    debugPrint(
+        "ALDownloader | _loadAndTryToRunTask `ALDownloader` tasks length = ${_alDownloadTasks.length}");
+
+    _alDownloadTasks.forEach((element) {
+      debugPrint(
+          "_loadAndTryToRunTask `ALDownloader` task element url = ${element.url}, status = ${element.status}, element url = ${element.taskId}");
+    });
   }
 
   /// get task from custom download tasks by [url]
@@ -542,6 +570,27 @@ class ALDownloader {
       debugPrint("ALDownloader | _getUrlWithTaskId, error = $error");
     }
     return url;
+  }
+
+  static Future<void> _innerRemove(String url) async {
+    try {
+      final alDownloaderTask = _getALDownloadTaskFromUrl(url);
+
+      if (alDownloaderTask == null) {
+        debugPrint(
+            "ALDownloader | _innerRemove alDownloaderTask of url = $url, url's  _ALDownloadTask is null");
+        return;
+      }
+
+      await FlutterDownloader.remove(
+          taskId: alDownloaderTask.taskId,
+          shouldDeleteContent:
+              true); // Delete a download task from DB & delete file
+      _alDownloadTasks.remove(alDownloaderTask);
+    } catch (error) {
+      debugPrint(
+          "ALDownloader | _innerRemove alDownloaderTask of url = $url, error = $error");
+    }
   }
 
   /// a dirty flag that guarantees that this scope is executed only once
