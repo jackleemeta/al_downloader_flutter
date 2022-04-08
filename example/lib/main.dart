@@ -63,7 +63,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// core data in listView
   get theListview => ListView.separated(
-        padding: const EdgeInsets.only(top: 30),
+        padding: EdgeInsets.only(
+            top: 30, bottom: MediaQuery.of(context).padding.bottom + 10),
         shrinkWrap: true,
         itemCount: models.length,
         itemBuilder: (BuildContext context, int index) {
