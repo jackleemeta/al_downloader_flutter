@@ -1,3 +1,8 @@
+## 1.2.4 - April 9, 2022
+
+- optimize pubspec file
+- optimize example
+
 ## 1.2.3 - April 9, 2022
 
 - fixed clerical error
@@ -12,8 +17,8 @@
 - special note: to be more stable, modify file storage directory 
   - Android: from temporary directory to external storage directory or document directory
   - iOS: from temporary directory to document directory
-- verify the data on disk, memory, and databases to ensure data consistency
-- optimize demo
+- verify the data on disk, memory, and database to ensure data consistency
+- optimize example
 
 ## 1.2.0 - April 6, 2022
 
