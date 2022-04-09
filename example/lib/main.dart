@@ -92,7 +92,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      model.url!,
+                      model.url,
                       style: const TextStyle(fontSize: 11, color: Colors.black),
                     )),
                 SizedBox(
@@ -112,6 +112,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               fontSize: 13, color: Colors.white),
                         ),
                       ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          model.statusDescription,
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.white),
+                        ),
+                      )
                     ]))
               ]);
         },
@@ -125,11 +133,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> initialize() async {
     await ALDownloader.initialize();
 
-    for (final model in models) {
-      final status = ALDownloader.getDownloadStatusForUrl(model.url!);
-      final progress = ALDownloader.getDownloadProgressForUrl(model.url!);
-      model.isSuccess = status == ALDownloaderStatus.downloadSuccced;
-      model.progress = progress;
+    for (var model in models) {
+      final url = model.url;
+      model.status = ALDownloader.getDownloadStatusForUrl(url);
+      model.progress = ALDownloader.getDownloadProgressForUrl(url);
     }
 
     setState(() {});
@@ -155,26 +162,31 @@ class _MyHomePageState extends State<MyHomePage> {
       final url = model.url;
       ALDownloader.addALDownloaderHandlerInterface(
           ALDownloaderHandlerInterface(progressHandler: (progress) {
+            model.status = ALDownloaderStatus.downloading;
             model.progress = progress;
+
             setState(() {});
 
             debugPrint(
                 "ALDownloader | downloading, the url = $url, progress = $progress");
           }, successHandler: () {
+            model.status = ALDownloaderStatus.downloadSuccced;
+
+            setState(() {});
+
             debugPrint("ALDownloader | download successfully, the url = $url");
-
-            model.isSuccess = true;
-            setState(() {});
           }, failureHandler: () {
+            model.status = ALDownloaderStatus.downloadFailed;
+
+            setState(() {});
+
             debugPrint("ALDownloader | download failed, the url = $url");
-
-            model.isSuccess = false;
-            setState(() {});
           }, pausedHandler: () {
-            debugPrint("ALDownloader | download paused, the url = $url");
+            model.status = ALDownloaderStatus.pausing;
 
-            model.isSuccess = false;
             setState(() {});
+
+            debugPrint("ALDownloader | download paused, the url = $url");
           }),
           url);
     }
@@ -182,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// batch download
   Future<void> testBatchDownload() async {
-    final urls = models.map((e) => e.url!).toList();
+    final urls = models.map((e) => e.url).toList();
     await ALDownloaderBatcher.downloadUrls(urls,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
@@ -198,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// download
   Future<void> testDownload() async {
-    final urls = models.map((e) => e.url!).toList();
+    final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
     await ALDownloader.download(url,
@@ -217,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// path
   Future<void> testPath() async {
-    final urls = models.map((e) => e.url!).toList();
+    final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
     final model = await ALDownloaderPersistentFileManager
@@ -251,13 +263,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void testRemoveInterface() {
-    final urls = models.map((e) => e.url!).toList();
+    final urls = models.map((e) => e.url).toList();
     final url = urls.first;
     ALDownloader.removeALDownloaderHandlerInterfaceForUrl(url);
   }
 
   void testStatus() {
-    final urls = models.map((e) => e.url!).toList();
+    final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
     ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
@@ -269,15 +281,32 @@ class _MyHomePageState extends State<MyHomePage> {
 /* ----------------------------------------------model class for test---------------------------------------------- */
 
 class DownloadModel {
-  final String? url;
+  final String url;
 
   double progress = 0;
 
-  bool isSuccess = false;
+  bool get isSuccess => status == ALDownloaderStatus.downloadSuccced;
 
   String get progressForPercent {
     int aProgress = (progress * 100).toInt();
     return "$aProgress%";
+  }
+
+  ALDownloaderStatus status = ALDownloaderStatus.unstarted;
+
+  String get statusDescription {
+    switch (status) {
+      case ALDownloaderStatus.downloading:
+        return "downloading";
+      case ALDownloaderStatus.pausing:
+        return "pausing";
+      case ALDownloaderStatus.downloadFailed:
+        return "downloadFailed";
+      case ALDownloaderStatus.downloadSuccced:
+        return "downloadSuccced";
+      default:
+        return "unstarted";
+    }
   }
 
   DownloadModel(this.url);

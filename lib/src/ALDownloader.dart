@@ -175,7 +175,8 @@ class ALDownloader {
       final anALDownloadTask = _getALDownloadTaskFromUrl(url);
       final downloadTaskStatus = anALDownloadTask?.status;
 
-      if (downloadTaskStatus == DownloadTaskStatus.canceled ||
+      if (downloadTaskStatus == null ||
+          downloadTaskStatus == DownloadTaskStatus.canceled ||
           downloadTaskStatus == DownloadTaskStatus.undefined ||
           downloadTaskStatus == DownloadTaskStatus.enqueued)
         alDownloaderStatus = ALDownloaderStatus.unstarted;
