@@ -4,5 +4,5 @@ enum ALDownloaderStatus {
   downloading,
   pausing,
   downloadFailed,
-  downloadSuccced
+  downloadSucceeded
 }

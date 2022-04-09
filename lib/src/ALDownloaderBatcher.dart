@@ -56,10 +56,10 @@ class ALDownloaderBatcher {
       // not contain downloaded task && not contain paused task && contain one failed task at least
       return ALDownloaderStatus.downloadFailed;
     } else if (allStatus
-            .difference({ALDownloaderStatus.downloadSuccced}).length ==
+            .difference({ALDownloaderStatus.downloadSucceeded}).length ==
         0) {
       // not contain downloading task && not contain paused task && not contain failed task && task is all successful
-      return ALDownloaderStatus.downloadSuccced;
+      return ALDownloaderStatus.downloadSucceeded;
     }
     // not contain downloading task && not contain failed task && not contain paused task && contain unsuccessful task
     return ALDownloaderStatus.unstarted;
@@ -195,9 +195,9 @@ class ALDownloaderBatcher {
 
 /// a binder for binding element of url and download ininterface for ALDownloaderBatcher
 class _ALDownloaderBatcherBinder {
-  bool get _isSuccess => _succeedUrls.length == _targetUrls.length;
+  bool get _isSuccess => _succeededUrls.length == _targetUrls.length;
 
-  List<String> get _succeedUrls {
+  List<String> get _succeededUrls {
     List<String> aList;
 
     try {
@@ -207,10 +207,10 @@ class _ALDownloaderBatcherBinder {
           .map((e) => e.key)
           .toList();
 
-      debugPrint("get _succeedUrls result = $aList");
+      debugPrint("get _succeededUrls result = $aList");
     } catch (error) {
       aList = <String>[];
-      debugPrint("get _succeedUrls error = $error");
+      debugPrint("get _succeededUrls error = $error");
     }
 
     return aList;
@@ -246,7 +246,7 @@ class _ALDownloaderBatcherBinder {
       if (_targetUrls.length == 0) {
         aDouble = 0;
       } else {
-        dynamic result = _succeedUrls.length / _targetUrls.length;
+        dynamic result = _succeededUrls.length / _targetUrls.length;
         result = result.toStringAsFixed(2);
         aDouble = double.tryParse(result) ?? 0;
       }

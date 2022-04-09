@@ -170,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
             debugPrint(
                 "ALDownloader | downloading, the url = $url, progress = $progress");
           }, successHandler: () {
-            model.status = ALDownloaderStatus.downloadSuccced;
+            model.status = ALDownloaderStatus.downloadSucceeded;
 
             setState(() {});
 
@@ -285,7 +285,7 @@ class DownloadModel {
 
   double progress = 0;
 
-  bool get isSuccess => status == ALDownloaderStatus.downloadSuccced;
+  bool get isSuccess => status == ALDownloaderStatus.downloadSucceeded;
 
   String get progressForPercent {
     int aProgress = (progress * 100).toInt();
@@ -302,8 +302,8 @@ class DownloadModel {
         return "pausing";
       case ALDownloaderStatus.downloadFailed:
         return "downloadFailed";
-      case ALDownloaderStatus.downloadSuccced:
-        return "downloadSuccced";
+      case ALDownloaderStatus.downloadSucceeded:
+        return "downloadSucceeded";
       default:
         return "unstarted";
     }

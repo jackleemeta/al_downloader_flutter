@@ -187,7 +187,7 @@ class ALDownloader {
       else if (downloadTaskStatus == DownloadTaskStatus.failed)
         alDownloaderStatus = ALDownloaderStatus.downloadFailed;
       else
-        alDownloaderStatus = ALDownloaderStatus.downloadSuccced;
+        alDownloaderStatus = ALDownloaderStatus.downloadSucceeded;
     } catch (error) {
       alDownloaderStatus = ALDownloaderStatus.unstarted;
       debugPrint(
