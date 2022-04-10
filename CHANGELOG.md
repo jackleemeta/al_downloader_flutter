@@ -1,3 +1,7 @@
+## 1.2.5 - April 11, 2022
+
+- compatible issue resolved
+
 ## 1.2.4 - April 9, 2022
 
 - optimize pubspec file
