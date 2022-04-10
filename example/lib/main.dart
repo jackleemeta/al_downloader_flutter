@@ -151,9 +151,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> test() async {
     testAddInterface();
     await testBatchDownload();
-    await testPath();
-    await testDownload();
-    testStatus();
+    // await testPath();
+    // await testDownload();
+    // testStatus();
   }
 
   /// add download handle interface
