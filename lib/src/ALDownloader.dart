@@ -54,13 +54,12 @@ class ALDownloader {
 
     var anALDownloadTask = _getALDownloadTaskFromUrl(url);
 
-    final isExist = await ALDownloaderPersistentFileManager
-        .isExistAbsolutePhysicalPathOfFileForUrl(url);
-    if (!isExist &&
-        anALDownloadTask != null &&
-        anALDownloadTask.status == DownloadTaskStatus.complete) {
-      await _innerRemove(url);
-      anALDownloadTask = null;
+    if (anALDownloadTask != null) {
+      if (await _isShouldRemoveDataForSavedDir(
+          anALDownloadTask.savedDir, url, anALDownloadTask.status)) {
+        await _innerRemove(url);
+        anALDownloadTask = null;
+      }
     }
 
     if (anALDownloadTask == null) {
@@ -69,17 +68,19 @@ class ALDownloader {
           await ALDownloaderPersistentFileManager
               .lazyGetALDownloaderPathModelFromUrl(url);
 
+      final dir = alDownloaderPathComponentModel.dir;
+
       // equeued a task
       final taskId = await FlutterDownloader.enqueue(
           url: url,
-          savedDir: alDownloaderPathComponentModel.dir,
+          savedDir: dir,
           fileName: alDownloaderPathComponentModel.fileName,
           showNotification: false,
           openFileFromNotification: false);
 
       if (taskId != null)
         _addALDownloadTaskOrReplaceALDownloadTaskId(
-            url, taskId, DownloadTaskStatus.enqueued, 0);
+            url, taskId, DownloadTaskStatus.enqueued, 0, dir);
 
       debugPrint(
           "ALDownloader | a download task was generated, download status = enqueued, taskId = $taskId");
@@ -90,14 +91,14 @@ class ALDownloader {
       if (newTaskIdForRetry != null) {
         debugPrint("ALDownloader | newTaskIdForRetry = $newTaskIdForRetry");
         _addALDownloadTaskOrReplaceALDownloadTaskId(url, newTaskIdForRetry,
-            DownloadTaskStatus.undefined, anALDownloadTask.progress);
+            DownloadTaskStatus.undefined, anALDownloadTask.progress, "");
       }
     } else if (anALDownloadTask.status == DownloadTaskStatus.paused) {
       final newTaskIdForResume =
           await FlutterDownloader.resume(taskId: anALDownloadTask.taskId);
       if (newTaskIdForResume != null)
         _addALDownloadTaskOrReplaceALDownloadTaskId(url, newTaskIdForResume,
-            DownloadTaskStatus.undefined, anALDownloadTask.progress);
+            DownloadTaskStatus.undefined, anALDownloadTask.progress, "");
     } else if (anALDownloadTask.status == DownloadTaskStatus.complete) {
       debugPrint(
           "ALDownloader | try to download downloadtaskOfUrl = $url, url is complete");
@@ -355,8 +356,8 @@ class ALDownloader {
   /// purpose: avoid frequent I/O
   ///
   /// add a new custom task or update the [url] mapping of the existing task's taskId
-  static void _addALDownloadTaskOrReplaceALDownloadTaskId(
-      String? url, String taskId, DownloadTaskStatus status, int progress) {
+  static void _addALDownloadTaskOrReplaceALDownloadTaskId(String? url,
+      String taskId, DownloadTaskStatus status, int progress, String savedDir) {
     if (url == null) {
       debugPrint(
           "_addALDownloadTaskOrReplaceALDownloadTaskId error url == null");
@@ -368,6 +369,7 @@ class ALDownloader {
     try {
       anALDownloadTask =
           _alDownloadTasks.firstWhere((element) => element.url == url);
+      if (savedDir != "") anALDownloadTask.savedDir = savedDir;
       anALDownloadTask.taskId = taskId;
       anALDownloadTask.status = status;
       anALDownloadTask.progress = progress;
@@ -378,6 +380,7 @@ class ALDownloader {
 
     if (anALDownloadTask == null) {
       anALDownloadTask = _ALDownloadTask(url);
+      if (savedDir != "") anALDownloadTask.savedDir = savedDir;
       anALDownloadTask.taskId = taskId;
       anALDownloadTask.status = status;
       anALDownloadTask.progress = progress;
@@ -420,7 +423,7 @@ class ALDownloader {
 
     final url = alDownloadTask.url;
 
-    _addALDownloadTaskOrReplaceALDownloadTaskId(url, id, status, progress);
+    _addALDownloadTaskOrReplaceALDownloadTaskId(url, id, status, progress, "");
 
     // ignore: non_constant_identifier_names
     final double_progress =
@@ -486,30 +489,22 @@ class ALDownloader {
             "_loadAndTryToRunTask `Flutterdownloader` task element url = ${element.url}, status = ${element.status}, element url = ${element.taskId}");
       });
 
-      for (var element in tasks) {
-        if (element.savedDir.contains("/flutter/al_")) {
+      for (final element in tasks) {
+        if (await _isShouldRemoveDataForSavedDir(
+            element.savedDir, element.url, element.status)) {
           await FlutterDownloader.remove(
               taskId: element.taskId,
               shouldDeleteContent:
                   true); // Delete a download task from DB & delete file
         } else {
           final anALDownloadTask = _ALDownloadTask(element.url);
+          anALDownloadTask.savedDir = element.savedDir;
           anALDownloadTask.taskId = element.taskId;
           anALDownloadTask.status = element.status;
           anALDownloadTask.progress = element.progress;
           _alDownloadTasks.add(anALDownloadTask);
         }
       }
-    }
-
-    final aTemp = [];
-    aTemp.addAll(_alDownloadTasks);
-    for (final element in aTemp) {
-      final url = element.url;
-      final isExist = await ALDownloaderPersistentFileManager
-          .isExistAbsolutePhysicalPathOfFileForUrl(url);
-      if (!isExist && element.status == DownloadTaskStatus.complete)
-        await _innerRemove(url);
     }
 
     debugPrint(
@@ -519,6 +514,30 @@ class ALDownloader {
       debugPrint(
           "_loadAndTryToRunTask `ALDownloader` task element url = ${element.url}, status = ${element.status}, element url = ${element.taskId}");
     });
+  }
+
+  /// verify the savedDir to determine whether to delete data
+  static Future<bool> _isShouldRemoveDataForSavedDir(
+      String savedDir, String url, DownloadTaskStatus status) async {
+    if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
+
+    final isExist = status == DownloadTaskStatus.complete &&
+        await ALDownloaderPersistentFileManager
+            .isExistAbsolutePhysicalPathOfFileForUrl(url);
+    return !isExist;
+  }
+
+  /// whether path is in root path
+  static Future<bool> _isInRootPathForPath(String path) async {
+    if (path == "") return false;
+
+    // for deleting old version's data
+    if (path.contains("/flutter/al_")) return false;
+
+    final isSavedDirInRootPath =
+        await ALDownloaderPersistentFileManager.isInRootPathWithPath(path);
+
+    return isSavedDirInRootPath;
   }
 
   /// get task from custom download tasks by [url]
@@ -616,6 +635,7 @@ class ALDownloader {
 /// class of custom download task
 class _ALDownloadTask {
   final String url;
+  String savedDir = "";
 
   String taskId = "";
   int progress = 0;

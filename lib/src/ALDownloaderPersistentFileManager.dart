@@ -177,6 +177,21 @@ class ALDownloaderPersistentFileManager {
     return fileName;
   }
 
+  /// check whether the [path] is in the root path
+  ///
+  /// **parameters**
+  ///
+  /// [path] path
+  ///
+  /// **return**
+  ///
+  /// whether the [path] is in the root path
+  static Future<bool> isInRootPathWithPath(String path) async {
+    final theRootDir = await _theRootDir;
+    final aBool = path.startsWith(theRootDir);
+    return aBool;
+  }
+
   /// -------------------------------- Private API --------------------------------
 
   /// root path
