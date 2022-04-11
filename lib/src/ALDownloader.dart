@@ -521,10 +521,13 @@ class ALDownloader {
       String savedDir, String url, DownloadTaskStatus status) async {
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
 
-    final aBool = status == DownloadTaskStatus.complete &&
-        await ALDownloaderPersistentFileManager
-            .isExistAbsolutePhysicalPathOfFileForUrl(url);
-    return !aBool;
+    if (status == DownloadTaskStatus.complete) {
+      final aBool = await ALDownloaderPersistentFileManager
+          .isExistAbsolutePhysicalPathOfFileForUrl(url);
+      return !aBool;
+    } else {
+      return false;
+    }
   }
 
   /// whether path is in root path
