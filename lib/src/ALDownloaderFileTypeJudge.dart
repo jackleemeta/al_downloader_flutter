@@ -34,6 +34,7 @@ class ALDownloaderFileTypeJudge {
     return ALDownloaderFileTypeModel(ALDownloaderFileType.unknown, anExtension);
   }
 
+  /// type and type list key value pairs
   static final Iterable<MapEntry<ALDownloaderFileType, List<String>>>
       _allALDownloaderFileTypeFilesEntries = {
     ALDownloaderFileType.common: _commons,

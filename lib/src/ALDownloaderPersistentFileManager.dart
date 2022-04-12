@@ -224,7 +224,7 @@ class ALDownloaderPersistentFileManager {
     return sb.toString();
   }
 
-  /// type and type list key value pairs
+  /// type and file path key value pairs
   static final _alDownloaderFileTypeDirKVs = {
     ALDownloaderFileType.common: _kExtensionCommonFilePath,
     ALDownloaderFileType.image: _kExtensionImageFilePath,
