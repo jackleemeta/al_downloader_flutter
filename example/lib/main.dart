@@ -131,6 +131,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// initialize
   Future<void> initialize() async {
+    testAddInterface();
+
     await ALDownloader.initialize();
 
     for (var model in models) {
@@ -149,7 +151,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// when executing the following methods together, try to keep them serial
   Future<void> test() async {
-    testAddInterface();
     await testBatchDownload();
     // await testPath();
     // await testDownload();
