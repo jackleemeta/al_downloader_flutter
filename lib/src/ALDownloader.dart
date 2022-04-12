@@ -5,6 +5,7 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderPersistentFileManager.dart';
 import 'ALDownloaderStatus.dart';
+import 'dart:io';
 
 /// ALDownloader
 class ALDownloader {
@@ -521,12 +522,20 @@ class ALDownloader {
       String savedDir, String url, DownloadTaskStatus status) async {
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
 
-    if (status == DownloadTaskStatus.complete) {
+    if (Platform.isAndroid) {
       final aBool = await ALDownloaderPersistentFileManager
           .isExistAbsolutePhysicalPathOfFileForUrl(url);
       return !aBool;
+    } else if (Platform.isIOS) {
+      if (status == DownloadTaskStatus.complete) {
+        final aBool = await ALDownloaderPersistentFileManager
+            .isExistAbsolutePhysicalPathOfFileForUrl(url);
+        return !aBool;
+      } else {
+        return false;
+      }
     } else {
-      return false;
+      return true;
     }
   }
 
