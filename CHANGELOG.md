@@ -1,3 +1,7 @@
+## 1.2.7 - April 12, 2022
+
+- bug fixed
+
 ## 1.2.6 - April 11, 2022
 
 - bug fixed
