@@ -91,24 +91,24 @@ double progress = ALDownloader.getDownloadProgressForUrl(url);
 /// 取消
 ///
 /// 详情查看接口描述
-ALDownloader.cancel(url);
-ALDownloader.cancelAll;
+await ALDownloader.cancel(url);
+await ALDownloader.cancelAll;
 ```
 
 ```
 /// 暂停
 ///
 /// 详情查看接口描述
-ALDownloader.pause(url);
-ALDownloader.pauseAll;
+await ALDownloader.pause(url);
+await ALDownloader.pauseAll;
 ```
 
 ```
 /// 移除
 ///
 /// 详情查看接口描述
-ALDownloader.remove(url);
-ALDownloader.removeAll;
+await ALDownloader.remove(url);
+await ALDownloader.removeAll;
 ```
 
 ### ALDownloaderBatcher

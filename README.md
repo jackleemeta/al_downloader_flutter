@@ -93,24 +93,24 @@ double progress = ALDownloader.getDownloadProgressForUrl(url);
 /// cancel
 ///
 /// for details, see interface description
-ALDownloader.cancel(url);
-ALDownloader.cancelAll;
+await ALDownloader.cancel(url);
+await ALDownloader.cancelAll;
 ```
 
 ```
 /// pause
 ///
 /// for details, see interface description
-ALDownloader.pause(url);
-ALDownloader.pauseAll;
+await ALDownloader.pause(url);
+await ALDownloader.pauseAll;
 ```
 
 ```
 /// remove
 ///
 /// for details, see interface description
-ALDownloader.remove(url);
-ALDownloader.removeAll;
+await ALDownloader.remove(url);
+await ALDownloader.removeAll;
 ```
 
 ### ALDownloaderBatcher

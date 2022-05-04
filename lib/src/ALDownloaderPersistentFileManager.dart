@@ -7,15 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
 
 /// disk path management by url
-///
-/// 1. gets the virtual/physical directory path
-///
-/// 2. get the virtual/physical file path
-///
-/// 3. get file name
 class ALDownloaderPersistentFileManager {
-  /// -------------------------------- Public API --------------------------------
-
   /// get the 'physical directory path' and 'vitual/physical file name' of the file by [url]
   ///
   /// when there is no 'physical directory path', create the 'physical directory path' of the disk by [url] 'lazily

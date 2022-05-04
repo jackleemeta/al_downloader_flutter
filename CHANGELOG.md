@@ -1,3 +1,7 @@
+## 1.2.8 - May 4, 2022
+
+- update document
+
 ## 1.2.7 - April 12, 2022
 
 - bug fixed

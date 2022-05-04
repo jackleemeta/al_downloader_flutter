@@ -9,11 +9,9 @@ import 'dart:io';
 
 /// ALDownloader
 class ALDownloader {
-  /// ---------------------- Public API ----------------------
-
   /// initialize
   ///
-  /// called or lazy call
+  /// call or lazy call
   ///
   /// lazy call：when call [download]
   static Future<void> initialize() async {
