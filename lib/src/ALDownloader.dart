@@ -345,7 +345,12 @@ class ALDownloader {
 
   /// remove ALDownloader data corresponding to all urls
   static Future<void> removeAll() async {
-    for (final alDownloadTask in _alDownloadTasks) remove(alDownloadTask.url);
+    final aTemp = [];
+    aTemp.addAll(_alDownloadTasks);
+    for (final alDownloadTask in aTemp) {
+      final url = alDownloadTask.url;
+      await remove(url);
+    }
   }
 
   /// ---------------------- Private API ----------------------
@@ -489,16 +494,18 @@ class ALDownloader {
       });
 
       for (final element in tasks) {
+        final taskId = element.taskId;
+
         if (await _isShouldRemoveDataForSavedDir(
             element.savedDir, element.url, element.status)) {
           await FlutterDownloader.remove(
-              taskId: element.taskId,
+              taskId: taskId,
               shouldDeleteContent:
                   true); // Delete a download task from DB & delete file
         } else {
           final anALDownloadTask = _ALDownloadTask(element.url);
           anALDownloadTask.savedDir = element.savedDir;
-          anALDownloadTask.taskId = element.taskId;
+          anALDownloadTask.taskId = taskId;
           anALDownloadTask.status = element.status;
           anALDownloadTask.progress = element.progress;
           _alDownloadTasks.add(anALDownloadTask);
