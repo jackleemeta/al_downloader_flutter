@@ -205,7 +205,7 @@ class ALDownloaderPersistentFileManager {
   static String _assembleFileName(String url, ALDownloaderFileTypeModel model) {
     final StringBuffer sb = StringBuffer();
 
-    final md5String = _getMd5StringFor(url);
+    final md5String = _getMd5StringForString(url);
     sb.write(md5String);
 
     final description = model.description;
@@ -223,8 +223,8 @@ class ALDownloaderPersistentFileManager {
     ALDownloaderFileType.unknown: _kExtensionUnknownFilePath
   };
 
-  static String _getMd5StringFor(String aString) {
-    var content = new Utf8Encoder().convert(aString);
+  static String _getMd5StringForString(String aString) {
+    var content = Utf8Encoder().convert(aString);
     var digest = md5.convert(content);
     return hex.encode(digest.bytes);
   }
