@@ -236,7 +236,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final model = await ALDownloaderPersistentFileManager
         .lazyGetALDownloaderPathModelForUrl(url);
     debugPrint(
-        "ALDownloader | get the 'physical directory path' and 'vitual/physical file name' of the file for [url], url = $url, model = $model\n");
+        "ALDownloader | get the 'physical directory path' and 'virtual/physical file name' of the file for [url], url = $url, model = $model\n");
 
     final path2 = await ALDownloaderPersistentFileManager
         .getAbsolutePathOfDirectoryForUrl(url);
@@ -260,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
     debugPrint(
-        "ALDownloader | get virtual/physical 'file name' for [url], url = $url, file name = $fileName\n");
+        "ALDownloader | get 'virtual/physical file name' for [url], url = $url, file name = $fileName\n");
   }
 
   void testRemoveInterface() {

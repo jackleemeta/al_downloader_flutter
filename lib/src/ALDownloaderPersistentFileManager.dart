@@ -8,7 +8,7 @@ import 'package:convert/convert.dart';
 
 /// persistent file management by url
 class ALDownloaderPersistentFileManager {
-  /// get the 'physical directory path' and 'vitual/physical file name' of the file for [url]
+  /// get the 'physical directory path' and 'virtual/physical file name' of the file for [url]
   ///
   /// when there is no 'physical directory path', create the 'physical directory path' in the disk by [url] lazily
   ///
@@ -18,7 +18,7 @@ class ALDownloaderPersistentFileManager {
   ///
   /// **return**
   ///
-  /// 'physical directory path' and 'vitual/physical file name'
+  /// 'physical directory path' and 'virtual/physical file name'
   static Future<ALDownloaderPathComponentModel>
       lazyGetALDownloaderPathModelForUrl(String url) async {
     // generate data models of file types based on urls
@@ -159,7 +159,7 @@ class ALDownloaderPersistentFileManager {
   ///
   /// **return**
   ///
-  /// `file name`
+  /// 'virtual/physical file name'
   static String getFileNameForUrl(String url) {
     final model =
         ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFromUrl(url);
