@@ -45,46 +45,46 @@ await ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | 正在下载, the url = $url, progress = $progress");
-    }, successHandler: () {
-      debugPrint("ALDownloader | 下载成功, the url = $url");
-    }, failureHandler: () {
-      debugPrint("ALDownloader | 下载失败, the url = $url");
+          "ALDownloader | download progress = $progress, url = $url");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | download succeeded, url = $url");
+    }, failedHandler: () {
+      debugPrint("ALDownloader | download failed, url = $url");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 下载暂停, the url = $url");
+      debugPrint("ALDownloader | download paused, url = $url");
     }));
 ```
 
 ```
 /// 添加一个下载句柄池
-ALDownloader.addALDownloaderHandlerInterface(
+ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-              "ALDownloader | 正在下载, the url = $url, progress = $progress");
-    }, successHandler: () {
-      debugPrint("ALDownloader | 下载成功, the url = $url");
-    }, failureHandler: () {
-      debugPrint("ALDownloader | 下载失败, the url = $url");
+          "ALDownloader | 下载进度 = $progress, url = $url");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | 下载成功, url = $url");
+    }, failedHandler: () {
+      debugPrint("ALDownloader | 下载失败, url = $url");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 下载暂停, the url = $url");
+      debugPrint("ALDownloader | 下载暂停, url = $url");
     }),
     url);
 ```
 
 ```
-/// 删除一个下载句柄池
-ALDownloader.removeALDownloaderHandlerInterfaceForUrl(url);
-ALDownloader.removeALDownloaderHandlerInterfaceForAll;
+/// 移除下载句柄池
+ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
+ALDownloader.removeDownloaderHandlerInterfaceForAll;
 ```
 
 ```
-/// 获取[url]的下载状态
+/// 获取url的下载状态
 ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
 ```
 
 ```
-/// 获取[url]的下载进度
-double progress = ALDownloader.getDownloadProgressForUrl(url);
+/// 获取url的下载进度
+final progress = ALDownloader.getDownloadProgressForUrl(url);
 ```
 
 ```
@@ -115,13 +115,13 @@ await ALDownloader.removeAll;
 
 ```
 /// 批量下载
-await ALDownloaderBatcher.downloadUrls(kTestVideos,
+await ALDownloaderBatcher.downloadUrls(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | 批量 | 正在下载, progress = $progress");
-    }, successHandler: () {
+      debugPrint("ALDownloader | 批量 | 下载进度 = $progress");
+    }, succeededHandler: () {
       debugPrint("ALDownloader | 批量 | 下载成功");
-    }, failureHandler: () {
+    }, failedHandler: () {
       debugPrint("ALDownloader | 批量 | 下载失败");
     }, pausedHandler: () {
       debugPrint("ALDownloader | 批量 | 下载暂停");
@@ -133,37 +133,37 @@ await ALDownloaderBatcher.downloadUrls(kTestVideos,
 final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```
 
-### ALDownloaderPersistentFileManager - 基于url管理磁盘路径
+### ALDownloaderPersistentFileManager - 基于url管理持久化文件
 
 ```
 final model = await ALDownloaderPersistentFileManager
-    .lazyGetALDownloaderPathModelFromUrl(url);
+    .lazyGetALDownloaderPathModelForUrl(url);
 debugPrint(
-    "ALDownloader | 通过[url]获取文件的“物理目录路径”和“虚拟/物理文件名”, url = $url, path model = $model\n");
+    "ALDownloader | 获取[url]的“物理目录路径”和“虚拟/物理文件名”, url = $url, model = $model\n");
 
 final path2 = await ALDownloaderPersistentFileManager
-    .getAbsolutePathOfDirectoryWithUrl(url);
+    .getAbsolutePathOfDirectoryForUrl(url);
 debugPrint(
-    "ALDownloader | 通过[url]获取“目录路径”, url = $url, path = $path2\n");
+    "ALDownloader | 获取[url]的“目录路径”, url = $url, path = $path2\n");
 
 final path3 = await ALDownloaderPersistentFileManager
-    .getAbsoluteVirtualPathOfFileWithUrl(url);
+    .getAbsoluteVirtualPathOfFileForUrl(url);
 debugPrint(
-    "ALDownloader | 通过[url]获取“虚拟文件路径”, url = $url, path = $path3\n");
+    "ALDownloader | 获取[url]的“虚拟文件路径”, url = $url, path = $path3\n");
 
 final path4 = await ALDownloaderPersistentFileManager
-    .getAbsolutePhysicalPathOfFileWithUrl(url);
+    .getAbsolutePhysicalPathOfFileForUrl(url);
 debugPrint(
-    "ALDownloader | 通过[url]获取“物理文件路径”, url = $url, path = $path4\n");
+    "ALDownloader | 获取[url]的“物理文件路径”, url = $url, path = $path4\n");
 
 final isExist = await ALDownloaderPersistentFileManager
     .isExistAbsolutePhysicalPathOfFileForUrl(url);
 debugPrint(
     "ALDownloader | 检查[url]是否存在对应物理路径, url = $url, is Exist = $isExist\n");
 
-final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
+final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
 debugPrint(
-    "ALDownloader | 通过[url]获取虚拟/物理的“文件名”, url = $url, file name = $fileName\n");
+    "ALDownloader | 获取[url]的“虚拟/物理文件名”, url = $url, file name = $fileName\n");
 ```
 
 ## iOS的Example的主要文件

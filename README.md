@@ -47,46 +47,46 @@ await ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | downloading, the url = $url, progress = $progress");
-    }, successHandler: () {
-      debugPrint("ALDownloader | download successfully, the url = $url");
-    }, failureHandler: () {
-      debugPrint("ALDownloader | download failed, the url = $url");
+          "ALDownloader | download progress = $progress, url = $url");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | download succeeded, url = $url");
+    }, failedHandler: () {
+      debugPrint("ALDownloader | download failed, url = $url");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, the url = $url");
+      debugPrint("ALDownloader | download paused, url = $url");
     }));
 ```
 
 ```
-/// add a download handle interface
-ALDownloader.addALDownloaderHandlerInterface(
+/// add a downloader handler interface
+ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-              "ALDownloader | downloading, the url = $url, progress = $progress");
-    }, successHandler: () {
-      debugPrint("ALDownloader | download successfully, the url = $url");
-    }, failureHandler: () {
-      debugPrint("ALDownloader | download failed, the url = $url");
+          "ALDownloader | download progress = $progress, url = $url");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | download succeeded, url = $url");
+    }, failedHandler: () {
+      debugPrint("ALDownloader | download failed, url = $url");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, the url = $url");
+      debugPrint("ALDownloader | download paused, url = $url");
     }),
     url);
 ```
 
 ```
-/// remove a download handle interface
-ALDownloader.removeALDownloaderHandlerInterfaceForUrl(url);
-ALDownloader.removeALDownloaderHandlerInterfaceForAll;
+/// remove downloader handler interface
+ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
+ALDownloader.removeDownloaderHandlerInterfaceForAll;
 ```
 
 ```
-/// get the download status of [url]
+/// get download status for [url]
 ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
 ```
 
 ```
-/// get the download progress of [url]
-double progress = ALDownloader.getDownloadProgressForUrl(url);
+/// get download progress for [url]
+final progress = ALDownloader.getDownloadProgressForUrl(url);
 ```
 
 ```
@@ -117,13 +117,13 @@ await ALDownloader.removeAll;
 
 ```
 /// batch download
-await ALDownloaderBatcher.downloadUrls(kTestVideos,
+await ALDownloaderBatcher.downloadUrls(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | batch | downloading, progress = $progress");
-    }, successHandler: () {
-      debugPrint("ALDownloader | batch | download successfully");
-    }, failureHandler: () {
+      debugPrint("ALDownloader | batch | download progress = $progress");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | batch | download succeeded");
+    }, failedHandler: () {
       debugPrint("ALDownloader | batch | download failed");
     }, pausedHandler: () {
       debugPrint("ALDownloader | batch | download paused");
@@ -131,41 +131,41 @@ await ALDownloaderBatcher.downloadUrls(kTestVideos,
 ```
 
 ```
-/// summarize the download status of a set of urls
+/// summarize the download status for a set of urls
 final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```
 
-### ALDownloaderPersistentFileManager - disk path management by url
+### ALDownloaderPersistentFileManager - persistent file management by url
 
 ```
 final model = await ALDownloaderPersistentFileManager
-    .lazyGetALDownloaderPathModelFromUrl(url);
+    .lazyGetALDownloaderPathModelForUrl(url);
 debugPrint(
-    "ALDownloader | get the 'physical directory path' and 'vitual/physical file name' of the file by [url], url = $url, path model = $model\n");
+    "ALDownloader | get the 'physical directory path' and 'vitual/physical file name' of the file for [url], url = $url, model = $model\n");
 
 final path2 = await ALDownloaderPersistentFileManager
-    .getAbsolutePathOfDirectoryWithUrl(url);
+    .getAbsolutePathOfDirectoryForUrl(url);
 debugPrint(
-    "ALDownloader | get 'directory path' by [url], url = $url, path = $path2\n");
+    "ALDownloader | get 'directory path' for [url], url = $url, path = $path2\n");
 
 final path3 = await ALDownloaderPersistentFileManager
-    .getAbsoluteVirtualPathOfFileWithUrl(url);
+    .getAbsoluteVirtualPathOfFileForUrl(url);
 debugPrint(
-    "ALDownloader | get 'virtual file path' by [url], url = $url, path = $path3\n");
+    "ALDownloader | get 'virtual file path' for [url], url = $url, path = $path3\n");
 
 final path4 = await ALDownloaderPersistentFileManager
-    .getAbsolutePhysicalPathOfFileWithUrl(url);
+    .getAbsolutePhysicalPathOfFileForUrl(url);
 debugPrint(
-    "ALDownloader | get 'physical file path' by [url], url = $url, path = $path4\n");
+    "ALDownloader | get 'physical file path' for [url], url = $url, path = $path4\n");
 
 final isExist = await ALDownloaderPersistentFileManager
     .isExistAbsolutePhysicalPathOfFileForUrl(url);
 debugPrint(
     "ALDownloader | check whether [url] has a physical path, url = $url, is Exist = $isExist\n");
 
-final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
+final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
 debugPrint(
-    "ALDownloader | get virtual/physical 'file name' by [url], url = $url, file name = $fileName\n");
+    "ALDownloader | get 'virtual/physical file name' for [url], url = $url, file name = $fileName\n");
 ```
 
 ## Key File Of Example For iOS

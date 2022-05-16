@@ -197,7 +197,7 @@ class ALDownloader {
     return alDownloaderStatus;
   }
 
-  /// get the download progress for [url]
+  /// get download progress for [url]
   ///
   /// **parameters**
   ///

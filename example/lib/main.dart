@@ -300,11 +300,11 @@ class DownloadModel {
       case ALDownloaderStatus.downloading:
         return "downloading";
       case ALDownloaderStatus.paused:
-        return "pausing";
+        return "paused";
       case ALDownloaderStatus.failed:
-        return "downloadFailed";
+        return "failed";
       case ALDownloaderStatus.succeeded:
-        return "downloadSucceeded";
+        return "succeeded";
       default:
         return "unstarted";
     }
