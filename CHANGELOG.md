@@ -1,3 +1,10 @@
+## 1.3.0 - May 16, 2022
+
+- update document
+- upgrade dependency
+- rename some interfaces
+- fix possible bug
+
 ## 1.2.9 - May 4, 2022
 
 - update document
