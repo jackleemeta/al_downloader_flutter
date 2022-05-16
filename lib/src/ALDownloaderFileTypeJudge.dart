@@ -4,7 +4,7 @@ import 'package:path/path.dart';
 
 /// file type judgment tool
 class ALDownloaderFileTypeJudge {
-  /// get file type from the URL
+  /// get file type from url
   ///
   /// **parameters**
   ///

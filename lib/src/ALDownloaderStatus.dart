@@ -1,8 +1,2 @@
 /// download status
-enum ALDownloaderStatus {
-  unstarted,
-  downloading,
-  pausing,
-  downloadFailed,
-  downloadSucceeded
-}
+enum ALDownloaderStatus { unstarted, downloading, paused, failed, succeeded }

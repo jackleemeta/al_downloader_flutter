@@ -161,7 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void testAddInterface() {
     for (final model in models) {
       final url = model.url;
-      ALDownloader.addALDownloaderHandlerInterface(
+      ALDownloader.addDownloaderHandlerInterface(
           ALDownloaderHandlerInterface(progressHandler: (progress) {
             model.status = ALDownloaderStatus.downloading;
             model.progress = progress;
@@ -169,25 +169,25 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {});
 
             debugPrint(
-                "ALDownloader | downloading, the url = $url, progress = $progress");
-          }, successHandler: () {
-            model.status = ALDownloaderStatus.downloadSucceeded;
+                "ALDownloader | download progress = $progress, url = $url");
+          }, succeededHandler: () {
+            model.status = ALDownloaderStatus.succeeded;
 
             setState(() {});
 
-            debugPrint("ALDownloader | download successfully, the url = $url");
-          }, failureHandler: () {
-            model.status = ALDownloaderStatus.downloadFailed;
+            debugPrint("ALDownloader | download succeeded, url = $url");
+          }, failedHandler: () {
+            model.status = ALDownloaderStatus.failed;
 
             setState(() {});
 
-            debugPrint("ALDownloader | download failed, the url = $url");
+            debugPrint("ALDownloader | download failed, url = $url");
           }, pausedHandler: () {
-            model.status = ALDownloaderStatus.pausing;
+            model.status = ALDownloaderStatus.paused;
 
             setState(() {});
 
-            debugPrint("ALDownloader | download paused, the url = $url");
+            debugPrint("ALDownloader | download paused, url = $url");
           }),
           url);
     }
@@ -199,10 +199,10 @@ class _MyHomePageState extends State<MyHomePage> {
     await ALDownloaderBatcher.downloadUrls(urls,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | batch |downloading, progress = $progress");
-        }, successHandler: () {
-          debugPrint("ALDownloader | batch | download successfully");
-        }, failureHandler: () {
+          debugPrint("ALDownloader | batch | download progress = $progress");
+        }, succeededHandler: () {
+          debugPrint("ALDownloader | batch | download succeeded");
+        }, failedHandler: () {
           debugPrint("ALDownloader | batch | download failed");
         }, pausedHandler: () {
           debugPrint("ALDownloader | batch | download paused");
@@ -218,13 +218,13 @@ class _MyHomePageState extends State<MyHomePage> {
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint(
-              "ALDownloader | downloading, the url = $url, progress = $progress");
-        }, successHandler: () {
-          debugPrint("ALDownloader | download successfully, the url = $url");
-        }, failureHandler: () {
-          debugPrint("ALDownloader | download failed, the url = $url");
+              "ALDownloader | download progress = $progress, url = $url");
+        }, succeededHandler: () {
+          debugPrint("ALDownloader | download succeeded, url = $url");
+        }, failedHandler: () {
+          debugPrint("ALDownloader | download failed, url = $url");
         }, pausedHandler: () {
-          debugPrint("ALDownloader | download paused, the url = $url");
+          debugPrint("ALDownloader | download paused, url = $url");
         }));
   }
 
@@ -234,39 +234,39 @@ class _MyHomePageState extends State<MyHomePage> {
     final url = urls.first;
 
     final model = await ALDownloaderPersistentFileManager
-        .lazyGetALDownloaderPathModelFromUrl(url);
+        .lazyGetALDownloaderPathModelForUrl(url);
     debugPrint(
-        "ALDownloader | get the 'physical directory path' and 'vitual/physical file name' of the file by [url], url = $url, path model = $model\n");
+        "ALDownloader | get the 'physical directory path' and 'vitual/physical file name' of the file for [url], url = $url, model = $model\n");
 
     final path2 = await ALDownloaderPersistentFileManager
-        .getAbsolutePathOfDirectoryWithUrl(url);
+        .getAbsolutePathOfDirectoryForUrl(url);
     debugPrint(
-        "ALDownloader | get 'directory path' by [url], url = $url, path = $path2\n");
+        "ALDownloader | get 'directory path' for [url], url = $url, path = $path2\n");
 
     final path3 = await ALDownloaderPersistentFileManager
-        .getAbsoluteVirtualPathOfFileWithUrl(url);
+        .getAbsoluteVirtualPathOfFileForUrl(url);
     debugPrint(
-        "ALDownloader | get 'virtual file path' by [url], url = $url, path = $path3\n");
+        "ALDownloader | get 'virtual file path' for [url], url = $url, path = $path3\n");
 
     final path4 = await ALDownloaderPersistentFileManager
-        .getAbsolutePhysicalPathOfFileWithUrl(url);
+        .getAbsolutePhysicalPathOfFileForUrl(url);
     debugPrint(
-        "ALDownloader | get 'physical file path' by [url], url = $url, path = $path4\n");
+        "ALDownloader | get 'physical file path' for [url], url = $url, path = $path4\n");
 
     final isExist = await ALDownloaderPersistentFileManager
         .isExistAbsolutePhysicalPathOfFileForUrl(url);
     debugPrint(
-        "ALDownloader | check whether [url] corresponds to physical path, url = $url, is Exist = $isExist\n");
+        "ALDownloader | check whether [url] has a physical path, url = $url, is Exist = $isExist\n");
 
-    final fileName = ALDownloaderPersistentFileManager.getFileNameFromUrl(url);
+    final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
     debugPrint(
-        "ALDownloader | get virtual/physical 'file name' by [url], url = $url, file name = $fileName\n");
+        "ALDownloader | get virtual/physical 'file name' for [url], url = $url, file name = $fileName\n");
   }
 
   void testRemoveInterface() {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
-    ALDownloader.removeALDownloaderHandlerInterfaceForUrl(url);
+    ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
   }
 
   void testStatus() {
@@ -275,7 +275,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
     debugPrint(
-        "ALDownloader | get the download status, url = $url, status= $status\n");
+        "ALDownloader | get download status for [url], url = $url, status= $status\n");
   }
 }
 
@@ -286,7 +286,7 @@ class DownloadModel {
 
   double progress = 0;
 
-  bool get isSuccess => status == ALDownloaderStatus.downloadSucceeded;
+  bool get isSuccess => status == ALDownloaderStatus.succeeded;
 
   String get progressForPercent {
     int aProgress = (progress * 100).toInt();
@@ -299,11 +299,11 @@ class DownloadModel {
     switch (status) {
       case ALDownloaderStatus.downloading:
         return "downloading";
-      case ALDownloaderStatus.pausing:
+      case ALDownloaderStatus.paused:
         return "pausing";
-      case ALDownloaderStatus.downloadFailed:
+      case ALDownloaderStatus.failed:
         return "downloadFailed";
-      case ALDownloaderStatus.downloadSucceeded:
+      case ALDownloaderStatus.succeeded:
         return "downloadSucceeded";
       default:
         return "unstarted";

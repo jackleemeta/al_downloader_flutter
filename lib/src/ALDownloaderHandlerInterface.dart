@@ -2,23 +2,23 @@
 class ALDownloaderHandlerInterface {
   ALDownloaderHandlerInterface(
       {this.progressHandler,
-      this.successHandler,
-      this.failureHandler,
+      this.succeededHandler,
+      this.failedHandler,
       this.pausedHandler});
   final ALDownloaderProgressHandler? progressHandler;
-  final ALDownloaderSuccessHandler? successHandler;
-  final ALDownloaderFailureHandler? failureHandler;
+  final ALDownloaderSucceededHandler? succeededHandler;
+  final ALDownloaderFailedHandler? failedHandler;
   final ALDownloaderPasusedHandler? pausedHandler;
 }
 
-/// download progress handle
+/// downloader progress handler
 typedef ALDownloaderProgressHandler = void Function(double progress);
 
-/// download successfully handle
-typedef ALDownloaderSuccessHandler = void Function();
+/// downloader succeeded handler
+typedef ALDownloaderSucceededHandler = void Function();
 
-/// download failed handle
-typedef ALDownloaderFailureHandler = void Function();
+/// downloader failed handler
+typedef ALDownloaderFailedHandler = void Function();
 
-/// download paused handle
+/// downloader paused handler
 typedef ALDownloaderPasusedHandler = void Function();

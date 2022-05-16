@@ -13,17 +13,17 @@ class ALDownloaderBatcher {
   ///
   /// [urls] urls
   ///
-  /// [downloaderHandlerInterface] the download handle interface
+  /// [downloaderHandlerInterface] downloader handler interface
   static Future<void> downloadUrls(List<String> urls,
       {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
-    addALDownloaderHandlerInterface(downloaderHandlerInterface, urls);
+    addDownloaderHandlerInterface(downloaderHandlerInterface, urls);
 
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     for (final url in aNonDuplicatedUrls) await ALDownloader.download(url);
   }
 
-  /// summarize the download status of a set of urls
+  /// summarize the download status for a set of urls
   ///
   /// **parameters**
   ///
@@ -34,7 +34,7 @@ class ALDownloaderBatcher {
   /// [ALDownloaderStatus] download status
   static ALDownloaderStatus getDownloadStatusForUrls(List<String> urls) {
     final Map<String, ALDownloaderStatus> aMap = {};
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     for (final url in aNonDuplicatedUrls) {
       final aStatus = ALDownloader.getDownloadStatusForUrl(url);
@@ -42,9 +42,9 @@ class ALDownloaderBatcher {
       if (aStatus == ALDownloaderStatus.downloading) {
         // contain downloading task
         return ALDownloaderStatus.downloading;
-      } else if (aStatus == ALDownloaderStatus.pausing) {
+      } else if (aStatus == ALDownloaderStatus.paused) {
         // contain paused task
-        return ALDownloaderStatus.pausing;
+        return ALDownloaderStatus.paused;
       }
 
       aMap[url] = aStatus;
@@ -52,20 +52,19 @@ class ALDownloaderBatcher {
 
     final allStatus = aMap.values.toSet();
 
-    if (allStatus.contains(ALDownloaderStatus.downloadFailed)) {
+    if (allStatus.contains(ALDownloaderStatus.failed)) {
       // not contain downloaded task && not contain paused task && contain one failed task at least
-      return ALDownloaderStatus.downloadFailed;
-    } else if (allStatus
-            .difference({ALDownloaderStatus.downloadSucceeded}).length ==
+      return ALDownloaderStatus.failed;
+    } else if (allStatus.difference({ALDownloaderStatus.succeeded}).length ==
         0) {
       // not contain downloading task && not contain paused task && not contain failed task && task is all successful
-      return ALDownloaderStatus.downloadSucceeded;
+      return ALDownloaderStatus.succeeded;
     }
     // not contain downloading task && not contain failed task && not contain paused task && contain unsuccessful task
     return ALDownloaderStatus.unstarted;
   }
 
-  /// get download progress of a set of urls
+  /// get download progress for a set of urls
   ///
   /// number of successful tasks / number of all tasks
   ///
@@ -75,25 +74,25 @@ class ALDownloaderBatcher {
   ///
   /// **return**
   ///
-  /// [double] download progress of urls
+  /// [double] download progress
   static double getProgressForUrls(List<String> urls) {
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
     final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
     final progress = binder.progress;
     return progress;
   }
 
-  /// add a download handle interface
+  /// add a downloader handler interface
   ///
   /// **parameters**
   ///
-  /// [downloaderHandlerInterface] download handle interface
+  /// [downloaderHandlerInterface] downloader handler interface
   ///
   /// [urls] urls
-  static void addALDownloaderHandlerInterface(
+  static void addDownloaderHandlerInterface(
       ALDownloaderHandlerInterface? downloaderHandlerInterface,
       List<String> urls) {
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
 
@@ -104,18 +103,17 @@ class ALDownloaderBatcher {
 
         final progressHandler = downloaderHandlerInterface?.progressHandler;
         if (progressHandler != null) progressHandler(binder.progress);
-      }, successHandler: () {
-        debugPrint(
-            "ALDownloaderBatcher | download successfully, the url = $url");
+      }, succeededHandler: () {
+        debugPrint("ALDownloaderBatcher | download succeeded, the url = $url");
 
         if (binder._isSuccess)
           _tryToCallBackForCompletion(binder, downloaderHandlerInterface);
-      }, failureHandler: () {
+      }, failedHandler: () {
         debugPrint("ALDownloaderBatcher | download failed, the url = $url");
 
         if (binder._isOver && !binder._isSuccess) {
-          final failureHandler = downloaderHandlerInterface?.failureHandler;
-          if (failureHandler != null) failureHandler();
+          final failedHandler = downloaderHandlerInterface?.failedHandler;
+          if (failedHandler != null) failedHandler();
         }
       }, pausedHandler: () {
         debugPrint("ALDownloaderBatcher | download paused, the url = $url");
@@ -123,48 +121,43 @@ class ALDownloaderBatcher {
         if (pausedHandler != null) pausedHandler();
       });
 
-      ALDownloader.addALDownloaderHandlerInterface(
+      ALDownloader.addDownloaderHandlerInterface(
           aDownloaderHandlerInterface, url);
     }
   }
 
-  /// remove a download handle interface
+  /// remove downloader handler interfaces
   ///
   /// **parameters**
   ///
   /// [urls] urls
-  static void removeALDownloaderHandlerInterfaceForUrls(List<String> urls) {
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+  static void removeDownloaderHandlerInterfaceForUrls(List<String> urls) {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     aNonDuplicatedUrls.forEach((element) =>
-        ALDownloader.removeALDownloaderHandlerInterfaceForUrl(element));
+        ALDownloader.removeDownloaderHandlerInterfaceForUrl(element));
   }
 
-  /// pause downloading a set of urls
+  /// pause download
   ///
   /// **parameters**
   ///
   /// [urls] urls
   static Future<void> pause(List<String> urls) async {
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     for (final url in aNonDuplicatedUrls) await ALDownloader.pause(url);
   }
 
-  /// clear download
-  ///
-  /// including: 1.ALDownloader memory cache 2.Flutterdownloader database index 3.Persist file data
+  /// remove data
   ///
   /// **parameters**
   ///
   /// [urls] urls
-  static Future<void> clear(List<String> urls) async {
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFrom(urls);
+  static Future<void> remove(List<String> urls) async {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final url in aNonDuplicatedUrls) {
-      await ALDownloader.cancel(url);
-      await ALDownloader.remove(url);
-    }
+    for (final url in aNonDuplicatedUrls) await ALDownloader.remove(url);
   }
 
   /// ------------------------------------ Private API ------------------------------------
@@ -172,16 +165,16 @@ class ALDownloaderBatcher {
   static void _tryToCallBackForCompletion(_ALDownloaderBatcherBinder binder,
       ALDownloaderHandlerInterface? downloaderHandlerInterface) {
     if (binder._isSuccess) {
-      final successHandler = downloaderHandlerInterface?.successHandler;
-      if (successHandler != null) successHandler();
+      final succeededHandler = downloaderHandlerInterface?.succeededHandler;
+      if (succeededHandler != null) succeededHandler();
     } else {
-      final failureHandler = downloaderHandlerInterface?.failureHandler;
-      if (failureHandler != null) failureHandler();
+      final failedHandler = downloaderHandlerInterface?.failedHandler;
+      if (failedHandler != null) failedHandler();
     }
   }
 
   // remove duplication of urls
-  static List<String> _getNonDuplicatedUrlsFrom(List<String> urls) {
+  static List<String> _getNonDuplicatedUrlsFromUrls(List<String> urls) {
     final aNonDuplicatedUrls = <String>[];
     for (final element in urls) {
       if (!aNonDuplicatedUrls.contains(element))
@@ -201,7 +194,7 @@ class _ALDownloaderBatcherBinder {
     List<String> aList;
 
     try {
-      aList = _alDownloaderUrlDownloadedKVs.entries
+      aList = _completedKVsForALDownloader.entries
           .where(
               (element) => element.value && _targetUrls.contains(element.key))
           .map((e) => e.key)
@@ -221,7 +214,7 @@ class _ALDownloaderBatcherBinder {
     List<String> aList;
 
     try {
-      aList = _alDownloaderUrlDownloadedKVs.entries
+      aList = _completedKVsForALDownloader.entries
           .where(
               (element) => !element.value && _targetUrls.contains(element.key))
           .map((e) => e.key)
@@ -260,15 +253,15 @@ class _ALDownloaderBatcherBinder {
 
   /// all download tasks are completed
   /// just completed, it may be successful or failed
-  bool get _isOver => _alDownloaderUrlDownloadedKVs.keys
+  bool get _isOver => _completedKVsForALDownloader.keys
       .toSet()
       .containsAll(_targetUrls.toSet());
 
-  /// download status for ALDownloader
-  static Map<String, bool> get _alDownloaderUrlDownloadedKVs =>
-      ALDownloader.urlResults;
+  /// completed KVs for ALDownloader
+  static Map<String, bool> get _completedKVsForALDownloader =>
+      ALDownloader.completedKVs;
 
-  /// need to download urls
+  /// urls that need to be downloaded
   final List<String> _targetUrls;
 
   /// privatize constructor
