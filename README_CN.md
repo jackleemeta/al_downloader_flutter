@@ -45,13 +45,13 @@ await ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | download progress = $progress, url = $url");
+          "ALDownloader | 下载进度 = $progress, url = $url");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | download succeeded, url = $url");
+      debugPrint("ALDownloader | 下载成功, url = $url");
     }, failedHandler: () {
-      debugPrint("ALDownloader | download failed, url = $url");
+      debugPrint("ALDownloader | 下载失败, url = $url");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, url = $url");
+      debugPrint("ALDownloader | 下载暂停, url = $url");
     }));
 ```
 
