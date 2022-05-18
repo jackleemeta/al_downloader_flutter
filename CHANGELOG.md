@@ -1,3 +1,8 @@
+## 1.3.1 - May 18, 2022
+
+- update document
+- fix bug
+
 ## 1.3.0 - May 16, 2022
 
 - update document
