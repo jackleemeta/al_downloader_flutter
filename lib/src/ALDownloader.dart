@@ -17,7 +17,7 @@ class ALDownloader {
   static Future<void> initialize() async {
     if (!_isInitial) {
       // FlutterDownloader initialize
-      await FlutterDownloader.initialize(debug: false);
+      await FlutterDownloader.initialize(debug: false, ignoreSsl: true);
 
       // register FlutterDownloader callback
       FlutterDownloader.registerCallback(_downloadCallback);
@@ -250,7 +250,7 @@ class ALDownloader {
 
   /// cancel download
   ///
-  /// the incomplete bytes will be deleted
+  /// the running download and incomplete bytes will be deleted
   ///
   /// **parameters**
   ///
@@ -272,7 +272,7 @@ class ALDownloader {
 
   /// cancel all downloads
   ///
-  /// the incomplete bytes will be deleted
+  /// the running download and incomplete bytes will be deleted
   static Future<void> cancelAll() async {
     await FlutterDownloader.cancelAll();
     for (final downloadTask in _alDownloadTasks) {

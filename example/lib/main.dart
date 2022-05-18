@@ -131,6 +131,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// initialize
   Future<void> initialize() async {
+    // some tasks may download automatically after initialization,
+    // so it need to add interface before initialization to ensure downloader handler interface call back in time.
     testAddInterface();
 
     await ALDownloader.initialize();
@@ -151,6 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// when executing the following methods together, try to keep them serial
   Future<void> test() async {
+    testAddInterface();
     await testBatchDownload();
     // await testPath();
     // await testDownload();
