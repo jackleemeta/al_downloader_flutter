@@ -22,7 +22,7 @@
 
 ```
 dependencies:
-  al_downloader: ^1.3.3
+  al_downloader: ^1.3.4
 ```
 
 使用命令行运行下面这行代码
@@ -71,6 +71,7 @@ ALDownloader.addDownloaderHandlerInterface(
     url);
 ```
 
+```
 /// 添加一个持久下载句柄池
 ALDownloader.addForeverDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
