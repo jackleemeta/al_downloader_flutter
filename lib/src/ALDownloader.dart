@@ -5,7 +5,6 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderPersistentFileManager.dart';
 import 'ALDownloaderStatus.dart';
-import 'dart:io';
 
 /// ALDownloader
 class ALDownloader {
@@ -283,7 +282,7 @@ class ALDownloader {
     if (alDownloadTask == null) return;
 
     if (alDownloadTask.status == DownloadTaskStatus.running)
-      await _removeCommonTask(alDownloadTask);
+      await _removeTaskWithActiveHandler(alDownloadTask);
   }
 
   /// cancel all downloads
@@ -326,7 +325,7 @@ class ALDownloader {
       final taskId = alDownloadTask.taskId;
       if (alDownloadTask.status == DownloadTaskStatus.undefined ||
           alDownloadTask.status == DownloadTaskStatus.enqueued) {
-        _removeUndefinedEnqueuedTask(alDownloadTask);
+        _removeTaskWithoutActiveHandler(alDownloadTask);
       } else if (alDownloadTask.status == DownloadTaskStatus.running) {
         await FlutterDownloader.pause(taskId: taskId);
       }
@@ -540,7 +539,7 @@ class ALDownloader {
         _alDownloadTasks.add(anALDownloadTask);
 
         if (await _isShouldRemoveDataForSavedDir(savedDir, taskUrl, status))
-          await _removeCommonTask(anALDownloadTask);
+          await _removeTaskWithActiveHandler(anALDownloadTask);
       }
     }
 
@@ -557,21 +556,12 @@ class ALDownloader {
   static Future<bool> _isShouldRemoveDataForSavedDir(
       String savedDir, String url, DownloadTaskStatus status) async {
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
-
-    if (Platform.isAndroid) {
+    if (status == DownloadTaskStatus.complete) {
       final aBool = await ALDownloaderPersistentFileManager
           .isExistAbsolutePhysicalPathOfFileForUrl(url);
       return !aBool;
-    } else if (Platform.isIOS) {
-      if (status == DownloadTaskStatus.complete) {
-        final aBool = await ALDownloaderPersistentFileManager
-            .isExistAbsolutePhysicalPathOfFileForUrl(url);
-        return !aBool;
-      } else {
-        return false;
-      }
     } else {
-      return true;
+      return false;
     }
   }
 
@@ -650,15 +640,14 @@ class ALDownloader {
         return;
       }
 
-      await _removeCommonTask(alDownloaderTask);
+      await _removeTaskWithActiveHandler(alDownloaderTask);
     } catch (error) {
       debugPrint("ALDownloader | _innerRemove, url = $url, error = $error");
     }
   }
 
-  /// remove non undefined/enqueued task
   /// running task will call back in [_processDataFromPort], non running task will be deleted directly
-  static Future<void> _removeCommonTask(_ALDownloadTask task) async {
+  static Future<void> _removeTaskWithActiveHandler(_ALDownloadTask task) async {
     try {
       final status = task.status;
       final id = task.taskId;
@@ -685,20 +674,19 @@ class ALDownloader {
       await FlutterDownloader.remove(taskId: id, shouldDeleteContent: true);
     } catch (error) {
       debugPrint(
-          "ALDownloader | _removeCommonTask, task = $task, error = $error");
+          "ALDownloader | _removeTaskWithActiveHandler, task = $task, error = $error");
     }
   }
 
-  /// remove undefined/enqueued task
-  /// no call back,
-  static Future<void> _removeUndefinedEnqueuedTask(_ALDownloadTask task) async {
+  static Future<void> _removeTaskWithoutActiveHandler(
+      _ALDownloadTask task) async {
     try {
       _alDownloadTasks.remove(task);
       await FlutterDownloader.remove(
           taskId: task.taskId, shouldDeleteContent: true);
     } catch (error) {
       debugPrint(
-          "ALDownloader | _removeUndefinedEnqueuedTask, task = $task, error = $error");
+          "ALDownloader | _removeTaskWithoutActiveHandler, task = $task, error = $error");
     }
   }
 

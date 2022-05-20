@@ -182,6 +182,10 @@ debugPrint(
     "ALDownloader | 获取[url]的“虚拟/物理文件名”, url = $url, file name = $fileName\n");
 ```
 
+### *提示*:
+
+*如果持久化文件被一些异常方式删除了，比如某些业务代码删除了缓存文件夹，调用[remove]，然后调用[download]重新下载来解决这个问题。*
+
 ## iOS的Example的主要文件
 
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
