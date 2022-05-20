@@ -74,6 +74,22 @@ ALDownloader.addDownloaderHandlerInterface(
 ```
 
 ```
+/// add a forever downloader handler interface
+ALDownloader.addForeverDownloaderHandlerInterface(
+    ALDownloaderHandlerInterface(progressHandler: (progress) {
+      debugPrint(
+          "ALDownloader | download progress = $progress, url = $url");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | download succeeded, url = $url");
+    }, failedHandler: () {
+      debugPrint("ALDownloader | download failed, url = $url");
+    }, pausedHandler: () {
+      debugPrint("ALDownloader | download paused, url = $url");
+    }),
+    url);
+```
+
+```
 /// remove downloader handler interface
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 ALDownloader.removeDownloaderHandlerInterfaceForAll;

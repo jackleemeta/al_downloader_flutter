@@ -71,6 +71,21 @@ ALDownloader.addDownloaderHandlerInterface(
     url);
 ```
 
+/// 添加一个持久下载句柄池
+ALDownloader.addForeverDownloaderHandlerInterface(
+    ALDownloaderHandlerInterface(progressHandler: (progress) {
+      debugPrint(
+          "ALDownloader | 下载进度 = $progress, url = $url");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | 下载成功, url = $url");
+    }, failedHandler: () {
+      debugPrint("ALDownloader | 下载失败, url = $url");
+    }, pausedHandler: () {
+      debugPrint("ALDownloader | 下载暂停, url = $url");
+    }),
+    url);
+```
+
 ```
 /// 移除下载句柄池
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);

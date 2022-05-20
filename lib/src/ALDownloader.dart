@@ -45,7 +45,8 @@ class ALDownloader {
     if (url == null) throw "ALDownloader | download error = url is null";
 
     if (downloaderHandlerInterface != null) {
-      final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface);
+      final aBinder =
+          _ALDownloaderBinder(url, downloaderHandlerInterface, false);
       _alDownloaderBinders.add(aBinder);
     }
 
@@ -120,7 +121,8 @@ class ALDownloader {
           if (succeededHandler != null) succeededHandler();
         }
       });
-      _alDownloaderBinders.removeWhere((element) => element.forUrl == url);
+      _alDownloaderBinders.removeWhere(
+          (element) => element.forUrl == url && !element.isForever);
     } else if (anALDownloadTask.status == DownloadTaskStatus.running) {
       debugPrint(
           "ALDownloader | try to download downloadtaskOfUrl = $url, but url is running");
@@ -144,7 +146,24 @@ class ALDownloader {
       ALDownloaderHandlerInterface? downloaderHandlerInterface,
       String? forUrl) {
     if (downloaderHandlerInterface == null || forUrl == null) return;
-    final aBinder = _ALDownloaderBinder(forUrl, downloaderHandlerInterface);
+    final aBinder =
+        _ALDownloaderBinder(forUrl, downloaderHandlerInterface, false);
+    _alDownloaderBinders.add(aBinder);
+  }
+
+  /// add a forever downloader handler interface
+  ///
+  /// **parameters**
+  ///
+  /// [downloaderHandlerInterface] downloader handler interface
+  ///
+  /// [forUrl] url
+  static void addForeverDownloaderHandlerInterface(
+      ALDownloaderHandlerInterface? downloaderHandlerInterface,
+      String? forUrl) {
+    if (downloaderHandlerInterface == null || forUrl == null) return;
+    final aBinder =
+        _ALDownloaderBinder(forUrl, downloaderHandlerInterface, true);
     _alDownloaderBinders.add(aBinder);
   }
 
@@ -263,21 +282,19 @@ class ALDownloader {
 
     if (alDownloadTask == null) return;
 
-    if (alDownloadTask.status == DownloadTaskStatus.running) {
-      final taskId = alDownloadTask.taskId;
-      await FlutterDownloader.cancel(taskId: taskId);
-      alDownloadTask.status = DownloadTaskStatus.canceled;
-    }
+    if (alDownloadTask.status == DownloadTaskStatus.running)
+      await _removeCommonTask(alDownloadTask);
   }
 
   /// cancel all downloads
   ///
-  /// the running download and incomplete bytes will be deleted
+  /// this is a multiple of [cancel], see [cancel]
   static Future<void> cancelAll() async {
-    await FlutterDownloader.cancelAll();
-    for (final downloadTask in _alDownloadTasks) {
-      if (downloadTask.status == DownloadTaskStatus.running)
-        downloadTask.status = DownloadTaskStatus.canceled;
+    final aTemp = [];
+    aTemp.addAll(_alDownloadTasks);
+    for (final alDownloadTask in aTemp) {
+      final url = alDownloadTask.url;
+      await cancel(url);
     }
   }
 
@@ -285,7 +302,7 @@ class ALDownloader {
   ///
   /// the incomplete bytes will not be deleted
   ///
-  /// task of undefined/enqueued/failed will be removed from the download queue
+  /// undefined/enqueued task will be removed from the download queue
   ///
   /// **parameters**
   ///
@@ -308,11 +325,8 @@ class ALDownloader {
 
       final taskId = alDownloadTask.taskId;
       if (alDownloadTask.status == DownloadTaskStatus.undefined ||
-          alDownloadTask.status == DownloadTaskStatus.enqueued ||
-          alDownloadTask.status == DownloadTaskStatus.failed) {
-        _alDownloadTasks.remove(alDownloadTask);
-        await FlutterDownloader.remove(
-            taskId: taskId, shouldDeleteContent: true);
+          alDownloadTask.status == DownloadTaskStatus.enqueued) {
+        _removeUndefinedEnqueuedTask(alDownloadTask);
       } else if (alDownloadTask.status == DownloadTaskStatus.running) {
         await FlutterDownloader.pause(taskId: taskId);
       }
@@ -441,7 +455,8 @@ class ALDownloader {
 
     if (status == DownloadTaskStatus.complete) {
       debugPrint(
-          "ALDownloader | _downloadCallback \n download succeeded url = $url \nid = $id ");
+          "ALDownloader | _downloadCallback download succeeded, url = $url, id = $id");
+
       _alDownloaderBinders.forEach((element) {
         if (element.forUrl == url) {
           final progressHandler =
@@ -451,20 +466,6 @@ class ALDownloader {
           final succeededHandler =
               element.downloaderHandlerHolder.succeededHandler;
           if (succeededHandler != null) succeededHandler();
-        }
-      });
-      _alDownloaderBinders.removeWhere((element) => element.forUrl == url);
-    } else if (status == DownloadTaskStatus.failed) {
-      debugPrint(
-          "ALDownloader | _downloadCallback \n download failed url = $url \nid = $id ");
-      _alDownloaderBinders.forEach((element) {
-        if (element.forUrl == url) {
-          final progressHandler =
-              element.downloaderHandlerHolder.progressHandler;
-          if (progressHandler != null) progressHandler(double_progress);
-
-          final failedHandler = element.downloaderHandlerHolder.failedHandler;
-          if (failedHandler != null) failedHandler();
         }
       });
     } else if (status == DownloadTaskStatus.running) {
@@ -482,10 +483,34 @@ class ALDownloader {
           if (pausedHandler != null) pausedHandler();
         }
       });
+    } else if (status == DownloadTaskStatus.canceled ||
+        status == DownloadTaskStatus.failed) {
+      debugPrint(
+          "ALDownloader | _downloadCallback download canceled/failed, status = $status, url = $url, id = $id");
+      _alDownloaderBinders.forEach((element) {
+        if (element.forUrl == url) {
+          final progressHandler =
+              element.downloaderHandlerHolder.progressHandler;
+          if (progressHandler != null) progressHandler(double_progress);
+
+          final failedHandler = element.downloaderHandlerHolder.failedHandler;
+          if (failedHandler != null) failedHandler();
+        }
+      });
+
+      if (status == DownloadTaskStatus.canceled)
+        _alDownloadTasks.remove(alDownloadTask);
+    }
+
+    if (status == DownloadTaskStatus.complete ||
+        status == DownloadTaskStatus.failed ||
+        status == DownloadTaskStatus.canceled) {
+      _alDownloaderBinders.removeWhere(
+          (element) => element.forUrl == url && !element.isForever);
     }
 
     debugPrint(
-        "ALDownloader | _downloadCallback \nid = $id \nurl = $url \nstatus = $status \nprogress = $progress \ndouble_progress = $double_progress");
+        "ALDownloader | final | _downloadCallback, id = $id, url = $url, status = $status, progress = $progress, double_progress = $double_progress");
   }
 
   /// load [FlutterDownloader]'s local database task to the memory cache, and attempt to execute the tasks
@@ -502,21 +527,20 @@ class ALDownloader {
 
       for (final element in tasks) {
         final taskId = element.taskId;
+        final taskUrl = element.url;
+        final status = element.status;
+        final savedDir = element.savedDir;
+        final progress = element.progress;
 
-        if (await _isShouldRemoveDataForSavedDir(
-            element.savedDir, element.url, element.status)) {
-          await FlutterDownloader.remove(
-              taskId: taskId,
-              shouldDeleteContent:
-                  true); // Delete a download task from DB & delete file
-        } else {
-          final anALDownloadTask = _ALDownloadTask(element.url);
-          anALDownloadTask.savedDir = element.savedDir;
-          anALDownloadTask.taskId = taskId;
-          anALDownloadTask.status = element.status;
-          anALDownloadTask.progress = element.progress;
-          _alDownloadTasks.add(anALDownloadTask);
-        }
+        final anALDownloadTask = _ALDownloadTask(taskUrl);
+        anALDownloadTask.savedDir = savedDir;
+        anALDownloadTask.taskId = taskId;
+        anALDownloadTask.status = status;
+        anALDownloadTask.progress = progress;
+        _alDownloadTasks.add(anALDownloadTask);
+
+        if (await _isShouldRemoveDataForSavedDir(savedDir, taskUrl, status))
+          await _removeCommonTask(anALDownloadTask);
       }
     }
 
@@ -626,13 +650,55 @@ class ALDownloader {
         return;
       }
 
-      await FlutterDownloader.remove(
-          taskId: alDownloaderTask.taskId,
-          shouldDeleteContent:
-              true); // Delete a download task from DB & delete file
-      _alDownloadTasks.remove(alDownloaderTask);
+      await _removeCommonTask(alDownloaderTask);
     } catch (error) {
       debugPrint("ALDownloader | _innerRemove, url = $url, error = $error");
+    }
+  }
+
+  /// remove non undefined/enqueued task
+  /// running task will call back in [_processDataFromPort], non running task will be deleted directly
+  static Future<void> _removeCommonTask(_ALDownloadTask task) async {
+    try {
+      final status = task.status;
+      final id = task.taskId;
+      final url = task.url;
+
+      if (status != DownloadTaskStatus.running) {
+        _alDownloaderBinders.forEach((element) {
+          if (element.forUrl == url) {
+            final progressHandler =
+                element.downloaderHandlerHolder.progressHandler;
+            if (progressHandler != null) progressHandler(-0.01);
+
+            final failedHandler = element.downloaderHandlerHolder.failedHandler;
+            if (failedHandler != null) failedHandler();
+          }
+        });
+
+        _alDownloaderBinders.removeWhere(
+            (element) => element.forUrl == url && !element.isForever);
+
+        _alDownloadTasks.remove(task);
+      }
+
+      await FlutterDownloader.remove(taskId: id, shouldDeleteContent: true);
+    } catch (error) {
+      debugPrint(
+          "ALDownloader | _removeCommonTask, task = $task, error = $error");
+    }
+  }
+
+  /// remove undefined/enqueued task
+  /// no call back,
+  static Future<void> _removeUndefinedEnqueuedTask(_ALDownloadTask task) async {
+    try {
+      _alDownloadTasks.remove(task);
+      await FlutterDownloader.remove(
+          taskId: task.taskId, shouldDeleteContent: true);
+    } catch (error) {
+      debugPrint(
+          "ALDownloader | _removeUndefinedEnqueuedTask, task = $task, error = $error");
     }
   }
 
@@ -670,7 +736,9 @@ class _ALDownloadTask {
 /// a binder for binding element of url and download ininterface
 /// it may bind more elements in the future
 class _ALDownloaderBinder {
-  _ALDownloaderBinder(this.forUrl, this.downloaderHandlerHolder);
+  _ALDownloaderBinder(
+      this.forUrl, this.downloaderHandlerHolder, this.isForever);
   final String forUrl;
   final ALDownloaderHandlerInterface downloaderHandlerHolder;
+  final bool isForever;
 }

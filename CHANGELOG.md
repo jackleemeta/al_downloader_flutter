@@ -1,3 +1,9 @@
+## 1.3.2 - May 20, 2022
+
+- optimize downloader handler
+- optimize example
+- fix bug
+
 ## 1.3.1 - May 18, 2022
 
 - update document

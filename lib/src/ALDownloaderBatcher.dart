@@ -92,38 +92,22 @@ class ALDownloaderBatcher {
   static void addDownloaderHandlerInterface(
       ALDownloaderHandlerInterface? downloaderHandlerInterface,
       List<String> urls) {
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+    _inner_addDownloaderHandlerInterface(
+        downloaderHandlerInterface, urls, false);
+  }
 
-    final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
-
-    for (final url in aNonDuplicatedUrls) {
-      final aDownloaderHandlerInterface =
-          ALDownloaderHandlerInterface(progressHandler: (progress) {
-        debugPrint("ALDownloaderBatcher | downloading, the url = $url");
-
-        final progressHandler = downloaderHandlerInterface?.progressHandler;
-        if (progressHandler != null) progressHandler(binder.progress);
-      }, succeededHandler: () {
-        debugPrint("ALDownloaderBatcher | download succeeded, the url = $url");
-
-        if (binder._isSuccess)
-          _tryToCallBackForCompletion(binder, downloaderHandlerInterface);
-      }, failedHandler: () {
-        debugPrint("ALDownloaderBatcher | download failed, the url = $url");
-
-        if (binder._isOver && !binder._isSuccess) {
-          final failedHandler = downloaderHandlerInterface?.failedHandler;
-          if (failedHandler != null) failedHandler();
-        }
-      }, pausedHandler: () {
-        debugPrint("ALDownloaderBatcher | download paused, the url = $url");
-        final pausedHandler = downloaderHandlerInterface?.pausedHandler;
-        if (pausedHandler != null) pausedHandler();
-      });
-
-      ALDownloader.addDownloaderHandlerInterface(
-          aDownloaderHandlerInterface, url);
-    }
+  /// add a forever downloader handler interface
+  ///
+  /// **parameters**
+  ///
+  /// [downloaderHandlerInterface] downloader handler interface
+  ///
+  /// [urls] urls
+  static void addForeverDownloaderHandlerInterface(
+      ALDownloaderHandlerInterface? downloaderHandlerInterface,
+      List<String> urls) {
+    _inner_addDownloaderHandlerInterface(
+        downloaderHandlerInterface, urls, true);
   }
 
   /// remove downloader handler interfaces
@@ -162,14 +146,67 @@ class ALDownloaderBatcher {
 
   /// ------------------------------------ Private API ------------------------------------
 
-  static void _tryToCallBackForCompletion(_ALDownloaderBatcherBinder binder,
-      ALDownloaderHandlerInterface? downloaderHandlerInterface) {
-    if (binder._isSuccess) {
-      final succeededHandler = downloaderHandlerInterface?.succeededHandler;
-      if (succeededHandler != null) succeededHandler();
-    } else {
-      final failedHandler = downloaderHandlerInterface?.failedHandler;
-      if (failedHandler != null) failedHandler();
+  // ignore: non_constant_identifier_names
+  static void _inner_addDownloaderHandlerInterface(
+      ALDownloaderHandlerInterface? downloaderHandlerInterface,
+      List<String> urls,
+      bool isForever) {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+
+    final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
+
+    for (final url in aNonDuplicatedUrls) {
+      final aDownloaderHandlerInterface =
+          ALDownloaderHandlerInterface(progressHandler: (progress) {
+        debugPrint("ALDownloaderBatcher | downloading, the url = $url");
+
+        final progressHandler = downloaderHandlerInterface?.progressHandler;
+        if (progressHandler != null) progressHandler(binder.progress);
+      }, succeededHandler: () {
+        debugPrint("ALDownloaderBatcher | download succeeded, the url = $url");
+
+        if (binder._completeKVs == null) binder._completeKVs = {};
+
+        binder._completeKVs![url] = true;
+
+        if (binder._isOver) {
+          if (binder._isSucceeded) {
+            final succeededHandler =
+                downloaderHandlerInterface?.succeededHandler;
+            if (succeededHandler != null) succeededHandler();
+          } else {
+            final failedHandler = downloaderHandlerInterface?.failedHandler;
+            if (failedHandler != null) failedHandler();
+          }
+
+          binder._completeKVs = null;
+        }
+      }, failedHandler: () {
+        debugPrint("ALDownloaderBatcher | download failed, the url = $url");
+
+        if (binder._completeKVs == null) binder._completeKVs = {};
+
+        binder._completeKVs![url] = false;
+
+        if (binder._isOver) {
+          final failedHandler = downloaderHandlerInterface?.failedHandler;
+          if (failedHandler != null) failedHandler();
+          binder._completeKVs = null;
+        }
+      }, pausedHandler: () {
+        debugPrint("ALDownloaderBatcher | download paused, the url = $url");
+
+        final pausedHandler = downloaderHandlerInterface?.pausedHandler;
+        if (pausedHandler != null) pausedHandler();
+      });
+
+      if (isForever) {
+        ALDownloader.addForeverDownloaderHandlerInterface(
+            aDownloaderHandlerInterface, url);
+      } else {
+        ALDownloader.addDownloaderHandlerInterface(
+            aDownloaderHandlerInterface, url);
+      }
     }
   }
 
@@ -188,15 +225,15 @@ class ALDownloaderBatcher {
 
 /// a binder for binding element of url and download ininterface for ALDownloaderBatcher
 class _ALDownloaderBatcherBinder {
-  bool get _isSuccess => _succeededUrls.length == _targetUrls.length;
+  bool get _isSucceeded => _succeededUrls.length == _targetUrls.length;
 
   List<String> get _succeededUrls {
     List<String> aList;
 
     try {
-      aList = _completedKVsForALDownloader.entries
-          .where(
-              (element) => element.value && _targetUrls.contains(element.key))
+      if (_completeKVs == null) return <String>[];
+      aList = _completeKVs!.entries
+          .where((element) => element.value)
           .map((e) => e.key)
           .toList();
 
@@ -214,9 +251,9 @@ class _ALDownloaderBatcherBinder {
     List<String> aList;
 
     try {
-      aList = _completedKVsForALDownloader.entries
-          .where(
-              (element) => !element.value && _targetUrls.contains(element.key))
+      if (_completeKVs == null) return <String>[];
+      aList = _completeKVs!.entries
+          .where((element) => !element.value)
           .map((e) => e.key)
           .toList();
 
@@ -253,13 +290,13 @@ class _ALDownloaderBatcherBinder {
 
   /// all download tasks are completed
   /// just completed, it may be successful or failed
-  bool get _isOver => _completedKVsForALDownloader.keys
-      .toSet()
-      .containsAll(_targetUrls.toSet());
+  bool get _isOver {
+    if (_completeKVs == null) return false;
+    return _completeKVs!.length == _targetUrls.length;
+  }
 
   /// completed KVs for ALDownloader
-  static Map<String, bool> get _completedKVsForALDownloader =>
-      ALDownloader.completedKVs;
+  Map<String, bool>? _completeKVs;
 
   /// urls that need to be downloaded
   final List<String> _targetUrls;

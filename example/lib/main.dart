@@ -42,10 +42,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: Column(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: Stack(fit: StackFit.expand, children: [
+        Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -60,12 +61,85 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Expanded(child: theListview)
             ]),
-        floatingActionButton: MaterialButton(
-          child: const Text('download'),
-          color: Colors.blue,
-          textTheme: ButtonTextTheme.primary,
-          onPressed: _downloadAction,
-        ));
+        Positioned(
+            left: 0,
+            right: 0,
+            bottom: MediaQuery.of(context).padding.bottom + 10,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 3,
+                ),
+                Expanded(
+                    child: MaterialButton(
+                  padding: const EdgeInsets.all(2),
+                  minWidth: 20,
+                  height: 50,
+                  child: const Text(
+                    'download',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                  color: Colors.blue,
+                  textTheme: ButtonTextTheme.primary,
+                  onPressed: _downloadAction,
+                )),
+                const SizedBox(
+                  width: 3,
+                ),
+                Expanded(
+                    child: MaterialButton(
+                  padding: const EdgeInsets.all(2),
+                  minWidth: 20,
+                  height: 50,
+                  child: const Text(
+                    'pause',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                  color: Colors.blue,
+                  textTheme: ButtonTextTheme.primary,
+                  onPressed: _pauseAllAction,
+                )),
+                const SizedBox(
+                  width: 3,
+                ),
+                Expanded(
+                    child: MaterialButton(
+                  padding: const EdgeInsets.all(2),
+                  minWidth: 20,
+                  height: 50,
+                  child: const Text(
+                    'cancel',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                  color: Colors.blue,
+                  textTheme: ButtonTextTheme.primary,
+                  onPressed: _cancelAllAction,
+                )),
+                const SizedBox(
+                  width: 3,
+                ),
+                Expanded(
+                    child: MaterialButton(
+                  padding: const EdgeInsets.all(2),
+                  minWidth: 20,
+                  height: 50,
+                  child: const Text(
+                    'remove',
+                    style: TextStyle(fontSize: 10),
+                  ),
+                  color: Colors.blue,
+                  textTheme: ButtonTextTheme.primary,
+                  onPressed: _removeAllAction,
+                )),
+                const SizedBox(
+                  width: 3,
+                ),
+              ],
+            ))
+      ]),
+    );
   }
 
   /// core data in listView
@@ -133,7 +207,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> initialize() async {
     // some tasks may download automatically after initialization,
     // so it need to add downloader handler interface before initialization to ensure the handler call back in time.
-    testAddInterface();
+    testForeverDownloaderHandlerInterface();
 
     await ALDownloader.initialize();
 
@@ -147,24 +221,62 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// action
-  void _downloadAction() {
+  // ignore: unused_element
+  _downloadAction() {
     test();
+  }
+
+  /// action
+  // ignore: unused_element
+  _pauseAction() async {
+    final url = models.first.url;
+    await ALDownloader.pause(url);
+  }
+
+  /// action
+  // ignore: unused_element
+  _pauseAllAction() async {
+    await ALDownloader.pauseAll();
+  }
+
+  /// action
+  // ignore: unused_element
+  _cancelAction() async {
+    final url = models.first.url;
+    await ALDownloader.cancel(url);
+  }
+
+  /// action
+  _cancelAllAction() async {
+    await ALDownloader.cancelAll();
+  }
+
+  /// action
+  // ignore: unused_element
+  _removeAction() async {
+    final url = models[3].url;
+    await ALDownloader.remove(url);
+  }
+
+  /// action
+  // ignore: unused_element
+  _removeAllAction() async {
+    await ALDownloader.removeAll();
   }
 
   /// when executing the following methods together, try to keep them serial
   Future<void> test() async {
-    testAddInterface();
     await testBatchDownload();
     // await testPath();
     // await testDownload();
     // testStatus();
   }
 
-  /// add download handle interface
-  void testAddInterface() {
+  /// add a forever download handle interface
+  void testForeverDownloaderHandlerInterface() {
     for (final model in models) {
       final url = model.url;
-      ALDownloader.addDownloaderHandlerInterface(
+      ALDownloader.addForeverDownloaderHandlerInterface(
           ALDownloaderHandlerInterface(progressHandler: (progress) {
             model.status = ALDownloaderStatus.downloading;
             model.progress = progress;
