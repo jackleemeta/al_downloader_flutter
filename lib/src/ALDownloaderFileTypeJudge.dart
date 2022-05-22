@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 
-/// file type judgment tool
+/// A tool that file type judgment
 class ALDownloaderFileTypeJudge {
-  /// get file type from url
+  /// Get file type model from url
   ///
   /// **parameters**
   ///
@@ -12,7 +12,7 @@ class ALDownloaderFileTypeJudge {
   ///
   /// **return**
   ///
-  /// file type model [ALDownloaderFileTypeModel]
+  /// [ALDownloaderFileTypeModel] file type model
   static ALDownloaderFileTypeModel getALDownloaderFileTypeModelFromUrl(
       String url) {
     final File file = File(url);
@@ -34,7 +34,7 @@ class ALDownloaderFileTypeJudge {
     return ALDownloaderFileTypeModel(ALDownloaderFileType.unknown, anExtension);
   }
 
-  /// type and type list key value pairs
+  /// A set of key-value pairs which type and type list
   static final Iterable<MapEntry<ALDownloaderFileType, List<String>>>
       _allALDownloaderFileTypeFilesEntries = {
     ALDownloaderFileType.common: _commons,
@@ -99,10 +99,10 @@ class ALDownloaderFileTypeJudge {
   static final _others = [".pdf"];
 }
 
-/// file type enumeration
+/// An enumeration of file type
 enum ALDownloaderFileType { common, image, audio, video, other, unknown }
 
-/// class of file type model
+/// A class of file type model
 class ALDownloaderFileTypeModel {
   ALDownloaderFileTypeModel(this.type, this.description);
   ALDownloaderFileType type = ALDownloaderFileType.unknown;

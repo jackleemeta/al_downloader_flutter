@@ -5,7 +5,7 @@ void main() {
   runApp(const MyApp());
 }
 
-/* ----------------------------------------------UI---------------------------------------------- */
+/* ----------------------------------------------UI for test---------------------------------------------- */
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -35,7 +35,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    // initialize downloader and get initial download status/progress
+    // Initialize downloader and get initial download status/progress.
     initialize();
   }
 
@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   color: Colors.blue,
                   textTheme: ButtonTextTheme.primary,
-                  onPressed: _downloadAction,
+                  onPressed: _downloadAllAction,
                 )),
                 const SizedBox(
                   width: 3,
@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  /// core data in listView
+  /// Core data in listView
   get theListview => ListView.separated(
         padding: EdgeInsets.only(
             top: 20, bottom: MediaQuery.of(context).padding.bottom + 75),
@@ -201,13 +201,75 @@ class _MyHomePageState extends State<MyHomePage> {
             const Divider(height: 10, color: Colors.transparent),
       );
 
-  /* ----------------------------------------------method for test---------------------------------------------- */
+  /* ----------------------------------------------Action for test---------------------------------------------- */
 
-  /// initialize
+  /// Action
+  // ignore: unused_element
+  _downloadAction() async {
+    await download();
+  }
+
+  /// Action
+  // ignore: unused_element
+  _downloadAllAction() async {
+    await downloadAll();
+  }
+
+  /// Action
+  // ignore: unused_element
+  _pauseAction() async {
+    final url = models.first.url;
+    await ALDownloader.pause(url);
+  }
+
+  /// Action
+  // ignore: unused_element
+  _pauseAllAction() async {
+    await ALDownloader.pauseAll();
+  }
+
+  /// Action
+  // ignore: unused_element
+  _cancelAction() async {
+    final url = models.first.url;
+    await ALDownloader.cancel(url);
+  }
+
+  /// Action
+  _cancelAllAction() async {
+    await ALDownloader.cancelAll();
+  }
+
+  /// Action
+  // ignore: unused_element
+  _removeAction() async {
+    final url = models.first.url;
+    await ALDownloader.remove(url);
+  }
+
+  /// Action
+  // ignore: unused_element
+  _removeAllAction() async {
+    await ALDownloader.removeAll();
+  }
+
+  /* ----------------------------------------------Method for test---------------------------------------------- */
+
+  /// Excute some methods together
+  ///
+  /// When executing the following methods together, try to keep them serial.
+  Future<void> excuteSomeMethodsTogether() async {
+    await downloadAll();
+    await path();
+    await download();
+    status();
+  }
+
+  /// Initialize
   Future<void> initialize() async {
-    // some tasks may download automatically after initialization,
-    // so it need to add downloader handler interface before initialization to ensure the handler call back in time.
-    testForeverDownloaderHandlerInterface();
+    // Some tasks may download automatically when initializing, so it need to add downloader handler
+    // interface before initialization to ensure that receive the information in call back first time.
+    addForeverDownloaderHandlerInterface();
 
     await ALDownloader.initialize();
 
@@ -220,60 +282,8 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
-  /// action
-  // ignore: unused_element
-  _downloadAction() {
-    test();
-  }
-
-  /// action
-  // ignore: unused_element
-  _pauseAction() async {
-    final url = models.first.url;
-    await ALDownloader.pause(url);
-  }
-
-  /// action
-  // ignore: unused_element
-  _pauseAllAction() async {
-    await ALDownloader.pauseAll();
-  }
-
-  /// action
-  // ignore: unused_element
-  _cancelAction() async {
-    final url = models.first.url;
-    await ALDownloader.cancel(url);
-  }
-
-  /// action
-  _cancelAllAction() async {
-    await ALDownloader.cancelAll();
-  }
-
-  /// action
-  // ignore: unused_element
-  _removeAction() async {
-    final url = models[3].url;
-    await ALDownloader.remove(url);
-  }
-
-  /// action
-  // ignore: unused_element
-  _removeAllAction() async {
-    await ALDownloader.removeAll();
-  }
-
-  /// when executing the following methods together, try to keep them serial
-  Future<void> test() async {
-    await testBatchDownload();
-    // await testPath();
-    // await testDownload();
-    // testStatus();
-  }
-
-  /// add a forever download handle interface
-  void testForeverDownloaderHandlerInterface() {
+  /// Add a forever download handle interface
+  void addForeverDownloaderHandlerInterface() {
     for (final model in models) {
       final url = model.url;
       ALDownloader.addForeverDownloaderHandlerInterface(
@@ -308,24 +318,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  /// batch download
-  Future<void> testBatchDownload() async {
-    final urls = models.map((e) => e.url).toList();
-    await ALDownloaderBatcher.downloadUrls(urls,
-        downloaderHandlerInterface:
-            ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | batch | download progress = $progress");
-        }, succeededHandler: () {
-          debugPrint("ALDownloader | batch | download succeeded");
-        }, failedHandler: () {
-          debugPrint("ALDownloader | batch | download failed");
-        }, pausedHandler: () {
-          debugPrint("ALDownloader | batch | download paused");
-        }));
-  }
-
-  /// download
-  Future<void> testDownload() async {
+  /// Download
+  Future<void> download() async {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
@@ -343,8 +337,24 @@ class _MyHomePageState extends State<MyHomePage> {
         }));
   }
 
-  /// path
-  Future<void> testPath() async {
+  /// Download all
+  Future<void> downloadAll() async {
+    final urls = models.map((e) => e.url).toList();
+    await ALDownloaderBatcher.downloadUrls(urls,
+        downloaderHandlerInterface:
+            ALDownloaderHandlerInterface(progressHandler: (progress) {
+          debugPrint("ALDownloader | batch | download progress = $progress");
+        }, succeededHandler: () {
+          debugPrint("ALDownloader | batch | download succeeded");
+        }, failedHandler: () {
+          debugPrint("ALDownloader | batch | download failed");
+        }, pausedHandler: () {
+          debugPrint("ALDownloader | batch | download paused");
+        }));
+  }
+
+  /// Path
+  Future<void> path() async {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
@@ -378,13 +388,20 @@ class _MyHomePageState extends State<MyHomePage> {
         "ALDownloader | get 'virtual/physical file name' for [url], url = $url, file name = $fileName\n");
   }
 
-  void testRemoveInterface() {
+  /// Remove downloader handler interface
+  void removeDownloaderHandlerInterface(String url) {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
     ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
   }
 
-  void testStatus() {
+  /// Remove all downloader handler interfaces
+  void removeDownloaderHandlerInterfaceForAll() {
+    ALDownloader.removeDownloaderHandlerInterfaceForAll();
+  }
+
+  /// Status
+  void status() {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
@@ -394,7 +411,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-/* ----------------------------------------------model class for test---------------------------------------------- */
+/* ----------------------------------------------Model class for test---------------------------------------------- */
 
 class DownloadModel {
   final String url;
@@ -428,7 +445,7 @@ class DownloadModel {
   DownloadModel(this.url);
 }
 
-/* ----------------------------------------------data for test---------------------------------------------- */
+/* ----------------------------------------------Data for test---------------------------------------------- */
 
 final models = kTestVideos.map((e) => DownloadModel(e)).toList();
 
@@ -439,9 +456,9 @@ final kTestPNGs = [
 ];
 
 final kTestVideos = [
+  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4",
   "http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4",
   "http://vfx.mtime.cn/Video/2019/03/21/mp4/190321153853126488.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4",
   "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4",
   "http://vfx.mtime.cn/Video/2019/03/18/mp4/190318231014076505.mp4",
   "http://vfx.mtime.cn/Video/2019/03/09/mp4/190309153658147087.mp4",
