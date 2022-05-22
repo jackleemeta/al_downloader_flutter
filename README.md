@@ -186,7 +186,7 @@ debugPrint(
 
 ### *Note*:
 
-*If the persistent file was removed by exceptional means, such as the cache folder being deleted by some business code, call [remove] and then call [download] to re-download to fix the problem.*
+*If the persistent file was removed by exceptional means, such as the cache folder being deleted by some business code, call [remove] and then call [download] to re-download for fixing the problem.*
 
 ## Key File Of Example For iOS
 
