@@ -1,3 +1,12 @@
+## 1.3.8 - May 22, 2022
+
+- more stable
+- more accurate status
+- optimize event switch
+- bug fix
+- optimize example
+- update document
+
 ## 1.3.7 - May 20, 2022
 
 - update document

@@ -478,6 +478,78 @@ class ALDownloader {
     final double_progress =
         double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
 
+    _callHandlerBusiness1(taskId, innerStatus, url, double_progress, false);
+
+    if (innerStatus == _ALDownloaderInnerStatus.canceled ||
+        innerStatus == _ALDownloaderInnerStatus.failed) {
+      _tasks.remove(task);
+    }
+
+    debugPrint(
+        "ALDownloader | final | _downloadCallback, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress");
+  }
+
+  /// load [FlutterDownloader]'s local database task to the memory cache, and attempt to execute the tasks
+  static Future<void> _loadAndTryToRunTask() async {
+    final tasks = await FlutterDownloader.loadTasks();
+    if (tasks != null) {
+      debugPrint(
+          "ALDownloader | Flutterdownloader | _loadAndTryToRunTask, tasks length = ${tasks.length}");
+
+      tasks.forEach((element) {
+        debugPrint(
+            "ALDownloader | Flutterdownloader | _loadAndTryToRunTask, url = ${element.url}, taskId = ${element.taskId}, status = ${element.status}");
+      });
+
+      for (final element in tasks) {
+        final taskId = element.taskId;
+        final url = element.url;
+        final status = element.status;
+        final savedDir = element.savedDir;
+        final progress = element.progress;
+
+        _ALDownloaderInnerStatus innerStatus = trasferStatus(status);
+
+        final task = _ALDownloadTask(url);
+        task.savedDir = savedDir;
+        task.taskId = taskId;
+        task.status = innerStatus;
+        task.progress = progress;
+        _tasks.add(task);
+
+        final isShouldRemoveDataForSavedDir =
+            await _isShouldRemoveDataForSavedDir(savedDir, url, innerStatus);
+        if (isShouldRemoveDataForSavedDir) {
+          // If the task should be deleted, process it throught calling [_removeTaskEntirely].
+          await _removeTaskEntirely(task);
+        } else {
+          // If the task is normal, call back initial data when initializing.
+          // ignore: non_constant_identifier_names
+          final double_progress =
+              double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
+          _callHandlerBusiness1(
+              taskId, innerStatus, url, double_progress, true);
+        }
+      }
+    }
+
+    debugPrint(
+        "ALDownloader | _loadAndTryToRunTask, tasks length = ${_tasks.length}");
+
+    _tasks.forEach((element) {
+      debugPrint(
+          "ALDownloader | _loadAndTryToRunTask, url = ${element.url}, taskId = ${element.taskId}, status = ${element.status}");
+    });
+  }
+
+  /// Process business 1 for call handler
+  static void _callHandlerBusiness1(
+      String taskId,
+      _ALDownloaderInnerStatus innerStatus,
+      String url,
+      // ignore: non_constant_identifier_names
+      double double_progress,
+      bool isInitial) {
     if (innerStatus == _ALDownloaderInnerStatus.complete) {
       _binders.forEach((element) {
         if (element.url == url) {
@@ -488,14 +560,6 @@ class ALDownloader {
           final succeededHandler =
               element.downloaderHandlerHolder.succeededHandler;
           if (succeededHandler != null) succeededHandler();
-        }
-      });
-    } else if (innerStatus == _ALDownloaderInnerStatus.running) {
-      _binders.forEach((element) {
-        if (element.url == url) {
-          final progressHandler =
-              element.downloaderHandlerHolder.progressHandler;
-          if (progressHandler != null) progressHandler(double_progress);
         }
       });
     } else if (innerStatus == _ALDownloaderInnerStatus.paused) {
@@ -517,8 +581,14 @@ class ALDownloader {
           if (failedHandler != null) failedHandler();
         }
       });
-
-      _tasks.remove(task);
+    } else if (innerStatus == _ALDownloaderInnerStatus.running || isInitial) {
+      _binders.forEach((element) {
+        if (element.url == url) {
+          final progressHandler =
+              element.downloaderHandlerHolder.progressHandler;
+          if (progressHandler != null) progressHandler(double_progress);
+        }
+      });
     }
 
     if (innerStatus == _ALDownloaderInnerStatus.complete ||
@@ -527,51 +597,6 @@ class ALDownloader {
       _binders
           .removeWhere((element) => element.url == url && !element.isForever);
     }
-
-    debugPrint(
-        "ALDownloader | final | _downloadCallback, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress");
-  }
-
-  /// load [FlutterDownloader]'s local database task to the memory cache, and attempt to execute the tasks
-  static Future<void> _loadAndTryToRunTask() async {
-    final tasks = await FlutterDownloader.loadTasks();
-    if (tasks != null) {
-      debugPrint(
-          "ALDownloader | Flutterdownloader | _loadAndTryToRunTask, tasks length = ${tasks.length}");
-
-      tasks.forEach((element) {
-        debugPrint(
-            "ALDownloader | Flutterdownloader | _loadAndTryToRunTask, url = ${element.url}, taskId = ${element.taskId}, status = ${element.status}");
-      });
-
-      for (final element in tasks) {
-        final taskId = element.taskId;
-        final taskUrl = element.url;
-        final status = element.status;
-        final savedDir = element.savedDir;
-        final progress = element.progress;
-
-        _ALDownloaderInnerStatus innerStatus = trasferStatus(status);
-
-        final task = _ALDownloadTask(taskUrl);
-        task.savedDir = savedDir;
-        task.taskId = taskId;
-        task.status = innerStatus;
-        task.progress = progress;
-        _tasks.add(task);
-
-        if (await _isShouldRemoveDataForSavedDir(
-            savedDir, taskUrl, innerStatus)) await _removeTaskEntirely(task);
-      }
-    }
-
-    debugPrint(
-        "ALDownloader | _loadAndTryToRunTask, tasks length = ${_tasks.length}");
-
-    _tasks.forEach((element) {
-      debugPrint(
-          "ALDownloader | _loadAndTryToRunTask, url = ${element.url}, taskId = ${element.taskId}, status = ${element.status}");
-    });
   }
 
   /// Verify the savedDir to determine whether to delete data

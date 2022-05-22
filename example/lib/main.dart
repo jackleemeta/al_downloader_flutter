@@ -267,19 +267,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Initialize
   Future<void> initialize() async {
-    // Some tasks may download automatically when initializing, so it need to add downloader handler
-    // interface before initialization to ensure that receive the information in call back first time.
+    // Why [downloader interface] and [downloader interface for ALDownloaderBatcher] are added before ALDownloader initialized?
+    //
+    // Because Some downloads may download automatically when initializing, so it need to add downloader handler
+    // interface before initialization to ensure that receive the information in the handler first time.
+
+    // It is for download. It is a forever interface.
     addForeverDownloaderHandlerInterface();
+    // It is for batch download. It is an one-off interface.
+    addALDownloaderBatcherDownloaderHandlerInterface();
 
     await ALDownloader.initialize();
-
-    for (var model in models) {
-      final url = model.url;
-      model.status = ALDownloader.getDownloadStatusForUrl(url);
-      model.progress = ALDownloader.getDownloadProgressForUrl(url);
-    }
-
-    setState(() {});
   }
 
   /// Add a forever download handle interface
@@ -316,6 +314,22 @@ class _MyHomePageState extends State<MyHomePage> {
           }),
           url);
     }
+  }
+
+  /// Add a download handle interface for ALDownloaderBatcher
+  void addALDownloaderBatcherDownloaderHandlerInterface() {
+    final urls = models.map((e) => e.url).toList();
+    ALDownloaderBatcher.addDownloaderHandlerInterface(
+        ALDownloaderHandlerInterface(progressHandler: (progress) {
+          debugPrint("ALDownloader | batch | download progress = $progress");
+        }, succeededHandler: () {
+          debugPrint("ALDownloader | batch | download succeeded");
+        }, failedHandler: () {
+          debugPrint("ALDownloader | batch | download failed");
+        }, pausedHandler: () {
+          debugPrint("ALDownloader | batch | download paused");
+        }),
+        urls);
   }
 
   /// Download
