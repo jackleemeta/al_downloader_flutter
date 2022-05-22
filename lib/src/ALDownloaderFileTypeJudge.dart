@@ -8,7 +8,7 @@ class ALDownloaderFileTypeJudge {
   ///
   /// **parameters**
   ///
-  ///[url] url
+  /// [url] url
   ///
   /// **return**
   ///

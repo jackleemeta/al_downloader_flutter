@@ -71,7 +71,7 @@ class ALDownloaderBatcher {
 
   /// Get download progress
   ///
-  /// number of successful tasks / number of all tasks
+  /// number of succeeded tasks / number of all tasks
   ///
   /// **parameters**
   ///
@@ -117,7 +117,7 @@ class ALDownloaderBatcher {
 
         binder._completeKVs![url] = true;
 
-        if (binder._isOver) {
+        if (binder._isCompleted) {
           if (binder._isSucceeded) {
             final succeededHandler =
                 downloaderHandlerInterface?.succeededHandler;
@@ -136,7 +136,7 @@ class ALDownloaderBatcher {
 
         binder._completeKVs![url] = false;
 
-        if (binder._isOver) {
+        if (binder._isCompleted) {
           final failedHandler = downloaderHandlerInterface?.failedHandler;
           if (failedHandler != null) failedHandler();
           binder._completeKVs = null;
@@ -217,9 +217,9 @@ class ALDownloaderBatcher {
   ALDownloaderBatcher._();
 }
 
-/// A binder for binding some element such as url and download ininterface for ALDownloaderBatcher
+/// A binder for binding some elements such as url, download ininterface and so on for ALDownloaderBatcher
 class _ALDownloaderBatcherBinder {
-  /// Get result of whether [_targetUrls] are all succeeded
+  /// Get result whether [_targetUrls] are all succeeded
   bool get _isSucceeded => _succeededUrls.length == _targetUrls.length;
 
   /// Get succeeded urls
@@ -285,10 +285,10 @@ class _ALDownloaderBatcherBinder {
     return aDouble;
   }
 
-  /// Get result whether [_targetUrls] are completed
+  /// Get result whether [_targetUrls] are all completed
   ///
   /// Just completed, it may be successful or failed.
-  bool get _isOver {
+  bool get _isCompleted {
     if (_completeKVs == null) return false;
     return _completeKVs!.length == _targetUrls.length;
   }

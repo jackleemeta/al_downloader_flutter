@@ -121,7 +121,7 @@ class ALDownloaderPersistentFileManager {
     return filePath;
   }
 
-  /// Get all storage directories
+  /// Get all disk directories
   static Future<List<String>?> get dirs async {
     try {
       final String theRootDir = await _theRootDir;
@@ -168,7 +168,7 @@ class ALDownloaderPersistentFileManager {
     return fileName;
   }
 
-  /// Check whether [path] is in the root path
+  /// Check whether [path] is in [_theRootDir]
   ///
   /// **parameters**
   ///

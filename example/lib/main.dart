@@ -66,78 +66,26 @@ class _MyHomePageState extends State<MyHomePage> {
             right: 0,
             bottom: MediaQuery.of(context).padding.bottom + 10,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  width: 3,
-                ),
-                Expanded(
-                    child: MaterialButton(
-                  padding: const EdgeInsets.all(2),
-                  minWidth: 20,
-                  height: 50,
-                  child: const Text(
-                    'download',
-                    style: TextStyle(fontSize: 10),
-                  ),
-                  color: Colors.blue,
-                  textTheme: ButtonTextTheme.primary,
-                  onPressed: _downloadAllAction,
-                )),
-                const SizedBox(
-                  width: 3,
-                ),
-                Expanded(
-                    child: MaterialButton(
-                  padding: const EdgeInsets.all(2),
-                  minWidth: 20,
-                  height: 50,
-                  child: const Text(
-                    'pause',
-                    style: TextStyle(fontSize: 10),
-                  ),
-                  color: Colors.blue,
-                  textTheme: ButtonTextTheme.primary,
-                  onPressed: _pauseAllAction,
-                )),
-                const SizedBox(
-                  width: 3,
-                ),
-                Expanded(
-                    child: MaterialButton(
-                  padding: const EdgeInsets.all(2),
-                  minWidth: 20,
-                  height: 50,
-                  child: const Text(
-                    'cancel',
-                    style: TextStyle(fontSize: 10),
-                  ),
-                  color: Colors.blue,
-                  textTheme: ButtonTextTheme.primary,
-                  onPressed: _cancelAllAction,
-                )),
-                const SizedBox(
-                  width: 3,
-                ),
-                Expanded(
-                    child: MaterialButton(
-                  padding: const EdgeInsets.all(2),
-                  minWidth: 20,
-                  height: 50,
-                  child: const Text(
-                    'remove',
-                    style: TextStyle(fontSize: 10),
-                  ),
-                  color: Colors.blue,
-                  textTheme: ButtonTextTheme.primary,
-                  onPressed: _removeAllAction,
-                )),
-                const SizedBox(
-                  width: 3,
-                ),
-              ],
-            ))
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisSize: MainAxisSize.min,
+                children: theActionLists
+                    .map((e) => Expanded(
+                            child: Padding(
+                          padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+                          child: MaterialButton(
+                            padding: const EdgeInsets.all(0),
+                            minWidth: 20,
+                            height: 50,
+                            child: Text(
+                              e[0],
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                            color: Colors.blue,
+                            textTheme: ButtonTextTheme.primary,
+                            onPressed: e[1],
+                          ),
+                        )))
+                    .toList()))
       ]),
     );
   }
@@ -200,6 +148,14 @@ class _MyHomePageState extends State<MyHomePage> {
         separatorBuilder: (BuildContext context, int index) =>
             const Divider(height: 10, color: Colors.transparent),
       );
+
+  /// The action lists
+  late final theActionLists = <List>[
+    ["download", _downloadAllAction],
+    ["pause", _pauseAllAction],
+    ["cancel", _cancelAllAction],
+    ["remove", _removeAllAction]
+  ];
 
   /* ----------------------------------------------Action for test---------------------------------------------- */
 
@@ -269,13 +225,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> initialize() async {
     // Why [downloader interface] and [downloader interface for batch] are added before ALDownloader initialized?
     //
-    // Because Some downloads may download automatically when initializing, so it need to add downloader handler
-    // interface before initialization to ensure that receive the information in the handler first time.
+    // Because some downloads may download automatically when initializing, so downloader handler interface need
+    // to be added before initialization to ensure that receive the information in the handler first time.
 
     // It is for download. It is a forever interface.
     addForeverDownloaderHandlerInterface();
     // It is for batch download. It is an one-off interface.
-    addALDownloaderBatcherDownloaderHandlerInterface();
+    addBatchDownloaderHandlerInterface();
 
     await ALDownloader.initialize();
   }
@@ -317,7 +273,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// Add a download handle interface for batch
-  void addALDownloaderBatcherDownloaderHandlerInterface() {
+  void addBatchDownloaderHandlerInterface() {
     final urls = models.map((e) => e.url).toList();
     ALDownloaderBatcher.addDownloaderHandlerInterface(
         ALDownloaderHandlerInterface(progressHandler: (progress) {

@@ -146,7 +146,7 @@ class ALDownloader {
   ///
   /// It is an one-off interface which will be destroyed when the download succeeded/failed.
   ///
-  /// [forUrl] url
+  /// [url] url
   static void addDownloaderHandlerInterface(
       ALDownloaderHandlerInterface? downloaderHandlerInterface, String? url) {
     if (downloaderHandlerInterface == null || url == null) return;
@@ -162,13 +162,11 @@ class ALDownloader {
   ///
   /// It is a forever interface which never is destroyed unless [removeDownloaderHandlerInterfaceForUrl] or [removeDownloaderHandlerInterfaceForAll] is called.
   ///
-  /// [forUrl] url
+  /// [url] url
   static void addForeverDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface? downloaderHandlerInterface,
-      String? forUrl) {
-    if (downloaderHandlerInterface == null || forUrl == null) return;
-    final aBinder =
-        _ALDownloaderBinder(forUrl, downloaderHandlerInterface, true);
+      ALDownloaderHandlerInterface? downloaderHandlerInterface, String? url) {
+    if (downloaderHandlerInterface == null || url == null) return;
+    final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface, true);
     _binders.add(aBinder);
   }
 
@@ -191,7 +189,7 @@ class ALDownloader {
   ///
   /// **return**
   ///
-  /// download status [ALDownloaderStatus]
+  /// [ALDownloaderStatus] download status
   static ALDownloaderStatus getDownloadStatusForUrl(String url) {
     ALDownloaderStatus alDownloaderStatus;
 
@@ -229,7 +227,7 @@ class ALDownloader {
   ///
   /// **return**
   ///
-  /// download progress
+  /// [double] download progress
   static double getDownloadProgressForUrl(String url) {
     double alDownloaderProgress;
 
@@ -438,7 +436,7 @@ class ALDownloader {
 
   /// Register send port and receive port for [IsolateNameServer]
   ///
-  /// It is used for communication between download isolate and the main isolate.
+  /// It is used for communication between download isolate and main isolate.
   static void _addIsolateNameServerPortService() {
     IsolateNameServer.registerPortWithName(
         _receivePort.sendPort, _kDownloaderSendPort);
@@ -450,7 +448,7 @@ class ALDownloader {
     });
   }
 
-  /// the callback binded by [FlutterDownloader]
+  /// The callback binded by [FlutterDownloader]
   static void _downloadCallback(
       String taskId, DownloadTaskStatus status, int progress) {
     final SendPort? send =
@@ -489,7 +487,7 @@ class ALDownloader {
         "ALDownloader | final | _downloadCallback, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress");
   }
 
-  /// load [FlutterDownloader]'s local database task to the memory cache, and attempt to execute the tasks
+  /// Load [FlutterDownloader]'s local database task to the memory cache, and attempt to execute the tasks
   static Future<void> _loadAndTryToRunTask() async {
     final tasks = await FlutterDownloader.loadTasks();
     if (tasks != null) {
@@ -613,7 +611,7 @@ class ALDownloader {
     }
   }
 
-  /// whether path is in root path
+  /// Whether path is in root path
   static Future<bool> _isInRootPathForPath(String path) async {
     if (path == "") return false;
 
@@ -755,7 +753,7 @@ class ALDownloader {
   /// Custom download tasks
   static final List<_ALDownloadTask> _tasks = [];
 
-  /// A binder list for binding element of url and download ininterface
+  /// A binder list for binding element such as url, download ininterface, forever flag and so on
   static final List<_ALDownloaderBinder> _binders = [];
 
   /// Send port key
