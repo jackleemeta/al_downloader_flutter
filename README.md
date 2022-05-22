@@ -147,6 +147,21 @@ await ALDownloaderBatcher.downloadUrls(urls,
 ```
 
 ```
+/// Add a download handle interface for batch
+ALDownloaderBatcher.addDownloaderHandlerInterface(
+    ALDownloaderHandlerInterface(progressHandler: (progress) {
+      debugPrint("ALDownloader | batch | download progress = $progress");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | batch | download succeeded");
+    }, failedHandler: () {
+      debugPrint("ALDownloader | batch | download failed");
+    }, pausedHandler: () {
+      debugPrint("ALDownloader | batch | download paused");
+    }),
+    urls);
+```
+
+```
 /// Get download status for a set of urls
 final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```

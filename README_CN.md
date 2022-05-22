@@ -145,6 +145,21 @@ await ALDownloaderBatcher.downloadUrls(urls,
 ```
 
 ```
+/// 对批量下载添加一个下载句柄池
+ALDownloaderBatcher.addDownloaderHandlerInterface(
+    ALDownloaderHandlerInterface(progressHandler: (progress) {
+      debugPrint("ALDownloader | batch | download progress = $progress");
+    }, succeededHandler: () {
+      debugPrint("ALDownloader | batch | download succeeded");
+    }, failedHandler: () {
+      debugPrint("ALDownloader | batch | download failed");
+    }, pausedHandler: () {
+      debugPrint("ALDownloader | batch | download paused");
+    }),
+    urls);
+```
+
+```
 /// 获取一组url的下载状态
 final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```

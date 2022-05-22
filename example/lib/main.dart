@@ -267,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Initialize
   Future<void> initialize() async {
-    // Why [downloader interface] and [downloader interface for ALDownloaderBatcher] are added before ALDownloader initialized?
+    // Why [downloader interface] and [downloader interface for batch] are added before ALDownloader initialized?
     //
     // Because Some downloads may download automatically when initializing, so it need to add downloader handler
     // interface before initialization to ensure that receive the information in the handler first time.
@@ -316,7 +316,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  /// Add a download handle interface for ALDownloaderBatcher
+  /// Add a download handle interface for batch
   void addALDownloaderBatcherDownloaderHandlerInterface() {
     final urls = models.map((e) => e.url).toList();
     ALDownloaderBatcher.addDownloaderHandlerInterface(
