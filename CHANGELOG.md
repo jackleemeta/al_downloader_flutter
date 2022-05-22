@@ -2,9 +2,10 @@
 
 - more stable
 - more accurate status
-- optimize event switch
-- bug fix
+- enable extreme exception to be repaired automatically or manually
+- optimize download action switch
 - optimize example
+- bug fix
 - update document
 
 ## 1.3.7 - May 20, 2022
