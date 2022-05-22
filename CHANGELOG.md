@@ -1,3 +1,7 @@
+## 1.3.9 - May 22, 2022
+
+- update document
+
 ## 1.3.8 - May 22, 2022
 
 - more stable

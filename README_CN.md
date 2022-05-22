@@ -22,7 +22,7 @@
 
 ```
 dependencies:
-  al_downloader: ^1.3.8
+  al_downloader: ^1.3.9
 ```
 
 使用命令行运行下面这行代码
@@ -148,13 +148,13 @@ await ALDownloaderBatcher.downloadUrls(urls,
 /// 对批量下载添加一个下载句柄池
 ALDownloaderBatcher.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | batch | download progress = $progress");
+      debugPrint("ALDownloader | 批量 | 下载进度 = $progress");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | batch | download succeeded");
+      debugPrint("ALDownloader | 批量 | 下载成功");
     }, failedHandler: () {
-      debugPrint("ALDownloader | batch | download failed");
+      debugPrint("ALDownloader | 批量 | 下载失败");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | batch | download paused");
+      debugPrint("ALDownloader | 批量 | 下载暂停");
     }),
     urls);
 ```
