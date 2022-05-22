@@ -249,32 +249,9 @@ class ALDownloader {
     return alDownloaderProgress;
   }
 
-  /// Get a completed set of key-value pairs
-  ///
-  /// Url and result(succeeded/failed) are added to the pool.
-  ///
-  /// **return**
-  ///
-  /// completed url and result(succeeded/failed) which the structure is [url: succeeded/failed]
-  static Map<String, bool> get completedKVs {
-    final Map<String, bool> aMap = {};
-    try {
-      _tasks.forEach((element) {
-        if (element.status == _ALDownloaderInnerStatus.complete) {
-          aMap[element.url] = true;
-        } else if (element.status == _ALDownloaderInnerStatus.failed) {
-          aMap[element.url] = false;
-        }
-      });
-    } catch (error) {
-      debugPrint("ALDownloader | get completedKVs error = $error");
-    }
-    return aMap;
-  }
-
   /// Pause download
   ///
-  /// The downloading download will be stopped, but the incomplete bytes will be not deleted.
+  /// The downloading download will be stopped, but the incomplete data will be not deleted.
   ///
   /// **parameters**
   ///
@@ -329,7 +306,7 @@ class ALDownloader {
 
   /// Cancel download
   ///
-  /// The downloading download will be stopped, and the incomplete bytes will be deleted.
+  /// The downloading download will be stopped, and the incomplete data will be deleted.
   ///
   /// **parameters**
   ///
@@ -372,7 +349,7 @@ class ALDownloader {
 
   /// Remove download
   ///
-  /// The download will be removed, and the all bytes will be deleted.
+  /// The download will be removed, and the all data will be deleted.
   ///
   /// **parameters**
   ///
@@ -394,6 +371,29 @@ class ALDownloader {
       final url = task.url;
       await remove(url);
     }
+  }
+
+  /// Get a completed set of key-value pairs
+  ///
+  /// Url and result(succeeded/failed) are added to the pool.
+  ///
+  /// **return**
+  ///
+  /// completed url and result(succeeded/failed) which the structure is [url: succeeded/failed]
+  static Map<String, bool> get completedKVs {
+    final Map<String, bool> aMap = {};
+    try {
+      _tasks.forEach((element) {
+        if (element.status == _ALDownloaderInnerStatus.complete) {
+          aMap[element.url] = true;
+        } else if (element.status == _ALDownloaderInnerStatus.failed) {
+          aMap[element.url] = false;
+        }
+      });
+    } catch (error) {
+      debugPrint("ALDownloader | get completedKVs error = $error");
+    }
+    return aMap;
   }
 
   /// Manager custom download tasks

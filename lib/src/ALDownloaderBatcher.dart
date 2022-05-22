@@ -28,6 +28,8 @@ class ALDownloaderBatcher {
 
   /// Get download status
   ///
+  /// Summarize the download status for a set of urls.
+  ///
   /// **parameters**
   ///
   /// [urls] urls
@@ -174,6 +176,19 @@ class ALDownloaderBatcher {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     for (final url in aNonDuplicatedUrls) await ALDownloader.pause(url);
+  }
+
+  /// Cancel download
+  ///
+  /// This is a multiple of [ALDownloader.cancel], see [ALDownloader.cancel].
+  ///
+  /// **parameters**
+  ///
+  /// [urls] urls
+  static Future<void> cancel(List<String> urls) async {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+
+    for (final url in aNonDuplicatedUrls) await ALDownloader.cancel(url);
   }
 
   /// Remove download

@@ -22,7 +22,7 @@
 
 ```
 dependencies:
-  al_downloader: ^1.3.7
+  al_downloader: ^1.3.8
 ```
 
 使用命令行运行下面这行代码
@@ -94,35 +94,35 @@ ALDownloader.removeDownloaderHandlerInterfaceForAll;
 ```
 
 ```
-/// 获取url的下载状态
+/// 获取下载状态
 ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
 ```
 
 ```
-/// 获取url的下载进度
+/// 获取下载进度
 final progress = ALDownloader.getDownloadProgressForUrl(url);
-```
-
-```
-/// 取消
-///
-/// 详情查看接口描述
-await ALDownloader.cancel(url);
-await ALDownloader.cancelAll;
 ```
 
 ```
 /// 暂停
 ///
-/// 详情查看接口描述
+/// 停止正在下载的任务，不删除未下载完成的数据
 await ALDownloader.pause(url);
 await ALDownloader.pauseAll;
 ```
 
 ```
+/// 取消
+///
+/// 停止正在下载的任务，删除未下载完成的数据
+await ALDownloader.cancel(url);
+await ALDownloader.cancelAll;
+```
+
+```
 /// 移除
 ///
-/// 详情查看接口描述
+/// 删除任务，删除所有数据
 await ALDownloader.remove(url);
 await ALDownloader.removeAll;
 ```
@@ -145,11 +145,11 @@ await ALDownloaderBatcher.downloadUrls(urls,
 ```
 
 ```
-/// 总结一组url的下载状态
+/// 获取一组url的下载状态
 final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```
 
-### ALDownloaderPersistentFileManager - 基于url管理持久化文件
+### ALDownloaderPersistentFileManager - 基于url的持久化文件管理器
 
 ```
 final model = await ALDownloaderPersistentFileManager

@@ -24,7 +24,7 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.3.7
+  al_downloader: ^1.3.8
 ```
 
 run the following line with your command line
@@ -42,7 +42,7 @@ import 'package:al_downloader/al_downloader.dart';
 ### ALDownloader
 
 ```
-/// download
+/// Download
 await ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
@@ -58,7 +58,7 @@ await ALDownloader.download(url,
 ```
 
 ```
-/// add a downloader handler interface
+/// Add a downloader handler interface
 ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -74,7 +74,7 @@ ALDownloader.addDownloaderHandlerInterface(
 ```
 
 ```
-/// add a forever downloader handler interface
+/// Add a forever downloader handler interface
 ALDownloader.addForeverDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -90,41 +90,41 @@ ALDownloader.addForeverDownloaderHandlerInterface(
 ```
 
 ```
-/// remove downloader handler interface
+/// Remove downloader handler interface
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 ALDownloader.removeDownloaderHandlerInterfaceForAll;
 ```
 
 ```
-/// get download status for [url]
+/// Get download status
 ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
 ```
 
 ```
-/// get download progress for [url]
+/// Get download progress
 final progress = ALDownloader.getDownloadProgressForUrl(url);
 ```
 
 ```
-/// cancel
+/// Pause
 ///
-/// for details, see interface description
-await ALDownloader.cancel(url);
-await ALDownloader.cancelAll;
-```
-
-```
-/// pause
-///
-/// for details, see interface description
+/// The downloading download will be stopped, but the incomplete data will be not deleted.
 await ALDownloader.pause(url);
 await ALDownloader.pauseAll;
 ```
 
 ```
-/// remove
+/// Cancel
 ///
-/// for details, see interface description
+/// The downloading download will be stopped, and the incomplete data will be deleted.
+await ALDownloader.cancel(url);
+await ALDownloader.cancelAll;
+```
+
+```
+/// Remove
+///
+/// The download will be removed, and the all data will be deleted.
 await ALDownloader.remove(url);
 await ALDownloader.removeAll;
 ```
@@ -132,7 +132,7 @@ await ALDownloader.removeAll;
 ### ALDownloaderBatcher
 
 ```
-/// batch download
+/// Batch download
 await ALDownloaderBatcher.downloadUrls(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
@@ -147,11 +147,11 @@ await ALDownloaderBatcher.downloadUrls(urls,
 ```
 
 ```
-/// summarize the download status for a set of urls
+/// Get download status for a set of urls
 final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```
 
-### ALDownloaderPersistentFileManager - persistent file management by url
+### ALDownloaderPersistentFileManager - A manager that manage persistent file by url
 
 ```
 final model = await ALDownloaderPersistentFileManager
