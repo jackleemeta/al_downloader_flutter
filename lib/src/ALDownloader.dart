@@ -249,7 +249,7 @@ class ALDownloader {
 
   /// Pause download
   ///
-  /// The downloading download will be stopped, but the incomplete data will be not deleted.
+  /// The downloading download will be stopped, but the incomplete data will not be deleted.
   ///
   /// **parameters**
   ///
@@ -459,7 +459,7 @@ class ALDownloader {
   /// Process the [FlutterDownloader]'s callback
   static void _processDataFromPort(
       String taskId, DownloadTaskStatus status, int progress) {
-    _ALDownloaderInnerStatus innerStatus = trasferStatus(status);
+    _ALDownloaderInnerStatus innerStatus = transferStatus(status);
 
     var task = _getTaskFromTaskId(taskId);
 
@@ -506,7 +506,7 @@ class ALDownloader {
         final savedDir = element.savedDir;
         final progress = element.progress;
 
-        _ALDownloaderInnerStatus innerStatus = trasferStatus(status);
+        _ALDownloaderInnerStatus innerStatus = transferStatus(status);
 
         final task = _ALDownloadTask(url);
         task.savedDir = savedDir;
@@ -729,7 +729,7 @@ class ALDownloader {
     _tasks.remove(task);
   }
 
-  static _ALDownloaderInnerStatus trasferStatus(DownloadTaskStatus status) {
+  static _ALDownloaderInnerStatus transferStatus(DownloadTaskStatus status) {
     if (status == DownloadTaskStatus.enqueued) {
       return _ALDownloaderInnerStatus.enqueued;
     } else if (status == DownloadTaskStatus.running) {

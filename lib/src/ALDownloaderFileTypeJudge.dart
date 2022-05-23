@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 
-/// A tool that file type judgment
+/// A file type judge
 class ALDownloaderFileTypeJudge {
   /// Get file type model from url
   ///

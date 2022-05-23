@@ -190,7 +190,7 @@ debugPrint(
 final isExist = await ALDownloaderPersistentFileManager
     .isExistAbsolutePhysicalPathOfFileForUrl(url);
 debugPrint(
-    "ALDownloader | 检查[url]是否存在对应物理路径, url = $url, is Exist = $isExist\n");
+    "ALDownloader | 检查[url]是否存在“物理文件路径”, url = $url, is Exist = $isExist\n");
 
 final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
 debugPrint(

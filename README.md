@@ -108,7 +108,7 @@ final progress = ALDownloader.getDownloadProgressForUrl(url);
 ```
 /// Pause
 ///
-/// The downloading download will be stopped, but the incomplete data will be not deleted.
+/// The downloading download will be stopped, but the incomplete data will not be deleted.
 await ALDownloader.pause(url);
 await ALDownloader.pauseAll;
 ```
@@ -166,7 +166,7 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
 ```
 
-### ALDownloaderPersistentFileManager - A manager that manage persistent file by url
+### ALDownloaderPersistentFileManager - A manager that manages persistent file by url
 
 ```
 final model = await ALDownloaderPersistentFileManager
@@ -192,7 +192,7 @@ debugPrint(
 final isExist = await ALDownloaderPersistentFileManager
     .isExistAbsolutePhysicalPathOfFileForUrl(url);
 debugPrint(
-    "ALDownloader | check whether [url] has a physical path, url = $url, is Exist = $isExist\n");
+    "ALDownloader | check whether [url] exists a 'physical file path', url = $url, is Exist = $isExist\n");
 
 final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
 debugPrint(

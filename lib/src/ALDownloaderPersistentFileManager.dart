@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
 
-/// A manager that manage persistent file by url
+/// A manager that manages persistent file by url
 class ALDownloaderPersistentFileManager {
   /// Get the 'physical directory path' and 'virtual/physical file name' of the file for [url]
   ///
@@ -37,7 +37,7 @@ class ALDownloaderPersistentFileManager {
     final theRootDir = await _theRootDir;
     final dirForRootToFinalLevel = theRootDir + extensionResourcePath;
 
-    await _ALDownloaderFilePathManager.tryCreateCustomDirectory(
+    await _ALDownloaderFilePathManager.tryToCreateCustomDirectory(
         dirForRootToFinalLevel,
         recursive: true);
 
@@ -138,7 +138,7 @@ class ALDownloaderPersistentFileManager {
     return null;
   }
 
-  /// Check whether [url] exists a physical path
+  /// Check whether [url] exists a 'physical file path'
   ///
   /// **parameters**
   ///
@@ -146,7 +146,7 @@ class ALDownloaderPersistentFileManager {
   ///
   /// **return**
   ///
-  /// the result whether [url] exists a physical path
+  /// the result whether [url] exists a 'physical file path'
   static Future<bool> isExistAbsolutePhysicalPathOfFileForUrl(
           String url) async =>
       await getAbsolutePhysicalPathOfFileForUrl(url) != null;
@@ -271,7 +271,7 @@ class ALDownloaderPathComponentModel {
 
 class _ALDownloaderFilePathManager {
   /// Try to create a directory.
-  static Future<Directory?> tryCreateCustomDirectory(String path,
+  static Future<Directory?> tryToCreateCustomDirectory(String path,
       {bool recursive = false}) async {
     var dir = Directory(path);
     try {

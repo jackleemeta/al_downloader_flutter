@@ -287,7 +287,7 @@ class _ALDownloaderBatcherBinder {
 
   /// Get result whether [_targetUrls] are all completed
   ///
-  /// Just completed, it may be successful or failed.
+  /// Just completed, it may be succeeded or failed.
   bool get _isCompleted {
     if (_completeKVs == null) return false;
     return _completeKVs!.length == _targetUrls.length;

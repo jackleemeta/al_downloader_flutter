@@ -211,10 +211,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /* ----------------------------------------------Method for test---------------------------------------------- */
 
-  /// Excute some methods together
+  /// Execute some methods together
   ///
   /// When executing the following methods together, try to keep them serial.
-  Future<void> excuteSomeMethodsTogether() async {
+  Future<void> executeSomeMethodsTogether() async {
     await downloadAll();
     await path();
     await download();
@@ -242,31 +242,31 @@ class _MyHomePageState extends State<MyHomePage> {
       final url = model.url;
       ALDownloader.addForeverDownloaderHandlerInterface(
           ALDownloaderHandlerInterface(progressHandler: (progress) {
-            model.status = ALDownloaderStatus.downloading;
+            debugPrint(
+                "ALDownloader | download progress = $progress, url = $url");
+
+            model.status = ALDownloader.getDownloadStatusForUrl(url);
             model.progress = progress;
 
             setState(() {});
-
-            debugPrint(
-                "ALDownloader | download progress = $progress, url = $url");
           }, succeededHandler: () {
-            model.status = ALDownloaderStatus.succeeded;
-
-            setState(() {});
-
             debugPrint("ALDownloader | download succeeded, url = $url");
+
+            model.status = ALDownloader.getDownloadStatusForUrl(url);
+
+            setState(() {});
           }, failedHandler: () {
-            model.status = ALDownloaderStatus.failed;
-
-            setState(() {});
-
             debugPrint("ALDownloader | download failed, url = $url");
-          }, pausedHandler: () {
-            model.status = ALDownloaderStatus.paused;
+
+            model.status = ALDownloader.getDownloadStatusForUrl(url);
 
             setState(() {});
-
+          }, pausedHandler: () {
             debugPrint("ALDownloader | download paused, url = $url");
+
+            model.status = ALDownloader.getDownloadStatusForUrl(url);
+
+            setState(() {});
           }),
           url);
     }
@@ -351,7 +351,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final isExist = await ALDownloaderPersistentFileManager
         .isExistAbsolutePhysicalPathOfFileForUrl(url);
     debugPrint(
-        "ALDownloader | check whether [url] has a physical path, url = $url, is Exist = $isExist\n");
+        "ALDownloader | Check whether [url] exists a 'physical file path', url = $url, is Exist = $isExist\n");
 
     final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
     debugPrint(
