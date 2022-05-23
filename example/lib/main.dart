@@ -241,30 +241,30 @@ class _MyHomePageState extends State<MyHomePage> {
     for (final model in models) {
       final url = model.url;
       ALDownloader.addForeverDownloaderHandlerInterface(
-          ALDownloaderHandlerInterface(progressHandler: (progress) {
+          ALDownloaderHandlerInterface(progressHandler: (progress) async {
             debugPrint(
                 "ALDownloader | download progress = $progress, url = $url");
 
-            model.status = ALDownloader.getDownloadStatusForUrl(url);
+            model.status = ALDownloaderStatus.downloading;
             model.progress = progress;
 
             setState(() {});
           }, succeededHandler: () {
             debugPrint("ALDownloader | download succeeded, url = $url");
 
-            model.status = ALDownloader.getDownloadStatusForUrl(url);
+            model.status = ALDownloaderStatus.succeeded;
 
             setState(() {});
           }, failedHandler: () {
             debugPrint("ALDownloader | download failed, url = $url");
 
-            model.status = ALDownloader.getDownloadStatusForUrl(url);
+            model.status = ALDownloaderStatus.failed;
 
             setState(() {});
           }, pausedHandler: () {
             debugPrint("ALDownloader | download paused, url = $url");
 
-            model.status = ALDownloader.getDownloadStatusForUrl(url);
+            model.status = ALDownloaderStatus.paused;
 
             setState(() {});
           }),
