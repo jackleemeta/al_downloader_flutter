@@ -199,7 +199,6 @@ class ALDownloader {
 
       if (status == null ||
           status == _ALDownloaderInnerStatus.prepared ||
-          status == _ALDownloaderInnerStatus.canceled ||
           status == _ALDownloaderInnerStatus.undefined ||
           status == _ALDownloaderInnerStatus.enqueued)
         alDownloaderStatus = ALDownloaderStatus.unstarted;
@@ -207,7 +206,8 @@ class ALDownloader {
         alDownloaderStatus = ALDownloaderStatus.downloading;
       else if (status == _ALDownloaderInnerStatus.paused)
         alDownloaderStatus = ALDownloaderStatus.paused;
-      else if (status == _ALDownloaderInnerStatus.failed)
+      else if (status == _ALDownloaderInnerStatus.canceled ||
+          status == _ALDownloaderInnerStatus.failed)
         alDownloaderStatus = ALDownloaderStatus.failed;
       else
         alDownloaderStatus = ALDownloaderStatus.succeeded;
@@ -476,7 +476,7 @@ class ALDownloader {
     final double_progress =
         double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
 
-    _callHandlerBusiness1(taskId, innerStatus, url, double_progress, false);
+    _callHandlerBusiness1(taskId, innerStatus, url, double_progress);
 
     if (innerStatus == _ALDownloaderInnerStatus.canceled ||
         innerStatus == _ALDownloaderInnerStatus.failed) {
@@ -525,8 +525,7 @@ class ALDownloader {
           // ignore: non_constant_identifier_names
           final double_progress =
               double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
-          _callHandlerBusiness1(
-              taskId, innerStatus, url, double_progress, true);
+          _callHandlerBusiness1(taskId, innerStatus, url, double_progress);
         }
       }
     }
@@ -546,8 +545,7 @@ class ALDownloader {
       _ALDownloaderInnerStatus innerStatus,
       String url,
       // ignore: non_constant_identifier_names
-      double double_progress,
-      bool isInitial) {
+      double double_progress) {
     if (innerStatus == _ALDownloaderInnerStatus.complete) {
       _binders.forEach((element) {
         if (element.url == url) {
@@ -579,7 +577,7 @@ class ALDownloader {
           if (failedHandler != null) failedHandler();
         }
       });
-    } else if (innerStatus == _ALDownloaderInnerStatus.running || isInitial) {
+    } else if (innerStatus == _ALDownloaderInnerStatus.running) {
       _binders.forEach((element) {
         if (element.url == url) {
           final progressHandler =
