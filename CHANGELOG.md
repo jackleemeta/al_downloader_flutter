@@ -1,3 +1,7 @@
+## 1.4.3 - May 23, 2022
+
+- bug fix
+
 ## 1.4.2 - May 23, 2022
 
 - update document

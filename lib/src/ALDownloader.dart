@@ -561,9 +561,11 @@ class ALDownloader {
     } else if (innerStatus == _ALDownloaderInnerStatus.paused) {
       _binders.forEach((element) {
         if (element.url == url) {
-          final progressHandler =
-              element.downloaderHandlerHolder.progressHandler;
-          if (progressHandler != null) progressHandler(double_progress);
+          if (double_progress > -0.01) {
+            final progressHandler =
+                element.downloaderHandlerHolder.progressHandler;
+            if (progressHandler != null) progressHandler(double_progress);
+          }
 
           final pausedHandler = element.downloaderHandlerHolder.pausedHandler;
           if (pausedHandler != null) pausedHandler();
