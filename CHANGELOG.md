@@ -1,3 +1,8 @@
+## 1.4.4 - May 26, 2022
+
+- bug fix
+- rename api
+
 ## 1.4.3 - May 23, 2022
 
 - bug fix
