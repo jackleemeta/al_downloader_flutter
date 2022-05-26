@@ -173,7 +173,7 @@ debugPrint(
     "ALDownloader | 获取[url]的“物理目录路径”和“虚拟/物理文件名”, url = $url, model = $model\n");
 
 final path2 = await ALDownloaderPersistentFileManager
-    .getAbsolutePathOfDirectoryForUrl(url);
+    .lazyGetAbsolutePathOfDirectoryForUrl(url);
 debugPrint(
     "ALDownloader | 获取[url]的“目录路径”, url = $url, path = $path2\n");
 

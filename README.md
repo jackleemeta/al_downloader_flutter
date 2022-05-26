@@ -175,7 +175,7 @@ debugPrint(
     "ALDownloader | get the 'physical directory path' and 'virtual/physical file name' of the file for [url], url = $url, model = $model\n");
 
 final path2 = await ALDownloaderPersistentFileManager
-    .getAbsolutePathOfDirectoryForUrl(url);
+    .lazyGetAbsolutePathOfDirectoryForUrl(url);
 debugPrint(
     "ALDownloader | get 'directory path' for [url], url = $url, path = $path2\n");
 

@@ -21,7 +21,7 @@ class ALDownloaderPersistentFileManager {
   /// 'physical directory path' and 'virtual/physical file name'
   static Future<ALDownloaderPathComponentModel>
       lazyGetALDownloaderPathModelForUrl(String url) async {
-    // Generate data models of file types based on urls.
+    // Generate path model by url.
     final model =
         ALDownloaderFileTypeJudge.getALDownloaderFileTypeModelFromUrl(url);
 
@@ -48,6 +48,8 @@ class ALDownloaderPersistentFileManager {
 
   /// Get 'directory path' for [url]
   ///
+  /// Create the 'physical directory path' lazily in the disk by [url] when there is no 'physical directory path'.
+  ///
   /// **parameters**
   ///
   /// [url] url
@@ -55,7 +57,7 @@ class ALDownloaderPersistentFileManager {
   /// **return**
   ///
   /// directory path
-  static Future<String> getAbsolutePathOfDirectoryForUrl(String url) async {
+  static Future<String> lazyGetAbsolutePathOfDirectoryForUrl(String url) async {
     final alDownloaderPathComponentModel =
         await lazyGetALDownloaderPathModelForUrl(url); // model
     final dirPath = alDownloaderPathComponentModel.dir;
@@ -121,23 +123,6 @@ class ALDownloaderPersistentFileManager {
     return filePath;
   }
 
-  /// Get all disk directories
-  static Future<List<String>?> get dirs async {
-    try {
-      final String theRootDir = await _theRootDir;
-
-      final List<String> aDirs = _alDownloaderFileTypeDirKVs.values
-          .map((e) => theRootDir + e)
-          .toList();
-
-      return aDirs;
-    } catch (error) {
-      debugPrint("ALDownloaderPersistentFileManager | get dirs error = $error");
-    }
-
-    return null;
-  }
-
   /// Check whether [url] exists a 'physical file path'
   ///
   /// **parameters**
@@ -181,6 +166,23 @@ class ALDownloaderPersistentFileManager {
     final theRootDir = await _theRootDir;
     final aBool = path.startsWith(theRootDir);
     return aBool;
+  }
+
+  /// Get all disk directories
+  static Future<List<String>?> get dirs async {
+    try {
+      final String theRootDir = await _theRootDir;
+
+      final List<String> aDirs = _alDownloaderFileTypeDirKVs.values
+          .map((e) => theRootDir + e)
+          .toList();
+
+      return aDirs;
+    } catch (error) {
+      debugPrint("ALDownloaderPersistentFileManager | get dirs error = $error");
+    }
+
+    return null;
   }
 
   /// Get root path
