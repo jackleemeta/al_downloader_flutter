@@ -57,7 +57,7 @@ class ALDownloader {
     if (task != null) {
       if (await _isShouldRemoveDataForSavedDir(
           task.savedDir, url, task.status)) {
-        await _innerRemove(url);
+        await _removeTaskWithoutCallHandler(task);
         task = null;
       }
     }
@@ -273,17 +273,14 @@ class ALDownloader {
               .isExistAbsolutePhysicalPathOfFileForUrl(url)) {
             await FlutterDownloader.pause(taskId: taskId);
           } else {
-            await FlutterDownloader.remove(
-                taskId: taskId, shouldDeleteContent: true);
+            await _removeTask(task);
           }
         } else {
           await FlutterDownloader.pause(taskId: taskId);
         }
       } else if (task.status == _ALDownloaderInnerStatus.undefined ||
           task.status == _ALDownloaderInnerStatus.enqueued) {
-        await FlutterDownloader.remove(
-            taskId: taskId, shouldDeleteContent: true);
-        _tasks.remove(task);
+        await _removeTask(task);
       }
     } catch (error) {
       debugPrint("ALDownloader | pause, url = $url, error = $error");
@@ -321,12 +318,10 @@ class ALDownloader {
         return;
       }
 
-      if (task.status == _ALDownloaderInnerStatus.running) {
-        await FlutterDownloader.remove(
-            taskId: task.taskId, shouldDeleteContent: true);
-      } else if (task.status == _ALDownloaderInnerStatus.undefined ||
-          task.status == _ALDownloaderInnerStatus.enqueued) {
-        await _removeDirectly(task);
+      if (task.status == _ALDownloaderInnerStatus.running ||
+          task.status == _ALDownloaderInnerStatus.enqueued ||
+          task.status == _ALDownloaderInnerStatus.undefined) {
+        await _removeTask(task);
       }
     } catch (error) {
       debugPrint("ALDownloader | cancel, url = $url, error = $error");
@@ -356,7 +351,18 @@ class ALDownloader {
     assert(_isInitial,
         "ALDownloader | ALDownloader.initialize or ALDownloader.download must be called first");
 
-    await _innerRemove(url);
+    try {
+      final task = _getTaskFromUrl(url);
+
+      if (task == null) {
+        debugPrint("ALDownloader | remove, url = $url, but url's task is null");
+        return;
+      }
+
+      await _removeTask(task);
+    } catch (error) {
+      debugPrint("ALDownloader | remove, url = $url, error = $error");
+    }
   }
 
   /// Remove all downloads
@@ -411,25 +417,28 @@ class ALDownloader {
       return;
     }
 
-    _ALDownloadTask? task;
+    bool isExistTask = false;
 
     try {
-      task = _tasks.firstWhere((element) => element.url == url);
-      if (savedDir != "") task.savedDir = savedDir;
-      task.taskId = taskId;
-      task.status = status;
-      task.progress = progress;
+      for (final element in _tasks) {
+        if (element.url == url) {
+          if (savedDir != "") element.savedDir = savedDir;
+          element.taskId = taskId;
+          element.status = status;
+          element.progress = progress;
+          if (!isExistTask) isExistTask = true;
+        }
+      }
     } catch (error) {
       debugPrint("ALDownloader | _addTaskOrUpdateTaskForUrl, error = $error");
     }
 
-    if (task == null) {
-      task = _ALDownloadTask(url);
+    if (!isExistTask) {
+      _ALDownloadTask task = _ALDownloadTask(url);
       if (savedDir != "") task.savedDir = savedDir;
       task.taskId = taskId;
       task.status = status;
       task.progress = progress;
-
       _tasks.add(task);
     }
   }
@@ -519,7 +528,7 @@ class ALDownloader {
             await _isShouldRemoveDataForSavedDir(savedDir, url, innerStatus);
         if (isShouldRemoveDataForSavedDir) {
           // If the task should be deleted, process it throught calling [_removeTaskEntirely].
-          await _removeTaskEntirely(task);
+          await _removeTask(task);
         } else {
           // If the task is normal, call back initial data when initializing.
           // ignore: non_constant_identifier_names
@@ -675,45 +684,7 @@ class ALDownloader {
     return url;
   }
 
-  static Future<void> _innerRemove(String url) async {
-    try {
-      final task = _getTaskFromUrl(url);
-
-      if (task == null) {
-        debugPrint(
-            "ALDownloader | _innerRemove, url = $url, but url's task is null");
-        return;
-      }
-
-      await _removeTaskEntirely(task);
-    } catch (error) {
-      debugPrint("ALDownloader | _innerRemove, url = $url, error = $error");
-    }
-  }
-
-  static Future<void> _removeTaskEntirely(_ALDownloadTask task) async {
-    try {
-      final status = task.status;
-      final taskId = task.taskId;
-
-      if (status == _ALDownloaderInnerStatus.running) {
-        await FlutterDownloader.remove(
-            taskId: taskId, shouldDeleteContent: true);
-      } else if (status == _ALDownloaderInnerStatus.undefined ||
-          status == _ALDownloaderInnerStatus.enqueued ||
-          status == _ALDownloaderInnerStatus.complete ||
-          status == _ALDownloaderInnerStatus.failed ||
-          status == _ALDownloaderInnerStatus.canceled ||
-          status == _ALDownloaderInnerStatus.paused) {
-        await _removeDirectly(task);
-      }
-    } catch (error) {
-      debugPrint(
-          "ALDownloader | _removeTaskEntirely, task = $task, error = $error");
-    }
-  }
-
-  static Future<void> _removeDirectly(_ALDownloadTask task) async {
+  static Future<void> _removeTask(_ALDownloadTask task) async {
     final taskId = task.taskId;
     final url = task.url;
 
@@ -729,6 +700,13 @@ class ALDownloader {
 
     _binders.removeWhere((element) => element.url == url && !element.isForever);
 
+    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
+    _tasks.remove(task);
+  }
+
+  static Future<void> _removeTaskWithoutCallHandler(
+      _ALDownloadTask task) async {
+    final taskId = task.taskId;
     await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
     _tasks.remove(task);
   }
