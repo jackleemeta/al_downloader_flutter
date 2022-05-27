@@ -192,6 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// Action
+  // ignore: unused_element
   _cancelAllAction() async {
     await ALDownloader.cancelAll();
   }
