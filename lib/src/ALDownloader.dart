@@ -63,7 +63,7 @@ class ALDownloader {
     }
 
     if (task == null) {
-      // Add a prepared task that represent placeholder.
+      // Add a prepared task to represent placeholder.
       _addTaskOrUpdateTaskForUrl(
           url, "", _ALDownloaderInnerStatus.prepared, 0, "");
 
@@ -74,7 +74,7 @@ class ALDownloader {
 
       final dir = alDownloaderPathComponentModel.dir;
 
-      // Equeued a task.
+      // Equeue a task.
       final taskId = await FlutterDownloader.enqueue(
           url: url,
           savedDir: dir,
@@ -527,7 +527,7 @@ class ALDownloader {
         final isShouldRemoveDataForSavedDir =
             await _isShouldRemoveDataForSavedDir(savedDir, url, innerStatus);
         if (isShouldRemoveDataForSavedDir) {
-          // If the task should be deleted, process it throught calling [_removeTaskEntirely].
+          // If the task should be deleted, process it throught calling [_removeTask].
           await _removeTask(task);
         } else {
           // If the task is normal, call back initial data when initializing.

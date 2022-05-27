@@ -46,7 +46,7 @@ class ALDownloaderPersistentFileManager {
     return ALDownloaderPathComponentModel(dirForRootToFirstLevel, fileName);
   }
 
-  /// Get 'directory path' for [url]
+  /// Get 'physical directory path' for [url]
   ///
   /// Create the 'physical directory path' lazily in the disk by [url] when there is no 'physical directory path'.
   ///
@@ -98,7 +98,7 @@ class ALDownloaderPersistentFileManager {
     return filePath!;
   }
 
-  /// get 'physical file path' for [url].
+  /// Get 'physical file path' for [url]
   ///
   /// Null will be returned if 'physical file path' does not exist.
   ///

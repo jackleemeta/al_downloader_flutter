@@ -177,7 +177,7 @@ debugPrint(
 final path2 = await ALDownloaderPersistentFileManager
     .lazyGetAbsolutePathOfDirectoryForUrl(url);
 debugPrint(
-    "ALDownloader | get 'directory path' for [url], url = $url, path = $path2\n");
+    "ALDownloader | get 'physical directory path' for [url], url = $url, path = $path2\n");
 
 final path3 = await ALDownloaderPersistentFileManager
     .getAbsoluteVirtualPathOfFileForUrl(url);

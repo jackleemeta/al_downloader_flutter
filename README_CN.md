@@ -175,7 +175,7 @@ debugPrint(
 final path2 = await ALDownloaderPersistentFileManager
     .lazyGetAbsolutePathOfDirectoryForUrl(url);
 debugPrint(
-    "ALDownloader | 获取[url]的“目录路径”, url = $url, path = $path2\n");
+    "ALDownloader | 获取[url]的“物理目录路径”, url = $url, path = $path2\n");
 
 final path3 = await ALDownloaderPersistentFileManager
     .getAbsoluteVirtualPathOfFileForUrl(url);

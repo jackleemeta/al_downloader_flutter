@@ -336,7 +336,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final path2 = await ALDownloaderPersistentFileManager
         .lazyGetAbsolutePathOfDirectoryForUrl(url);
     debugPrint(
-        "ALDownloader | get 'directory path' for [url], url = $url, path = $path2\n");
+        "ALDownloader | get 'physical directory path' for [url], url = $url, path = $path2\n");
 
     final path3 = await ALDownloaderPersistentFileManager
         .getAbsoluteVirtualPathOfFileForUrl(url);
@@ -351,7 +351,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final isExist = await ALDownloaderPersistentFileManager
         .isExistAbsolutePhysicalPathOfFileForUrl(url);
     debugPrint(
-        "ALDownloader | Check whether [url] exists a 'physical file path', url = $url, is Exist = $isExist\n");
+        "ALDownloader | check whether [url] exists a 'physical file path', url = $url, is Exist = $isExist\n");
 
     final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
     debugPrint(
