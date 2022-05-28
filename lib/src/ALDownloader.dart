@@ -74,7 +74,7 @@ class ALDownloader {
 
       final dir = alDownloaderPathComponentModel.dir;
 
-      // Equeue a task.
+      // Enqueue a task.
       final taskId = await FlutterDownloader.enqueue(
           url: url,
           savedDir: dir,
@@ -467,7 +467,7 @@ class ALDownloader {
       String taskId, DownloadTaskStatus status, int progress) {
     _ALDownloaderInnerStatus innerStatus = transferStatus(status);
 
-    var task = _getTaskFromTaskId(taskId);
+    final task = _getTaskFromTaskId(taskId);
 
     if (task == null) {
       debugPrint("not found task, taskId = $taskId");
