@@ -6,8 +6,8 @@ homepage: https://github.com/jackleemeta/al_downloader_flutter
 maintainer: jackleemeta (jackleemeta@outlook.com)
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=2.17.0 <3.0.0"
+  flutter: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
