@@ -1,3 +1,8 @@
+## 1.4.6 - May 28, 2022
+
+- update dependency
+- update document
+
 ## 1.4.5 - May 27, 2022
 
 - update document
