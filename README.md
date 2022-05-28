@@ -202,6 +202,8 @@ debugPrint(
 ### *Note*:
 
 *1. Method needs to add qualifier `await` when executing in a coroutine.*
+
+*For example that*
 ```
 Future<void> executeSomeMethodsTogetherSerially() async {
   await ALDownloader.initialize();

@@ -200,6 +200,8 @@ debugPrint(
 ### *提示*:
 
 *1. 在一个协程中，方法需要`await`修饰*
+
+*例如：*
 ```
 Future<void> executeSomeMethodsTogetherSerially() async {
   await ALDownloader.initialize();
