@@ -224,8 +224,8 @@ class ALDownloaderPersistentFileManager {
   };
 
   static String _getMd5StringForString(String aString) {
-    var content = Utf8Encoder().convert(aString);
-    var digest = md5.convert(content);
+    final content = Utf8Encoder().convert(aString);
+    final digest = md5.convert(content);
     return hex.encode(digest.bytes);
   }
 
@@ -275,7 +275,7 @@ class _ALDownloaderFilePathManager {
   /// Try to create a directory.
   static Future<Directory?> tryToCreateCustomDirectory(String path,
       {bool recursive = false}) async {
-    var dir = Directory(path);
+    final dir = Directory(path);
     try {
       bool exists = await dir.exists();
       if (!exists) return await dir.create(recursive: recursive);
