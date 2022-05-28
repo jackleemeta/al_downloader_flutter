@@ -199,7 +199,16 @@ debugPrint(
 
 ### *提示*:
 
-*如果持久化文件被一些异常方式删除了，比如某些业务代码删除了缓存文件夹，调用[remove]，然后调用[download]重新下载来解决这个问题*
+*1. 在一个协程中，方法需要`await`修饰*
+```
+Future<void> executeSomeMethodsTogetherSerially() async {
+  await ALDownloader.initialize();
+  await ALDownloader.remove(url);
+  await ALDownloader.download(url);
+}
+```
+
+*2. 如果持久化文件被一些异常方式删除了，比如某些业务代码删除了缓存文件夹，调用[remove]，然后调用[download]重新下载来解决这个问题*
 
 ## iOS的Example的主要文件
 

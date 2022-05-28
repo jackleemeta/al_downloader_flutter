@@ -212,14 +212,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /* ----------------------------------------------Method for test---------------------------------------------- */
 
-  /// Execute some methods together
+  /// Execute some methods together serially
   ///
   /// When executing the following methods together, try to keep them serial.
-  Future<void> executeSomeMethodsTogether() async {
-    await downloadAll();
-    await path();
-    await download();
-    status();
+  Future<void> executeSomeMethodsTogetherSerially() async {
+    final urls = models.map((e) => e.url).toList();
+    final url = urls.first;
+    await ALDownloader.initialize();
+    await ALDownloader.remove(url);
+    await ALDownloader.download(url);
   }
 
   /// Initialize

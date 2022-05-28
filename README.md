@@ -201,7 +201,16 @@ debugPrint(
 
 ### *Note*:
 
-*If the persistent file was removed by exceptional means, such as the cache folder being deleted by some business code, call [remove] and then call [download] to re-download for fixing the problem.*
+*1. Method needs to add qualifier `await` when executing in a coroutine.*
+```
+Future<void> executeSomeMethodsTogetherSerially() async {
+  await ALDownloader.initialize();
+  await ALDownloader.remove(url);
+  await ALDownloader.download(url);
+}
+```
+
+*2. If the persistent file was removed by exceptional means, such as the cache folder being deleted by some business code, call [remove] and then call [download] to re-download for fixing the problem.*
 
 ## Key File Of Example For iOS
 
