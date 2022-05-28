@@ -417,28 +417,25 @@ class ALDownloader {
       return;
     }
 
-    bool isExistTask = false;
+    _ALDownloadTask? task;
 
     try {
-      for (final element in _tasks) {
-        if (element.url == url) {
-          if (savedDir != "") element.savedDir = savedDir;
-          element.taskId = taskId;
-          element.status = status;
-          element.progress = progress;
-          if (!isExistTask) isExistTask = true;
-        }
-      }
-    } catch (error) {
-      debugPrint("ALDownloader | _addTaskOrUpdateTaskForUrl, error = $error");
-    }
-
-    if (!isExistTask) {
-      _ALDownloadTask task = _ALDownloadTask(url);
+      task = _tasks.firstWhere((element) => element.url == url);
       if (savedDir != "") task.savedDir = savedDir;
       task.taskId = taskId;
       task.status = status;
       task.progress = progress;
+    } catch (error) {
+      debugPrint("ALDownloader | _addTaskOrUpdateTaskForUrl, error = $error");
+    }
+
+    if (task == null) {
+      task = _ALDownloadTask(url);
+      if (savedDir != "") task.savedDir = savedDir;
+      task.taskId = taskId;
+      task.status = status;
+      task.progress = progress;
+
       _tasks.add(task);
     }
   }
