@@ -124,7 +124,7 @@ await ALDownloader.cancelAll;
 ```
 /// Remove
 ///
-/// The download will be removed, and the all data will be deleted.
+/// The download will be removed, and all the data will be deleted.
 await ALDownloader.remove(url);
 await ALDownloader.removeAll;
 ```

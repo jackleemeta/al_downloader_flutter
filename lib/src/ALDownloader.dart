@@ -57,15 +57,14 @@ class ALDownloader {
     if (task != null) {
       if (await _isShouldRemoveDataForSavedDir(
           task.savedDir, url, task.status)) {
-        await _removeTaskWithoutCallHandler(task);
+        await _removeTask(task);
         task = null;
       }
     }
 
     if (task == null) {
       // Add a prepared task to represent placeholder.
-      _addTaskOrUpdateTaskForUrl(
-          url, "", _ALDownloaderInnerStatus.prepared, 0, "");
+      _addOrUpdateTaskForUrl(url, "", _ALDownloaderInnerStatus.prepared, 0, "");
 
       // Get the 'physical directory path' and 'file name' of the file by url.
       final alDownloaderPathComponentModel =
@@ -82,30 +81,47 @@ class ALDownloader {
           showNotification: false,
           openFileFromNotification: false);
 
-      if (taskId != null)
-        _addTaskOrUpdateTaskForUrl(
-            url, taskId, _ALDownloaderInnerStatus.enqueued, 0, dir);
+      if (taskId != null) {
+        debugPrint(
+            "ALDownloader | try to download url, a new download task of the url generates succeeded, url = $url, taskId = $taskId, status = enqueued");
 
-      debugPrint(
-          "ALDownloader | a download task was generated, download status = enqueued, taskId = $taskId");
-    } else if (task.status == _ALDownloaderInnerStatus.failed ||
-        task.status == _ALDownloaderInnerStatus.canceled) {
+        _addOrUpdateTaskForUrl(
+            url, taskId, _ALDownloaderInnerStatus.enqueued, 0, dir);
+      } else {
+        debugPrint(
+            "ALDownloader | try to download url, but a new download task of the url generates failed, url = $url, taskId = $taskId");
+      }
+    } else if (task.status == _ALDownloaderInnerStatus.canceled ||
+        task.status == _ALDownloaderInnerStatus.failed) {
       final newTaskIdForRetry =
           await FlutterDownloader.retry(taskId: task.taskId);
       if (newTaskIdForRetry != null) {
-        debugPrint("ALDownloader | newTaskIdForRetry = $newTaskIdForRetry");
-        _addTaskOrUpdateTaskForUrl(url, newTaskIdForRetry,
+        debugPrint(
+            "ALDownloader | try to download url, the url is canceled/failed previously and downloads succeeded, url = $url, old taskId = ${task.taskId}, new taskId = $newTaskIdForRetry, status = enqueued");
+
+        _addOrUpdateTaskForUrl(url, newTaskIdForRetry,
             _ALDownloaderInnerStatus.enqueued, task.progress, "");
+      } else {
+        debugPrint(
+            "ALDownloader | try to download url, the url is canceled/failed previously but downloads failed, url = $url, old taskId = ${task.taskId}, new taskId = null");
       }
     } else if (task.status == _ALDownloaderInnerStatus.paused) {
       final newTaskIdForResume =
           await FlutterDownloader.resume(taskId: task.taskId);
-      if (newTaskIdForResume != null)
-        _addTaskOrUpdateTaskForUrl(url, newTaskIdForResume,
+      if (newTaskIdForResume != null) {
+        debugPrint(
+            "ALDownloader | try to download url, the url is paused previously and downloads succeeded, url = $url, old taskId = ${task.taskId}, new taskId = $newTaskIdForResume, status = running");
+
+        _addOrUpdateTaskForUrl(url, newTaskIdForResume,
             _ALDownloaderInnerStatus.running, task.progress, "");
+      } else {
+        debugPrint(
+            "ALDownloader | try to download url, the url is paused previously but downloads failed, url = $url, old taskId = ${task.taskId}, new taskId = null");
+      }
     } else if (task.status == _ALDownloaderInnerStatus.complete) {
       debugPrint(
-          "ALDownloader | try to download downloadtaskOfUrl = $url, url is complete");
+          "ALDownloader | try to download url, but the url is succeeded, url = $url, taskId = ${task.taskId}");
+
       _binders.forEach((element) {
         if (element.url == url) {
           final progressHandler =
@@ -128,14 +144,17 @@ class ALDownloader {
           .removeWhere((element) => element.url == url && !element.isForever);
     } else if (task.status == _ALDownloaderInnerStatus.running) {
       debugPrint(
-          "ALDownloader | try to download url = $url, but url is running");
+          "ALDownloader | try to download url, but the url is running, url = $url, taskId = ${task.taskId}");
     } else if (task.status == _ALDownloaderInnerStatus.enqueued) {
       debugPrint(
-          "ALDownloader | try to download url = $url, but url is enqueued");
+          "ALDownloader | try to download url, but the url is enqueued, url = $url, taskId = ${task.taskId}");
     } else if (task.status == _ALDownloaderInnerStatus.prepared) {
       debugPrint(
-          "ALDownloader | try to download url = $url, but url is prepared");
-    } else {}
+          "ALDownloader | try to download url, but the url is prepared, url = $url, taskId = ${task.taskId}");
+    } else {
+      debugPrint(
+          "ALDownloader | try to download url, but the url is unknown, url = $url, taskId = ${task.taskId}");
+    }
   }
 
   /// Add a downloader handler interface
@@ -273,14 +292,14 @@ class ALDownloader {
               .isExistAbsolutePhysicalPathOfFileForUrl(url)) {
             await FlutterDownloader.pause(taskId: taskId);
           } else {
-            await _removeTask(task);
+            await _removeTaskWithCallHandler(task);
           }
         } else {
           await FlutterDownloader.pause(taskId: taskId);
         }
       } else if (task.status == _ALDownloaderInnerStatus.undefined ||
           task.status == _ALDownloaderInnerStatus.enqueued) {
-        await _removeTask(task);
+        await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
       debugPrint("ALDownloader | pause, url = $url, error = $error");
@@ -321,7 +340,7 @@ class ALDownloader {
       if (task.status == _ALDownloaderInnerStatus.running ||
           task.status == _ALDownloaderInnerStatus.enqueued ||
           task.status == _ALDownloaderInnerStatus.undefined) {
-        await _removeTask(task);
+        await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
       debugPrint("ALDownloader | cancel, url = $url, error = $error");
@@ -342,7 +361,7 @@ class ALDownloader {
 
   /// Remove download
   ///
-  /// The download will be removed, and the all data will be deleted.
+  /// The download will be removed, and all the data will be deleted.
   ///
   /// **parameters**
   ///
@@ -359,7 +378,7 @@ class ALDownloader {
         return;
       }
 
-      await _removeTask(task);
+      await _removeTaskWithCallHandler(task);
     } catch (error) {
       debugPrint("ALDownloader | remove, url = $url, error = $error");
     }
@@ -377,28 +396,10 @@ class ALDownloader {
     }
   }
 
-  /// Get a completed set of key-value pairs
+  /// Get a completed set of key-value pairs which the structure is [url: succeeded/failed]
   ///
   /// Url and result(succeeded/failed) are added to the pool.
-  ///
-  /// **return**
-  ///
-  /// completed url and result(succeeded/failed) which the structure is [url: succeeded/failed]
-  static Map<String, bool> get completedKVs {
-    final Map<String, bool> aMap = {};
-    try {
-      _tasks.forEach((element) {
-        if (element.status == _ALDownloaderInnerStatus.complete) {
-          aMap[element.url] = true;
-        } else if (element.status == _ALDownloaderInnerStatus.failed) {
-          aMap[element.url] = false;
-        }
-      });
-    } catch (error) {
-      debugPrint("ALDownloader | get completedKVs error = $error");
-    }
-    return aMap;
-  }
+  static Map<String, bool> get completedKVs => _completedKVs;
 
   /// Manager custom download tasks
   ///
@@ -408,12 +409,11 @@ class ALDownloader {
   ///
   /// **discusstion**
   ///
-  /// Add a task or update the [url] mapping of the existing [taskId].
-  static void _addTaskOrUpdateTaskForUrl(String? url, String taskId,
+  /// Add or update the task for [url].
+  static void _addOrUpdateTaskForUrl(String? url, String taskId,
       _ALDownloaderInnerStatus status, int progress, String savedDir) {
     if (url == null) {
-      debugPrint(
-          "ALDownloader | _addTaskOrUpdateTaskForUrl, error = url is null");
+      debugPrint("ALDownloader | _addOrUpdateTaskForUrl, error = url is null");
       return;
     }
 
@@ -426,7 +426,7 @@ class ALDownloader {
       task.status = status;
       task.progress = progress;
     } catch (error) {
-      debugPrint("ALDownloader | _addTaskOrUpdateTaskForUrl, error = $error");
+      debugPrint("ALDownloader | _addOrUpdateTaskForUrl, error = $error");
     }
 
     if (task == null) {
@@ -476,18 +476,25 @@ class ALDownloader {
 
     final url = task.url;
 
-    _addTaskOrUpdateTaskForUrl(url, taskId, innerStatus, progress, "");
+    _addOrUpdateTaskForUrl(url, taskId, innerStatus, progress, "");
+
+    if (innerStatus == _ALDownloaderInnerStatus.complete) {
+      _completedKVs[url] = true;
+    } else if (innerStatus == _ALDownloaderInnerStatus.failed ||
+        innerStatus == _ALDownloaderInnerStatus.canceled) {
+      _completedKVs[url] = false;
+    }
+
+    if (innerStatus == _ALDownloaderInnerStatus.canceled ||
+        innerStatus == _ALDownloaderInnerStatus.failed) {
+      _tasks.remove(task);
+    }
 
     // ignore: non_constant_identifier_names
     final double_progress =
         double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
 
     _callHandlerBusiness1(taskId, innerStatus, url, double_progress);
-
-    if (innerStatus == _ALDownloaderInnerStatus.canceled ||
-        innerStatus == _ALDownloaderInnerStatus.failed) {
-      _tasks.remove(task);
-    }
 
     debugPrint(
         "ALDownloader | final | _downloadCallback, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress");
@@ -524,10 +531,17 @@ class ALDownloader {
         final isShouldRemoveDataForSavedDir =
             await _isShouldRemoveDataForSavedDir(savedDir, url, innerStatus);
         if (isShouldRemoveDataForSavedDir) {
-          // If the task should be deleted, process it throught calling [_removeTask].
-          await _removeTask(task);
+          // If the task should be deleted, call back throught calling [_removeTaskWithCallHandler].
+          await _removeTaskWithCallHandler(task);
         } else {
-          // If the task is normal, call back initial data when initializing.
+          if (innerStatus == _ALDownloaderInnerStatus.complete) {
+            _completedKVs[url] = true;
+          } else if (innerStatus == _ALDownloaderInnerStatus.failed ||
+              innerStatus == _ALDownloaderInnerStatus.canceled) {
+            _completedKVs[url] = false;
+          }
+
+          // If the task is normal, call back directly.
           // ignore: non_constant_identifier_names
           final double_progress =
               double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
@@ -681,9 +695,10 @@ class ALDownloader {
     return url;
   }
 
-  static Future<void> _removeTask(_ALDownloadTask task) async {
-    final taskId = task.taskId;
+  static Future<void> _removeTaskWithCallHandler(_ALDownloadTask task) async {
     final url = task.url;
+
+    await _removeTask(task);
 
     _binders.forEach((element) {
       if (element.url == url) {
@@ -696,16 +711,15 @@ class ALDownloader {
     });
 
     _binders.removeWhere((element) => element.url == url && !element.isForever);
-
-    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
-    _tasks.remove(task);
   }
 
-  static Future<void> _removeTaskWithoutCallHandler(
-      _ALDownloadTask task) async {
+  static Future<void> _removeTask(_ALDownloadTask task) async {
     final taskId = task.taskId;
-    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
+    final url = task.taskId;
+
+    _completedKVs[url] = false;
     _tasks.remove(task);
+    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
   }
 
   static _ALDownloaderInnerStatus transferStatus(DownloadTaskStatus status) {
@@ -734,6 +748,9 @@ class ALDownloader {
 
   /// A binder list for binding element such as url, download ininterface, forever flag and so on
   static final List<_ALDownloaderBinder> _binders = [];
+
+  /// This is same as [completedKVs], see [completedKVs]
+  static final Map<String, bool> _completedKVs = {};
 
   /// Send port key
   static final _kDownloaderSendPort = "al_downloader_send_port";
