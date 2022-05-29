@@ -62,7 +62,14 @@ class ALDownloader {
       }
     }
 
-    if (task == null) {
+    if (task == null || task.status == _ALDownloaderInnerStatus.deprecated) {
+      if (task == null) {
+        debugPrint("ALDownloader | try to download url, because task is null");
+      } else {
+        debugPrint(
+            "ALDownloader | try to download url, because task is deprecated");
+      }
+
       // Add a prepared task to represent placeholder.
       _addOrUpdateTaskForUrl(url, "", _ALDownloaderInnerStatus.prepared, 0, "");
 
@@ -280,8 +287,14 @@ class ALDownloader {
     try {
       final task = _getTaskFromUrl(url);
 
-      if (task == null) {
-        debugPrint("ALDownloader | pause, url = $url, but url's task is null");
+      if (task == null || task.status == _ALDownloaderInnerStatus.deprecated) {
+        if (task == null) {
+          debugPrint(
+              "ALDownloader | pause, url = $url, but url's task is null");
+        } else {
+          debugPrint(
+              "ALDownloader | pause, url = $url, but url's task is deprecated");
+        }
 
         _callFailedHandler(url);
       } else {
@@ -333,8 +346,14 @@ class ALDownloader {
     try {
       final task = _getTaskFromUrl(url);
 
-      if (task == null) {
-        debugPrint("ALDownloader | cancel, url = $url, but url's task is null");
+      if (task == null || task.status == _ALDownloaderInnerStatus.deprecated) {
+        if (task == null) {
+          debugPrint(
+              "ALDownloader | cancel, url = $url, but url's task is null");
+        } else {
+          debugPrint(
+              "ALDownloader | cancel, url = $url, but url's task is deprecated");
+        }
 
         _callFailedHandler(url);
       } else {
@@ -375,8 +394,14 @@ class ALDownloader {
     try {
       final task = _getTaskFromUrl(url);
 
-      if (task == null) {
-        debugPrint("ALDownloader | remove, url = $url, but url's task is null");
+      if (task == null || task.status == _ALDownloaderInnerStatus.deprecated) {
+        if (task == null) {
+          debugPrint(
+              "ALDownloader | remove, url = $url, but url's task is null");
+        } else {
+          debugPrint(
+              "ALDownloader | remove, url = $url, but url's task is deprecated");
+        }
 
         _callFailedHandler(url);
       } else {
@@ -473,7 +498,14 @@ class ALDownloader {
     final task = _getTaskFromTaskId(taskId);
 
     if (task == null) {
-      debugPrint("not found task, taskId = $taskId");
+      debugPrint(
+          "ALDownloader | _processDataFromPort | the func return, because task is not found, taskId = $taskId");
+      return;
+    }
+
+    if (task.status == _ALDownloaderInnerStatus.deprecated) {
+      debugPrint(
+          "ALDownloader | _processDataFromPort | the func return, because task is deprecated, taskId = $taskId");
       return;
     }
 
@@ -490,7 +522,7 @@ class ALDownloader {
 
     if (innerStatus == _ALDownloaderInnerStatus.canceled ||
         innerStatus == _ALDownloaderInnerStatus.failed) {
-      _tasks.remove(task);
+      task.status = _ALDownloaderInnerStatus.deprecated;
     }
 
     // ignore: non_constant_identifier_names
@@ -711,7 +743,7 @@ class ALDownloader {
     final url = task.taskId;
 
     _completedKVs[url] = false;
-    _tasks.remove(task);
+    task.status = _ALDownloaderInnerStatus.deprecated;
     await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
   }
 
@@ -796,7 +828,7 @@ class _ALDownloaderBinder {
 ///
 /// It is used to supplement some status for [DownloadTaskStatus].
 ///
-/// It has supplemented a status [prepared] at present and may supplement more status in the future.
+/// It has supplemented [prepared] and [deprecated] at present and may supplement more status in the future.
 enum _ALDownloaderInnerStatus {
   prepared,
   undefined,
@@ -805,5 +837,6 @@ enum _ALDownloaderInnerStatus {
   complete,
   failed,
   canceled,
-  paused
+  paused,
+  deprecated
 }
