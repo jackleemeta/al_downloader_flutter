@@ -226,7 +226,8 @@ class ALDownloader {
       if (status == null ||
           status == _ALDownloaderInnerStatus.prepared ||
           status == _ALDownloaderInnerStatus.undefined ||
-          status == _ALDownloaderInnerStatus.enqueued)
+          status == _ALDownloaderInnerStatus.enqueued ||
+          status == _ALDownloaderInnerStatus.deprecated)
         alDownloaderStatus = ALDownloaderStatus.unstarted;
       else if (status == _ALDownloaderInnerStatus.running)
         alDownloaderStatus = ALDownloaderStatus.downloading;
