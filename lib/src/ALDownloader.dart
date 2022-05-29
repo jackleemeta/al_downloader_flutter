@@ -282,24 +282,25 @@ class ALDownloader {
 
       if (task == null) {
         debugPrint("ALDownloader | pause, url = $url, but url's task is null");
-        return;
-      }
 
-      final taskId = task.taskId;
-      if (task.status == _ALDownloaderInnerStatus.running) {
-        if (Platform.isAndroid) {
-          if (await ALDownloaderPersistentFileManager
-              .isExistAbsolutePhysicalPathOfFileForUrl(url)) {
-            await FlutterDownloader.pause(taskId: taskId);
+        _callFailedHandler(url);
+      } else {
+        final taskId = task.taskId;
+        if (task.status == _ALDownloaderInnerStatus.running) {
+          if (Platform.isAndroid) {
+            if (await ALDownloaderPersistentFileManager
+                .isExistAbsolutePhysicalPathOfFileForUrl(url)) {
+              await FlutterDownloader.pause(taskId: taskId);
+            } else {
+              await _removeTaskWithCallHandler(task);
+            }
           } else {
-            await _removeTaskWithCallHandler(task);
+            await FlutterDownloader.pause(taskId: taskId);
           }
-        } else {
-          await FlutterDownloader.pause(taskId: taskId);
+        } else if (task.status == _ALDownloaderInnerStatus.undefined ||
+            task.status == _ALDownloaderInnerStatus.enqueued) {
+          await _removeTaskWithCallHandler(task);
         }
-      } else if (task.status == _ALDownloaderInnerStatus.undefined ||
-          task.status == _ALDownloaderInnerStatus.enqueued) {
-        await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
       debugPrint("ALDownloader | pause, url = $url, error = $error");
@@ -334,13 +335,14 @@ class ALDownloader {
 
       if (task == null) {
         debugPrint("ALDownloader | cancel, url = $url, but url's task is null");
-        return;
-      }
 
-      if (task.status == _ALDownloaderInnerStatus.running ||
-          task.status == _ALDownloaderInnerStatus.enqueued ||
-          task.status == _ALDownloaderInnerStatus.undefined) {
-        await _removeTaskWithCallHandler(task);
+        _callFailedHandler(url);
+      } else {
+        if (task.status == _ALDownloaderInnerStatus.running ||
+            task.status == _ALDownloaderInnerStatus.enqueued ||
+            task.status == _ALDownloaderInnerStatus.undefined) {
+          await _removeTaskWithCallHandler(task);
+        }
       }
     } catch (error) {
       debugPrint("ALDownloader | cancel, url = $url, error = $error");
@@ -375,10 +377,11 @@ class ALDownloader {
 
       if (task == null) {
         debugPrint("ALDownloader | remove, url = $url, but url's task is null");
-        return;
-      }
 
-      await _removeTaskWithCallHandler(task);
+        _callFailedHandler(url);
+      } else {
+        await _removeTaskWithCallHandler(task);
+      }
     } catch (error) {
       debugPrint("ALDownloader | remove, url = $url, error = $error");
     }
@@ -700,6 +703,19 @@ class ALDownloader {
 
     await _removeTask(task);
 
+    _callFailedHandler(url);
+  }
+
+  static Future<void> _removeTask(_ALDownloadTask task) async {
+    final taskId = task.taskId;
+    final url = task.taskId;
+
+    _completedKVs[url] = false;
+    _tasks.remove(task);
+    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
+  }
+
+  static void _callFailedHandler(String url) {
     _binders.forEach((element) {
       if (element.url == url) {
         final progressHandler = element.downloaderHandlerHolder.progressHandler;
@@ -711,15 +727,6 @@ class ALDownloader {
     });
 
     _binders.removeWhere((element) => element.url == url && !element.isForever);
-  }
-
-  static Future<void> _removeTask(_ALDownloadTask task) async {
-    final taskId = task.taskId;
-    final url = task.taskId;
-
-    _completedKVs[url] = false;
-    _tasks.remove(task);
-    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
   }
 
   static _ALDownloaderInnerStatus transferStatus(DownloadTaskStatus status) {
