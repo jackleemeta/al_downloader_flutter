@@ -2,6 +2,7 @@
 
 - more accurate status
 - optimize batch download
+- optimize print
 - update document
 
 ## 1.4.6 - May 28, 2022
