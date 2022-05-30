@@ -1,4 +1,12 @@
-## 1.4.7 - May 29, 2022
+## 1.4.9 - May 30, 2022
+
+- update document
+
+## 1.4.8 - May 30, 2022
+
+- update document
+
+## 1.4.7 - May 30, 2022
 
 - more accurate status
 - optimize batch download
