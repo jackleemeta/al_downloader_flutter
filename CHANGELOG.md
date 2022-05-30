@@ -1,3 +1,9 @@
+## 1.4.7 - May 29, 2022
+
+- more accurate status
+- optimize batch download
+- update document
+
 ## 1.4.6 - May 28, 2022
 
 - update dependency

@@ -64,10 +64,11 @@ class ALDownloader {
 
     if (task == null || task.status == _ALDownloaderInnerStatus.deprecated) {
       if (task == null) {
-        debugPrint("ALDownloader | try to download url, because task is null");
+        debugPrint(
+            "ALDownloader | try to download url, the url has not yet started download, url = $url, old task is null");
       } else {
         debugPrint(
-            "ALDownloader | try to download url, because task is deprecated");
+            "ALDownloader | try to download url, the url is deprecated previously, url = $url, old taskId = ${task.taskId}");
       }
 
       // Add a prepared task to represent placeholder.
@@ -104,26 +105,26 @@ class ALDownloader {
           await FlutterDownloader.retry(taskId: task.taskId);
       if (newTaskIdForRetry != null) {
         debugPrint(
-            "ALDownloader | try to download url, the url is canceled/failed previously and downloads succeeded, url = $url, old taskId = ${task.taskId}, new taskId = $newTaskIdForRetry, status = enqueued");
+            "ALDownloader | try to download url, the url is canceled/failed previously and retries succeeded, url = $url, old taskId = ${task.taskId}, new taskId = $newTaskIdForRetry, status = enqueued");
 
         _addOrUpdateTaskForUrl(url, newTaskIdForRetry,
             _ALDownloaderInnerStatus.enqueued, task.progress, "");
       } else {
         debugPrint(
-            "ALDownloader | try to download url, the url is canceled/failed previously but downloads failed, url = $url, old taskId = ${task.taskId}, new taskId = null");
+            "ALDownloader | try to download url, the url is canceled/failed previously but retries failed, url = $url, old taskId = ${task.taskId}, new taskId = null");
       }
     } else if (task.status == _ALDownloaderInnerStatus.paused) {
       final newTaskIdForResume =
           await FlutterDownloader.resume(taskId: task.taskId);
       if (newTaskIdForResume != null) {
         debugPrint(
-            "ALDownloader | try to download url, the url is paused previously and downloads succeeded, url = $url, old taskId = ${task.taskId}, new taskId = $newTaskIdForResume, status = running");
+            "ALDownloader | try to download url, the url is paused previously and resumes succeeded, url = $url, old taskId = ${task.taskId}, new taskId = $newTaskIdForResume, status = running");
 
         _addOrUpdateTaskForUrl(url, newTaskIdForResume,
             _ALDownloaderInnerStatus.running, task.progress, "");
       } else {
         debugPrint(
-            "ALDownloader | try to download url, the url is paused previously but downloads failed, url = $url, old taskId = ${task.taskId}, new taskId = null");
+            "ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, old taskId = ${task.taskId}, new taskId = null");
       }
     } else if (task.status == _ALDownloaderInnerStatus.complete) {
       debugPrint(
@@ -519,11 +520,6 @@ class ALDownloader {
     } else if (innerStatus == _ALDownloaderInnerStatus.failed ||
         innerStatus == _ALDownloaderInnerStatus.canceled) {
       _completedKVs[url] = false;
-    }
-
-    if (innerStatus == _ALDownloaderInnerStatus.canceled ||
-        innerStatus == _ALDownloaderInnerStatus.failed) {
-      task.status = _ALDownloaderInnerStatus.deprecated;
     }
 
     // ignore: non_constant_identifier_names
