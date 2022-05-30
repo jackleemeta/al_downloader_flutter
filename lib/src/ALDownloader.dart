@@ -495,6 +495,9 @@ class ALDownloader {
   /// Process the [FlutterDownloader]'s callback
   static void _processDataFromPort(
       String taskId, DownloadTaskStatus status, int progress) {
+    debugPrint(
+        "ALDownloader | original _downloadCallback, taskId = $taskId, status = $status, progress = $progress");
+
     _ALDownloaderInnerStatus innerStatus = transferStatus(status);
 
     final task = _getTaskFromTaskId(taskId);
@@ -529,7 +532,7 @@ class ALDownloader {
     _callHandlerBusiness1(taskId, innerStatus, url, double_progress);
 
     debugPrint(
-        "ALDownloader | final | _downloadCallback, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress");
+        "ALDownloader | processed _downloadCallback, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress");
   }
 
   /// Load [FlutterDownloader]'s local database task to the memory cache, and attempt to execute the tasks
