@@ -260,7 +260,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }, failedHandler: () {
             debugPrint("ALDownloader | download failed, url = $url");
 
-            model.status = ALDownloaderStatus.failed;
+            model.status = ALDownloader.getDownloadStatusForUrl(url);
 
             setState(() {});
           }, pausedHandler: () {
