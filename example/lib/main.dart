@@ -225,7 +225,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Initialize
   Future<void> initialize() async {
-    // About print.
+    // about print
     aboutPrint();
 
     // Why [downloader interface] and [downloader interface for batch] are added before ALDownloader initialized?
@@ -244,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// About print
   void aboutPrint() {
     ALDownloaderPrintConfig.enable = true;
-    ALDownloaderPrintConfig.frequentEnble = false;
+    ALDownloaderPrintConfig.frequentEnable = false;
   }
 
   /// Add a forever download handle interface

@@ -206,7 +206,7 @@ debugPrint(
 ALDownloaderPrintConfig.enable = true;
 
 /// Disable frequent print
-ALDownloaderPrintConfig.frequentEnble = false;
+ALDownloaderPrintConfig.frequentEnable = false;
 ```
 
 ### *Note*:

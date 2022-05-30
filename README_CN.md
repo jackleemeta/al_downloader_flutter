@@ -204,7 +204,7 @@ debugPrint(
 ALDownloaderPrintConfig.enable = true;
 
 /// 关闭频繁打印
-ALDownloaderPrintConfig.frequentEnble = false;
+ALDownloaderPrintConfig.frequentEnable = false;
 ```
 
 ### *提示*:
