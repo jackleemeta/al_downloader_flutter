@@ -241,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await ALDownloader.initialize();
   }
 
-  /// About Print
+  /// About print
   void aboutPrint() {
     ALDownloaderPrintConfig.enable = true;
     ALDownloaderPrintConfig.frequentEnble = false;
