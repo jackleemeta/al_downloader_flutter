@@ -225,6 +225,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Initialize
   Future<void> initialize() async {
+    // About print
+    aboutPrint();
+
     // Why [downloader interface] and [downloader interface for batch] are added before ALDownloader initialized?
     //
     // Because some downloads may download automatically when initializing, so downloader handler interface need
@@ -238,6 +241,12 @@ class _MyHomePageState extends State<MyHomePage> {
     await ALDownloader.initialize();
   }
 
+  /// About Print
+  void aboutPrint() {
+    ALDownloaderPrintConfig.enable = true;
+    ALDownloaderPrintConfig.frequentEnble = false;
+  }
+
   /// Add a forever download handle interface
   void addForeverDownloaderHandlerInterface() {
     for (final model in models) {
@@ -245,26 +254,26 @@ class _MyHomePageState extends State<MyHomePage> {
       ALDownloader.addForeverDownloaderHandlerInterface(
           ALDownloaderHandlerInterface(progressHandler: (progress) async {
             debugPrint(
-                "ALDownloader | download progress = $progress, url = $url");
+                "ALDownloader | download progress = $progress, url = $url\n");
 
             model.status = ALDownloaderStatus.downloading;
             model.progress = progress;
 
             setState(() {});
           }, succeededHandler: () {
-            debugPrint("ALDownloader | download succeeded, url = $url");
+            debugPrint("ALDownloader | download succeeded, url = $url\n");
 
             model.status = ALDownloaderStatus.succeeded;
 
             setState(() {});
           }, failedHandler: () {
-            debugPrint("ALDownloader | download failed, url = $url");
+            debugPrint("ALDownloader | download failed, url = $url\n");
 
             model.status = ALDownloader.getDownloadStatusForUrl(url);
 
             setState(() {});
           }, pausedHandler: () {
-            debugPrint("ALDownloader | download paused, url = $url");
+            debugPrint("ALDownloader | download paused, url = $url\n");
 
             model.status = ALDownloaderStatus.paused;
 
@@ -279,13 +288,13 @@ class _MyHomePageState extends State<MyHomePage> {
     final urls = models.map((e) => e.url).toList();
     ALDownloaderBatcher.addDownloaderHandlerInterface(
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | batch | download progress = $progress");
+          debugPrint("ALDownloader | batch | download progress = $progress\n");
         }, succeededHandler: () {
-          debugPrint("ALDownloader | batch | download succeeded");
+          debugPrint("ALDownloader | batch | download succeeded\n");
         }, failedHandler: () {
-          debugPrint("ALDownloader | batch | download failed");
+          debugPrint("ALDownloader | batch | download failed\n");
         }, pausedHandler: () {
-          debugPrint("ALDownloader | batch | download paused");
+          debugPrint("ALDownloader | batch | download paused\n");
         }),
         urls);
   }
@@ -299,13 +308,13 @@ class _MyHomePageState extends State<MyHomePage> {
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint(
-              "ALDownloader | download progress = $progress, url = $url");
+              "ALDownloader | download progress = $progress, url = $url\n");
         }, succeededHandler: () {
-          debugPrint("ALDownloader | download succeeded, url = $url");
+          debugPrint("ALDownloader | download succeeded, url = $url\n");
         }, failedHandler: () {
-          debugPrint("ALDownloader | download failed, url = $url");
+          debugPrint("ALDownloader | download failed, url = $url\n");
         }, pausedHandler: () {
-          debugPrint("ALDownloader | download paused, url = $url");
+          debugPrint("ALDownloader | download paused, url = $url\n");
         }));
   }
 
@@ -315,13 +324,13 @@ class _MyHomePageState extends State<MyHomePage> {
     await ALDownloaderBatcher.downloadUrls(urls,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | batch | download progress = $progress");
+          debugPrint("ALDownloader | batch | download progress = $progress\n");
         }, succeededHandler: () {
-          debugPrint("ALDownloader | batch | download succeeded");
+          debugPrint("ALDownloader | batch | download succeeded\n");
         }, failedHandler: () {
-          debugPrint("ALDownloader | batch | download failed");
+          debugPrint("ALDownloader | batch | download failed\n");
         }, pausedHandler: () {
-          debugPrint("ALDownloader | batch | download paused");
+          debugPrint("ALDownloader | batch | download paused\n");
         }));
   }
 

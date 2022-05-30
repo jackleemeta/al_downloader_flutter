@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
+import 'ALDownloaderPrint.dart';
 
 /// A file type judge
 class ALDownloaderFileTypeJudge {
@@ -26,7 +26,7 @@ class ALDownloaderFileTypeJudge {
         if (value.contains(anExtension))
           return ALDownloaderFileTypeModel(type, anExtension);
       } catch (error) {
-        debugPrint(
+        aldDebugPrint(
             "ALDownloader | getALDownloaderFileTypeModelFromUrl, type = $type, error = $error");
       }
     }

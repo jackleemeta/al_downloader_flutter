@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'ALDownloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderStatus.dart';
+import 'internal/ALDownloaderPrint.dart';
 
 /// ALDownloaderBatcher
 ///
@@ -106,12 +106,13 @@ class ALDownloaderBatcher {
     for (final url in aNonDuplicatedUrls) {
       final aDownloaderHandlerInterface =
           ALDownloaderHandlerInterface(progressHandler: (progress) {
-        debugPrint("ALDownloaderBatcher | downloading, url = $url");
+        aldDebugPrint("ALDownloaderBatcher | downloading, url = $url",
+            isFrequentPrint: true);
 
         final progressHandler = downloaderHandlerInterface?.progressHandler;
         if (progressHandler != null) progressHandler(binder.progress);
       }, succeededHandler: () {
-        debugPrint("ALDownloaderBatcher | download succeeded, url = $url");
+        aldDebugPrint("ALDownloaderBatcher | download succeeded, url = $url");
 
         binder._callBackCount++;
 
@@ -126,7 +127,7 @@ class ALDownloaderBatcher {
           }
         }
       }, failedHandler: () {
-        debugPrint("ALDownloaderBatcher | download failed, url = $url");
+        aldDebugPrint("ALDownloaderBatcher | download failed, url = $url");
 
         binder._callBackCount++;
 
@@ -135,7 +136,7 @@ class ALDownloaderBatcher {
           if (failedHandler != null) failedHandler();
         }
       }, pausedHandler: () {
-        debugPrint("ALDownloaderBatcher | download paused, url = $url");
+        aldDebugPrint("ALDownloaderBatcher | download paused, url = $url");
 
         final pausedHandler = downloaderHandlerInterface?.pausedHandler;
         if (pausedHandler != null) pausedHandler();
@@ -226,10 +227,11 @@ class _ALDownloaderBatcherBinder {
           .map((e) => e.key)
           .toList();
 
-      debugPrint("get _succeededUrls result = $aList");
+      aldDebugPrint("get _succeededUrls result = $aList",
+          isFrequentPrint: true);
     } catch (error) {
       aList = <String>[];
-      debugPrint("get _succeededUrls error = $error");
+      aldDebugPrint("get _succeededUrls error = $error");
     }
 
     return aList;
@@ -247,10 +249,13 @@ class _ALDownloaderBatcherBinder {
           .map((e) => e.key)
           .toList();
 
-      debugPrint("get _failedUrls result = $aList");
+      aldDebugPrint(
+          "_ALDownloaderBatcherBinder | get _failedUrls, result = $aList",
+          isFrequentPrint: true);
     } catch (error) {
       aList = <String>[];
-      debugPrint("get _failedUrls error = $error");
+      aldDebugPrint(
+          "_ALDownloaderBatcherBinder | get _failedUrls, error = $error");
     }
 
     return aList;
@@ -272,7 +277,7 @@ class _ALDownloaderBatcherBinder {
       }
     } catch (error) {
       aDouble = 0;
-      debugPrint("$error");
+      aldDebugPrint("_ALDownloaderBatcherBinder | get progress, $error");
     }
 
     return aDouble;

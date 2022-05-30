@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'ALDownloaderFileTypeJudge.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:crypto/crypto.dart';
 import 'package:convert/convert.dart';
+import 'internal/ALDownloaderFileTypeJudge.dart';
+import 'internal/ALDownloaderPrint.dart';
 
 /// A manager that manages persistent file by url
 class ALDownloaderPersistentFileManager {
@@ -90,9 +90,11 @@ class ALDownloaderPersistentFileManager {
 
     try {
       filePath = dirForRootToFirstLevel + fileName;
-      debugPrint("getAbsoluteVirtualPathOfFileWithUrl | filePath = $filePath");
+      aldDebugPrint(
+          "ALDownloaderPersistentFileManager | getAbsoluteVirtualPathOfFileForUrl, filePath = $filePath");
     } catch (error) {
-      debugPrint("getAbsoluteVirtualPathOfFileWithUrl | error = $error");
+      aldDebugPrint(
+          "ALDownloaderPersistentFileManager | getAbsoluteVirtualPathOfFileForUrl, error = $error");
     }
 
     return filePath!;
@@ -117,7 +119,8 @@ class ALDownloaderPersistentFileManager {
       File aFile = File(virtualfilePath); // physical file
       if (aFile.existsSync()) filePath = virtualfilePath;
     } catch (error) {
-      debugPrint("getAbsolutePhysicalPathOfFileWithUrl | error = $error");
+      aldDebugPrint(
+          "ALDownloaderPersistentFileManager | getAbsolutePhysicalPathOfFileForUrl, error = $error");
     }
 
     return filePath;
@@ -179,7 +182,8 @@ class ALDownloaderPersistentFileManager {
 
       return aDirs;
     } catch (error) {
-      debugPrint("ALDownloaderPersistentFileManager | get dirs error = $error");
+      aldDebugPrint(
+          "ALDownloaderPersistentFileManager | get dirs, error = $error");
     }
 
     return null;
@@ -195,7 +199,7 @@ class ALDownloaderPersistentFileManager {
       if (aDir == null)
         aDir = await _ALDownloaderFilePathManager.localDocumentDirectory;
     } else {
-      throw "ALDownloaderPersistentFileManager get theRootDir error: ALDownloader can not operate on current platform ${Platform.operatingSystem}";
+      throw "ALDownloaderPersistentFileManager | get _theRootDir, error = ALDownloader can not operate on current platform ${Platform.operatingSystem}";
     }
 
     return aDir;
@@ -280,8 +284,8 @@ class _ALDownloaderFilePathManager {
       bool exists = await dir.exists();
       if (!exists) return await dir.create(recursive: recursive);
     } catch (error) {
-      debugPrint(
-          "_ALDownloaderFilePathManager | tryCreateCustomDirectory error = $error");
+      aldDebugPrint(
+          "_ALDownloaderFilePathManager | tryToCreateCustomDirectory, error = $error");
     }
     return null;
   }
@@ -294,11 +298,11 @@ class _ALDownloaderFilePathManager {
       final aDir = await getApplicationDocumentsDirectory();
       aPath = aDir.path;
 
-      debugPrint(
-          "_ALDownloaderFilePathManager | get document directory: $aPath");
+      aldDebugPrint(
+          "_ALDownloaderFilePathManager | get localDocumentDirectory, directoryPath = $aPath");
     } catch (error) {
-      debugPrint(
-          "_ALDownloaderFilePathManager | get document directory error = $error");
+      aldDebugPrint(
+          "_ALDownloaderFilePathManager | get localDocumentDirectory, error = $error");
     }
     return aPath!;
   }
@@ -311,11 +315,11 @@ class _ALDownloaderFilePathManager {
       final aDir = await getTemporaryDirectory();
       aPath = aDir.path;
 
-      debugPrint(
-          "_ALDownloaderFilePathManager | get temporary directory: $aPath");
+      aldDebugPrint(
+          "_ALDownloaderFilePathManager | get localTemporaryDirectory, directoryPath = $aPath");
     } catch (error) {
-      debugPrint(
-          "_ALDownloaderFilePathManager | get temporary directory error = $error");
+      aldDebugPrint(
+          "_ALDownloaderFilePathManager | get localTemporaryDirectory, error = $error");
     }
     return aPath!;
   }
@@ -333,15 +337,15 @@ class _ALDownloaderFilePathManager {
       if (aDir != null) {
         aPath = aDir.path;
 
-        debugPrint(
-            "_ALDownloaderFilePathManager | get external storage directory: $aPath");
+        aldDebugPrint(
+            "_ALDownloaderFilePathManager | get localExternalStorageDirectory, directoryPath = $aPath");
       } else {
-        debugPrint(
-            "_ALDownloaderFilePathManager | get external storage directory: none");
+        aldDebugPrint(
+            "_ALDownloaderFilePathManager | get localExternalStorageDirectory, directoryPath = none");
       }
     } catch (error) {
-      debugPrint(
-          "_ALDownloaderFilePathManager | et external storage directory error = $error");
+      aldDebugPrint(
+          "_ALDownloaderFilePathManager | get localExternalStorageDirectory, error = $error");
     }
     return aPath;
   }
