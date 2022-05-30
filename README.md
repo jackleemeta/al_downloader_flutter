@@ -24,7 +24,7 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.4.9
+  al_downloader: ^1.5.0
 ```
 
 run the following line with your command line
@@ -47,13 +47,13 @@ await ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | download progress = $progress, url = $url");
+          "ALDownloader | download progress = $progress, url = $url\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | download succeeded, url = $url");
+      debugPrint("ALDownloader | download succeeded, url = $url\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | download failed, url = $url");
+      debugPrint("ALDownloader | download failed, url = $url\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, url = $url");
+      debugPrint("ALDownloader | download paused, url = $url\n");
     }));
 ```
 
@@ -62,13 +62,13 @@ await ALDownloader.download(url,
 ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | download progress = $progress, url = $url");
+          "ALDownloader | download progress = $progress, url = $url\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | download succeeded, url = $url");
+      debugPrint("ALDownloader | download succeeded, url = $url\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | download failed, url = $url");
+      debugPrint("ALDownloader | download failed, url = $url\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, url = $url");
+      debugPrint("ALDownloader | download paused, url = $url\n");
     }),
     url);
 ```
@@ -78,13 +78,13 @@ ALDownloader.addDownloaderHandlerInterface(
 ALDownloader.addForeverDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | download progress = $progress, url = $url");
+          "ALDownloader | download progress = $progress, url = $url\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | download succeeded, url = $url");
+      debugPrint("ALDownloader | download succeeded, url = $url\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | download failed, url = $url");
+      debugPrint("ALDownloader | download failed, url = $url\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, url = $url");
+      debugPrint("ALDownloader | download paused, url = $url\n");
     }),
     url);
 ```
@@ -136,13 +136,13 @@ await ALDownloader.removeAll;
 await ALDownloaderBatcher.downloadUrls(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | batch | download progress = $progress");
+      debugPrint("ALDownloader | batch | download progress = $progress\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | batch | download succeeded");
+      debugPrint("ALDownloader | batch | download succeeded\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | batch | download failed");
+      debugPrint("ALDownloader | batch | download failed\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | batch | download paused");
+      debugPrint("ALDownloader | batch | download paused\n");
     }));
 ```
 
@@ -150,13 +150,13 @@ await ALDownloaderBatcher.downloadUrls(urls,
 /// Add a download handle interface for batch
 ALDownloaderBatcher.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | batch | download progress = $progress");
+      debugPrint("ALDownloader | batch | download progress = $progress\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | batch | download succeeded");
+      debugPrint("ALDownloader | batch | download succeeded\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | batch | download failed");
+      debugPrint("ALDownloader | batch | download failed\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | batch | download paused");
+      debugPrint("ALDownloader | batch | download paused\n");
     }),
     urls);
 ```

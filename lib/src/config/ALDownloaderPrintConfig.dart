@@ -18,6 +18,3 @@ class ALDownloaderPrintConfig {
 
   static bool _innerFrequentEnable = true;
 }
-
-// /// ALDownloaderOther Config
-// class ALDownloaderOtherConfig {}

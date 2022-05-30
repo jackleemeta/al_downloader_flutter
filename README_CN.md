@@ -22,7 +22,7 @@
 
 ```
 dependencies:
-  al_downloader: ^1.4.9
+  al_downloader: ^1.5.0
 ```
 
 使用命令行运行下面这行代码
@@ -45,13 +45,13 @@ await ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | 下载进度 = $progress, url = $url");
+          "ALDownloader | 下载进度 = $progress, url = $url\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 下载成功, url = $url");
+      debugPrint("ALDownloader | 下载成功, url = $url\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | 下载失败, url = $url");
+      debugPrint("ALDownloader | 下载失败, url = $url\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 下载暂停, url = $url");
+      debugPrint("ALDownloader | 下载暂停, url = $url\n");
     }));
 ```
 
@@ -60,13 +60,13 @@ await ALDownloader.download(url,
 ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | 下载进度 = $progress, url = $url");
+          "ALDownloader | 下载进度 = $progress, url = $url\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 下载成功, url = $url");
+      debugPrint("ALDownloader | 下载成功, url = $url\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | 下载失败, url = $url");
+      debugPrint("ALDownloader | 下载失败, url = $url\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 下载暂停, url = $url");
+      debugPrint("ALDownloader | 下载暂停, url = $url\n");
     }),
     url);
 ```
@@ -76,13 +76,13 @@ ALDownloader.addDownloaderHandlerInterface(
 ALDownloader.addForeverDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | 下载进度 = $progress, url = $url");
+          "ALDownloader | 下载进度 = $progress, url = $url\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 下载成功, url = $url");
+      debugPrint("ALDownloader | 下载成功, url = $url\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | 下载失败, url = $url");
+      debugPrint("ALDownloader | 下载失败, url = $url\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 下载暂停, url = $url");
+      debugPrint("ALDownloader | 下载暂停, url = $url\n");
     }),
     url);
 ```
@@ -134,13 +134,13 @@ await ALDownloader.removeAll;
 await ALDownloaderBatcher.downloadUrls(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | 批量 | 下载进度 = $progress");
+      debugPrint("ALDownloader | 批量 | 下载进度 = $progress\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载成功");
+      debugPrint("ALDownloader | 批量 | 下载成功\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载失败");
+      debugPrint("ALDownloader | 批量 | 下载失败\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载暂停");
+      debugPrint("ALDownloader | 批量 | 下载暂停\n");
     }));
 ```
 
@@ -148,13 +148,13 @@ await ALDownloaderBatcher.downloadUrls(urls,
 /// 对批量下载添加一个下载句柄池
 ALDownloaderBatcher.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | 批量 | 下载进度 = $progress");
+      debugPrint("ALDownloader | 批量 | 下载进度 = $progress\n");
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载成功");
+      debugPrint("ALDownloader | 批量 | 下载成功\n");
     }, failedHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载失败");
+      debugPrint("ALDownloader | 批量 | 下载失败\n");
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载暂停");
+      debugPrint("ALDownloader | 批量 | 下载暂停\n");
     }),
     urls);
 ```
