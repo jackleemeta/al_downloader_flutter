@@ -199,6 +199,16 @@ debugPrint(
     "ALDownloader | get 'virtual/physical file name' for [url], url = $url, file name = $fileName\n");
 ```
 
+### ALDownloaderPrintConfig
+
+```
+/// Enable print
+ALDownloaderPrintConfig.enable = true;
+
+/// Disable frequent print
+ALDownloaderPrintConfig.frequentEnble = false;
+```
+
 ### *Note*:
 
 *1. Method needs to add qualifier `await` when executing in a coroutine.*

@@ -197,6 +197,16 @@ debugPrint(
     "ALDownloader | 获取[url]的“虚拟/物理文件名”, url = $url, file name = $fileName\n");
 ```
 
+### ALDownloaderPrintConfig
+
+```
+/// 开启打印
+ALDownloaderPrintConfig.enable = true;
+
+/// 关闭频繁打印
+ALDownloaderPrintConfig.frequentEnble = false;
+```
+
 ### *提示*:
 
 *1. 在一个协程中，方法需要`await`修饰*
