@@ -24,7 +24,7 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.4.7
+  al_downloader: ^1.4.8
 ```
 
 run the following line with your command line
