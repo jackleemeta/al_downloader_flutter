@@ -93,43 +93,44 @@ class ALDownloader {
 
       if (taskId != null) {
         aldDebugPrint(
-            "ALDownloader | try to download url, a new download task of the url generates succeeded, url = $url, taskId = $taskId, innerStatus = enqueued");
+            "ALDownloader | try to download url, a download task of the url generates succeeded, url = $url, taskId = $taskId, innerStatus = enqueued");
 
         _addOrUpdateTaskForUrl(
             url, taskId, _ALDownloaderInnerStatus.enqueued, 0, dir);
       } else {
         aldDebugPrint(
-            "ALDownloader | try to download url, but a new download task of the url generates failed, url = $url, taskId = null");
+            "ALDownloader | try to download url, but a download task of the url generates failed, url = $url, taskId = null");
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.canceled ||
         task.innerStatus == _ALDownloaderInnerStatus.failed) {
       final previousTaskId = task.taskId;
       final previousStatusDescription = task.innerStatus.alDescription;
 
-      final newTaskId = await FlutterDownloader.retry(taskId: task.taskId);
+      final taskIdForRetry = await FlutterDownloader.retry(taskId: task.taskId);
 
-      if (newTaskId != null) {
-        _addOrUpdateTaskForUrl(url, newTaskId,
+      if (taskIdForRetry != null) {
+        _addOrUpdateTaskForUrl(url, taskIdForRetry,
             _ALDownloaderInnerStatus.enqueued, task.progress, "");
         aldDebugPrint(
-            "ALDownloader | try to download url, the url is $previousStatusDescription previously and retries succeeded, url = $url, previous taskId = $previousTaskId, new taskId = $newTaskId, innerStatus = enqueued");
+            "ALDownloader | try to download url, the url is $previousStatusDescription previously and retries succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForRetry, innerStatus = enqueued");
       } else {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url is $previousStatusDescription previously but retries failed, url = $url, previous taskId = $previousTaskId, new taskId = null");
+            "ALDownloader | try to download url, the url is $previousStatusDescription previously but retries failed, url = $url, previous taskId = $previousTaskId, taskId = null");
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.paused) {
       final previousTaskId = task.taskId;
 
-      final newTaskId = await FlutterDownloader.resume(taskId: task.taskId);
-      if (newTaskId != null) {
+      final taskIdForResumption =
+          await FlutterDownloader.resume(taskId: task.taskId);
+      if (taskIdForResumption != null) {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url is paused previously and resumes succeeded, url = $url, previous taskId = $previousTaskId, new taskId = $newTaskId, innerStatus = running");
+            "ALDownloader | try to download url, the url is paused previously and resumes succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForResumption, innerStatus = running");
 
-        _addOrUpdateTaskForUrl(url, newTaskId, _ALDownloaderInnerStatus.running,
-            task.progress, "");
+        _addOrUpdateTaskForUrl(url, taskIdForResumption,
+            _ALDownloaderInnerStatus.running, task.progress, "");
       } else {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, new taskId = null");
+            "ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, taskId = null");
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.complete) {
       aldDebugPrint(
