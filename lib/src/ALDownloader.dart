@@ -67,10 +67,10 @@ class ALDownloader {
         task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
       if (task == null) {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url has not yet started download, url = $url, old task = null");
+            "ALDownloader | try to download url, the url is initial, url = $url, taskId = null");
       } else {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url is deprecated previously, url = $url, old taskId = ${task.taskId}");
+            "ALDownloader | try to download url, the url is deprecated, url = $url, taskId = ${task.taskId}");
       }
 
       // Add a prepared task to represent placeholder.
@@ -103,30 +103,33 @@ class ALDownloader {
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.canceled ||
         task.innerStatus == _ALDownloaderInnerStatus.failed) {
-      final newTaskIdForRetry =
-          await FlutterDownloader.retry(taskId: task.taskId);
-      if (newTaskIdForRetry != null) {
-        aldDebugPrint(
-            "ALDownloader | try to download url, the url is canceled/failed previously and retries succeeded, url = $url, old taskId = ${task.taskId}, new taskId = $newTaskIdForRetry, innerStatus = enqueued");
+      final previousTaskId = task.taskId;
+      final previousStatusDescription = task.innerStatus.alDescription;
 
-        _addOrUpdateTaskForUrl(url, newTaskIdForRetry,
+      final newTaskId = await FlutterDownloader.retry(taskId: task.taskId);
+
+      if (newTaskId != null) {
+        _addOrUpdateTaskForUrl(url, newTaskId,
             _ALDownloaderInnerStatus.enqueued, task.progress, "");
+        aldDebugPrint(
+            "ALDownloader | try to download url, the url is $previousStatusDescription previously and retries succeeded, url = $url, previous taskId = $previousTaskId, new taskId = $newTaskId, innerStatus = enqueued");
       } else {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url is canceled/failed previously but retries failed, url = $url, old taskId = ${task.taskId}, new taskId = null");
+            "ALDownloader | try to download url, the url is $previousStatusDescription previously but retries failed, url = $url, previous taskId = $previousTaskId, new taskId = null");
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.paused) {
-      final newTaskIdForResume =
-          await FlutterDownloader.resume(taskId: task.taskId);
-      if (newTaskIdForResume != null) {
-        aldDebugPrint(
-            "ALDownloader | try to download url, the url is paused previously and resumes succeeded, url = $url, old taskId = ${task.taskId}, new taskId = $newTaskIdForResume, innerStatus = running");
+      final previousTaskId = task.taskId;
 
-        _addOrUpdateTaskForUrl(url, newTaskIdForResume,
-            _ALDownloaderInnerStatus.running, task.progress, "");
+      final newTaskId = await FlutterDownloader.resume(taskId: task.taskId);
+      if (newTaskId != null) {
+        aldDebugPrint(
+            "ALDownloader | try to download url, the url is paused previously and resumes succeeded, url = $url, previous taskId = $previousTaskId, new taskId = $newTaskId, innerStatus = running");
+
+        _addOrUpdateTaskForUrl(url, newTaskId, _ALDownloaderInnerStatus.running,
+            task.progress, "");
       } else {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, old taskId = ${task.taskId}, new taskId = null");
+            "ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, new taskId = null");
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.complete) {
       aldDebugPrint(
@@ -681,7 +684,7 @@ class ALDownloader {
   static Future<bool> _isInRootPathForPath(String path) async {
     if (path == "") return false;
 
-    // for deleting old version's data
+    // Delete previous versions's data.
     if (path.contains("/flutter/al_")) return false;
 
     final isSavedDirInRootPath =
@@ -848,4 +851,19 @@ enum _ALDownloaderInnerStatus {
   canceled,
   paused,
   deprecated
+}
+
+/// An enumeration extension of inner status
+extension _ALDownloaderInnerStatusExtension on _ALDownloaderInnerStatus {
+  String get alDescription => const [
+        "prepared",
+        "undefined",
+        "enqueued",
+        "running",
+        "complete",
+        "failed",
+        "canceled",
+        "paused",
+        "deprecated"
+      ][index];
 }
