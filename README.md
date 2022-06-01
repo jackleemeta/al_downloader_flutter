@@ -97,7 +97,7 @@ ALDownloader.removeDownloaderHandlerInterfaceForAll;
 
 ```
 /// Get download status
-ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
+final status = ALDownloader.getDownloadStatusForUrl(url);
 ```
 
 ```
