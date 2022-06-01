@@ -796,7 +796,7 @@ class ALDownloader {
   /// Custom download tasks
   static final List<_ALDownloadTask> _tasks = [];
 
-  /// A binder list for binding element such as url, download ininterface, forever flag and so on
+  /// A binder list for binding element such as url, downloader interface, forever flag and so on
   static final List<_ALDownloaderBinder> _binders = [];
 
   /// This is same as [completedKVs], see [completedKVs]
@@ -827,7 +827,7 @@ class _ALDownloadTask {
   _ALDownloadTask(this.url);
 }
 
-/// A binder for binding element of url and download ininterface
+/// A binder for binding element of url and downloader interface
 ///
 /// It may bind more elements in the future.
 class _ALDownloaderBinder {

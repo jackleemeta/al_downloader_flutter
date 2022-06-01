@@ -211,7 +211,7 @@ class ALDownloaderBatcher {
   ALDownloaderBatcher._();
 }
 
-/// A binder for binding some elements such as url, download ininterface and so on for ALDownloaderBatcher
+/// A binder for binding some elements such as url, downloader interface and so on for ALDownloaderBatcher
 class _ALDownloaderBatcherBinder {
   /// Get result whether [_targetUrls] are all succeeded
   bool get _isSucceeded => _succeededUrls.length == _targetUrls.length;
