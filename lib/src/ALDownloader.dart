@@ -296,7 +296,7 @@ class ALDownloader {
               "ALDownloader | pause, url = $url, but url's task is null");
         } else {
           aldDebugPrint(
-              "ALDownloader | pause, url = $url, but url's task is deprecated");
+              "ALDownloader | pause, url = $url, but url is deprecated");
         }
 
         _callFailedHandler(url);
@@ -355,7 +355,7 @@ class ALDownloader {
               "ALDownloader | cancel, url = $url, but url's task is null");
         } else {
           aldDebugPrint(
-              "ALDownloader | cancel, url = $url, but url's task is deprecated");
+              "ALDownloader | cancel, url = $url, but url is deprecated");
         }
 
         _callFailedHandler(url);
@@ -403,7 +403,7 @@ class ALDownloader {
               "ALDownloader | remove, url = $url, but url's task is null");
         } else {
           aldDebugPrint(
-              "ALDownloader | remove, url = $url, but url's task is deprecated");
+              "ALDownloader | remove, url = $url, but url is deprecated");
         }
 
         _callFailedHandler(url);
