@@ -209,7 +209,7 @@ ALDownloaderPrintConfig.enable = true;
 ALDownloaderPrintConfig.frequentEnable = false;
 ```
 
-### *Note*:
+## *Note*:
 
 *1. Method needs to add qualifier `await` when executing in a coroutine.*
 
@@ -224,13 +224,15 @@ Future<void> executeSomeMethodsTogetherSerially() async {
 
 *2. If the persistent file was removed by exceptional means, such as the cache folder being deleted by some business code, call [remove] and then call [download] to re-download for fixing the problem.*
 
-## Key File Of Example For iOS
+## Key File Of Example
+
+### iOS
 
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AppDelegate.swift](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/AppDelegate.swift)
 - [Info.plist](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/Info.plist)
 
-## Key File Of Example For Android
+### Android
 
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AndroidManifest.xml](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/android/app/src/main/AndroidManifest.xml)

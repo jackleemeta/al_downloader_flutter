@@ -207,7 +207,7 @@ ALDownloaderPrintConfig.enable = true;
 ALDownloaderPrintConfig.frequentEnable = false;
 ```
 
-### *提示*:
+## *提示*:
 
 *1. 在一个协程中，方法需要`await`修饰*
 
@@ -222,13 +222,15 @@ Future<void> executeSomeMethodsTogetherSerially() async {
 
 *2. 如果持久化文件被一些异常方式删除了，比如某些业务代码删除了缓存文件夹，调用[remove]，然后调用[download]重新下载来解决这个问题*
 
-## iOS的Example的主要文件
+## Example的主要文件
+
+### iOS
 
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AppDelegate.swift](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/AppDelegate.swift)
 - [Info.plist](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/ios/Runner/Info.plist)
 
-## Android的Example的主要文件
+### Android
 
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AndroidManifest.xml](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/android/app/src/main/AndroidManifest.xml)
