@@ -342,7 +342,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final model = await ALDownloaderPersistentFileManager
         .lazyGetALDownloaderPathModelForUrl(url);
     debugPrint(
-        "ALDownloader | get the 'physical directory path' and 'virtual/physical file name' of the file for [url], url = $url, model = $model\n");
+        "ALDownloader | get 'physical directory path' and 'virtual/physical file name' of the file for [url], url = $url, model = $model\n");
 
     final path2 = await ALDownloaderPersistentFileManager
         .lazyGetAbsolutePathOfDirectoryForUrl(url);

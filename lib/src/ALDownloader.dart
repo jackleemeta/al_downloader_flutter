@@ -75,7 +75,7 @@ class ALDownloader {
       // Add a prepared task to represent placeholder.
       _addOrUpdateTaskForUrl(url, "", _ALDownloaderInnerStatus.prepared, 0, "");
 
-      // Get the 'physical directory path' and 'file name' of the file by url.
+      // Get 'physical directory path' and 'file name' of the file by url.
       final alDownloaderPathComponentModel =
           await ALDownloaderPersistentFileManager
               .lazyGetALDownloaderPathModelForUrl(url);

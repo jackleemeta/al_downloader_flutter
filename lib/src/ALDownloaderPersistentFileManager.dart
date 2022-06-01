@@ -8,7 +8,7 @@ import 'internal/ALDownloaderPrint.dart';
 
 /// A manager that manages persistent file by url
 class ALDownloaderPersistentFileManager {
-  /// Get the 'physical directory path' and 'virtual/physical file name' of the file for [url]
+  /// Get 'physical directory path' and 'virtual/physical file name' of the file for [url]
   ///
   /// Create the 'physical directory path' lazily in the disk by [url] when there is no 'physical directory path'.
   ///
