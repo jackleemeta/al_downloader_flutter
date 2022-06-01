@@ -762,7 +762,7 @@ class ALDownloader {
     _binders.forEach((element) {
       if (element.url == url) {
         final progressHandler = element.downloaderHandlerHolder.progressHandler;
-        if (progressHandler != null) progressHandler(-0.01);
+        if (progressHandler != null) progressHandler(0);
 
         final failedHandler = element.downloaderHandlerHolder.failedHandler;
         if (failedHandler != null) failedHandler();
