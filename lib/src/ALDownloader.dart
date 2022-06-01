@@ -56,8 +56,7 @@ class ALDownloader {
     var task = _getTaskFromUrl(url);
 
     if (task != null) {
-      if (await _isShouldRemoveDataForSavedDir(
-          task.savedDir, url, task.innerStatus)) {
+      if (await _isShouldRemoveData(task.savedDir, url, task.innerStatus)) {
         await _removeTask(task);
         task = null;
       }
@@ -575,7 +574,7 @@ class ALDownloader {
         _tasks.add(task);
 
         final isShouldRemoveDataForSavedDir =
-            await _isShouldRemoveDataForSavedDir(
+            await _isShouldRemoveDataForInitialization(
                 task.savedDir, task.url, task.innerStatus);
         if (isShouldRemoveDataForSavedDir) {
           // If the task should be deleted, call back throught calling [_removeTaskWithCallHandler].
@@ -667,8 +666,32 @@ class ALDownloader {
     }
   }
 
-  /// Verify the savedDir to determine whether to delete data
-  static Future<bool> _isShouldRemoveDataForSavedDir(
+  /// Verify data and then determine whether to delete data from disk
+  ///
+  /// for initialization
+  static Future<bool> _isShouldRemoveDataForInitialization(
+      String savedDir, String url, _ALDownloaderInnerStatus innerStatus) async {
+    if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
+    if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
+    bool aBool;
+    if (innerStatus == _ALDownloaderInnerStatus.complete) {
+      aBool = !(await ALDownloaderPersistentFileManager
+          .isExistAbsolutePhysicalPathOfFileForUrl(url));
+    } else {
+      aBool = false;
+    }
+
+    if (!aBool)
+      aBool = Platform.isIOS &&
+          (innerStatus == _ALDownloaderInnerStatus.undefined ||
+              innerStatus == _ALDownloaderInnerStatus.enqueued ||
+              innerStatus == _ALDownloaderInnerStatus.running);
+
+    return aBool;
+  }
+
+  /// Verify data and then determine whether to delete data from disk
+  static Future<bool> _isShouldRemoveData(
       String savedDir, String url, _ALDownloaderInnerStatus innerStatus) async {
     if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
