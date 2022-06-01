@@ -66,7 +66,7 @@ class ALDownloader {
     if (task == null || task.status == _ALDownloaderInnerStatus.deprecated) {
       if (task == null) {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url has not yet started download, url = $url, old task is null");
+            "ALDownloader | try to download url, the url has not yet started download, url = $url, old task = null");
       } else {
         aldDebugPrint(
             "ALDownloader | try to download url, the url is deprecated previously, url = $url, old taskId = ${task.taskId}");
@@ -98,7 +98,7 @@ class ALDownloader {
             url, taskId, _ALDownloaderInnerStatus.enqueued, 0, dir);
       } else {
         aldDebugPrint(
-            "ALDownloader | try to download url, but a new download task of the url generates failed, url = $url, taskId = $taskId");
+            "ALDownloader | try to download url, but a new download task of the url generates failed, url = $url, taskId = null");
       }
     } else if (task.status == _ALDownloaderInnerStatus.canceled ||
         task.status == _ALDownloaderInnerStatus.failed) {
