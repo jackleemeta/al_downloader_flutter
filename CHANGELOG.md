@@ -1,3 +1,7 @@
+## 1.5.2 - June 1, 2022
+
+- optimization
+
 ## 1.5.1 - June 1, 2022
 
 - optimize failed scenario
