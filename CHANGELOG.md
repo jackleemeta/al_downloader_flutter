@@ -1,4 +1,4 @@
-## 1.5.1 - May 30, 2022
+## 1.5.1 - June 1, 2022
 
 - optimize failed scenario
 - optimize print
