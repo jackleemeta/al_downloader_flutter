@@ -228,7 +228,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // about print
     aboutPrint();
 
-    // Why [downloader interface] and [downloader interface for batch] are added before ALDownloader initialized?
+    // Why [downloader handler interface] and [downloader handler interface for batch] are added before ALDownloader initialized?
     //
     // Because some downloads may download automatically when initializing, downloader handler interface needs
     // to be added before initialization to ensure that receive the information in the handler first time.
@@ -247,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ALDownloaderPrintConfig.frequentEnable = false;
   }
 
-  /// Add a forever download handle interface
+  /// Add a forever downloader handler interface
   void addForeverDownloaderHandlerInterface() {
     for (final model in models) {
       final url = model.url;
@@ -283,7 +283,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  /// Add a download handle interface for batch
+  /// Add a downloader handler interface for batch
   void addBatchDownloaderHandlerInterface() {
     final urls = models.map((e) => e.url).toList();
     ALDownloaderBatcher.addDownloaderHandlerInterface(

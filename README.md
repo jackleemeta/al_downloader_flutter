@@ -24,7 +24,7 @@ add the following line to your pubspec.yaml
 
 ```
 dependencies:
-  al_downloader: ^1.5.2
+  al_downloader: ^1.5.3
 ```
 
 run the following line with your command line
@@ -147,7 +147,7 @@ await ALDownloaderBatcher.downloadUrls(urls,
 ```
 
 ```
-/// Add a download handle interface for batch
+/// Add a downloader handler interface for batch
 ALDownloaderBatcher.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint("ALDownloader | batch | download progress = $progress\n");
