@@ -1,3 +1,8 @@
+## 1.5.5
+
+- make Android and iOS consistent
+- update document
+
 ## 1.5.4
 
 - update document
