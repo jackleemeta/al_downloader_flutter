@@ -252,7 +252,7 @@ class _MyHomePageState extends State<MyHomePage> {
     for (final model in models) {
       final url = model.url;
       ALDownloader.addForeverDownloaderHandlerInterface(
-          ALDownloaderHandlerInterface(progressHandler: (progress) async {
+          ALDownloaderHandlerInterface(progressHandler: (progress) {
             debugPrint(
                 "ALDownloader | download progress = $progress, url = $url\n");
 
