@@ -301,7 +301,7 @@ class _ALDownloaderBatcherBinder {
   /// A set of completed key-value pairs of [ALDownloader]
   Map<String, bool> get _completeKVs => ALDownloader.completedKVs;
 
-  /// Urls that need to be downloaded
+  /// Urls that need to download
   final List<String> _targetUrls;
 
   /// Privatize constructor

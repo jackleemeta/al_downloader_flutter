@@ -23,7 +23,7 @@ class ALDownloader {
       // Register the isolate communication service.
       _addIsolateNameServerPortService();
 
-      // Extract all current tasks from database and execute the tasks that need to be executed.
+      // Extract all current tasks from database and execute the tasks that need to execute.
       await _loadAndTryToRunTask();
 
       // a dirty flag that guarantees that this scope is executed only once
