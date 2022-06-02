@@ -92,7 +92,6 @@ ALDownloader.addForeverDownloaderHandlerInterface(
 ```
 /// Remove downloader handler interface
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
-ALDownloader.removeDownloaderHandlerInterfaceForAll;
 ```
 
 ```

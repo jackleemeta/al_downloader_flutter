@@ -90,7 +90,6 @@ ALDownloader.addForeverDownloaderHandlerInterface(
 ```
 /// 移除下载句柄池
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
-ALDownloader.removeDownloaderHandlerInterfaceForAll;
 ```
 
 ```
