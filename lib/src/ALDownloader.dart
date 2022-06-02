@@ -507,7 +507,7 @@ class ALDownloader {
   static void _processDataFromPort(
       String taskId, DownloadTaskStatus originalStatus, int progress) {
     aldDebugPrint(
-        "ALDownloader | original _downloadCallback, taskId = $taskId, original status = $originalStatus, original progress = $progress",
+        "ALDownloader | _processDataFromPort | original, taskId = $taskId, original status = $originalStatus, original progress = $progress",
         isFrequentPrint: true);
 
     _ALDownloaderInnerStatus innerStatus = transferStatus(originalStatus);
@@ -516,13 +516,13 @@ class ALDownloader {
 
     if (task == null) {
       aldDebugPrint(
-          "ALDownloader | _processDataFromPort | the func return, because task is not found, taskId = $taskId");
+          "ALDownloader | _processDataFromPort, the func return, because task is not found, taskId = $taskId");
       return;
     }
 
     if (task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
       aldDebugPrint(
-          "ALDownloader | _processDataFromPort | the func return, because task is deprecated, taskId = $taskId");
+          "ALDownloader | _processDataFromPort, the func return, because task is deprecated, taskId = $taskId");
       return;
     }
 
@@ -544,7 +544,7 @@ class ALDownloader {
     _callHandlerBusiness1(taskId, url, innerStatus, double_progress);
 
     aldDebugPrint(
-        "ALDownloader | processed _downloadCallback, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress",
+        "ALDownloader | _processDataFromPort | processed, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress",
         isFrequentPrint: true);
   }
 
