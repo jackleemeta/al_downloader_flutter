@@ -104,27 +104,24 @@ final progress = ALDownloader.getDownloadProgressForUrl(url);
 ```
 
 ```
-/// 暂停
+/// 暂停下载
 ///
-/// 停止正在下载的任务，不删除未下载完成的数据
+/// 停止下载，不删除未下载完成的数据
 await ALDownloader.pause(url);
-await ALDownloader.pauseAll;
 ```
 
 ```
-/// 取消
+/// 取消下载
 ///
-/// 停止正在下载的任务，删除未下载完成的数据
+/// 停止下载，删除未下载完成的数据
 await ALDownloader.cancel(url);
-await ALDownloader.cancelAll;
 ```
 
 ```
-/// 移除
+/// 移除下载
 ///
-/// 删除任务，删除所有数据
+/// 删除下载，删除所有数据
 await ALDownloader.remove(url);
-await ALDownloader.removeAll;
 ```
 
 ### ALDownloaderBatcher

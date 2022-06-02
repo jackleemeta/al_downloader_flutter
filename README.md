@@ -106,27 +106,24 @@ final progress = ALDownloader.getDownloadProgressForUrl(url);
 ```
 
 ```
-/// Pause
+/// Pause download
 ///
-/// The downloading download will be stopped, but the incomplete data will not be deleted.
+/// Stop download, but the incomplete data will not be deleted.
 await ALDownloader.pause(url);
-await ALDownloader.pauseAll;
 ```
 
 ```
-/// Cancel
+/// Cancel download
 ///
-/// The downloading download will be stopped, and the incomplete data will be deleted.
+/// Stop download, and the incomplete data will be deleted.
 await ALDownloader.cancel(url);
-await ALDownloader.cancelAll;
 ```
 
 ```
-/// Remove
+/// Remove download
 ///
-/// The download will be removed, and all the data will be deleted.
+/// Remove download, and all the data will be deleted.
 await ALDownloader.remove(url);
-await ALDownloader.removeAll;
 ```
 
 ### ALDownloaderBatcher

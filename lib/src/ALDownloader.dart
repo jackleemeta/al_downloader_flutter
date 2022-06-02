@@ -284,7 +284,7 @@ class ALDownloader {
 
   /// Pause download
   ///
-  /// The downloading download will be stopped, but the incomplete data will not be deleted.
+  /// Stop download, but the incomplete data will not be deleted.
   ///
   /// **parameters**
   ///
@@ -344,7 +344,7 @@ class ALDownloader {
 
   /// Cancel download
   ///
-  /// The downloading download will be stopped, and the incomplete data will be deleted.
+  /// Stop download, and the incomplete data will be deleted.
   ///
   /// **parameters**
   ///
@@ -393,7 +393,7 @@ class ALDownloader {
 
   /// Remove download
   ///
-  /// The download will be removed, and all the data will be deleted.
+  /// Remove download, and all the data will be deleted.
   ///
   /// **parameters**
   ///

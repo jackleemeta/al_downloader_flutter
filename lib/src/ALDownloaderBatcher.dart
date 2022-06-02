@@ -159,7 +159,7 @@ class ALDownloaderBatcher {
         ALDownloader.removeDownloaderHandlerInterfaceForUrl(element));
   }
 
-  /// Pause download
+  /// Pause downloads
   ///
   /// This is a multiple of [ALDownloader.pause], see [ALDownloader.pause].
   ///
@@ -172,7 +172,7 @@ class ALDownloaderBatcher {
     for (final url in aNonDuplicatedUrls) await ALDownloader.pause(url);
   }
 
-  /// Cancel download
+  /// Cancel downloads
   ///
   /// This is a multiple of [ALDownloader.cancel], see [ALDownloader.cancel].
   ///
@@ -185,7 +185,7 @@ class ALDownloaderBatcher {
     for (final url in aNonDuplicatedUrls) await ALDownloader.cancel(url);
   }
 
-  /// Remove download
+  /// Remove downloads
   ///
   /// This is a multiple of [ALDownloader.remove], see [ALDownloader.remove].
   ///
@@ -198,7 +198,7 @@ class ALDownloaderBatcher {
     for (final url in aNonDuplicatedUrls) await ALDownloader.remove(url);
   }
 
-  // Remove duplicated urls
+  /// Remove duplicated urls
   static List<String> _getNonDuplicatedUrlsFromUrls(List<String> urls) {
     final aNonDuplicatedUrls = <String>[];
     for (final element in urls) {

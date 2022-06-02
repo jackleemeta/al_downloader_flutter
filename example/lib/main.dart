@@ -386,7 +386,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
-    ALDownloaderStatus status = ALDownloader.getDownloadStatusForUrl(url);
+    final status = ALDownloader.getDownloadStatusForUrl(url);
     debugPrint(
         "ALDownloader | get download status for [url], url = $url, status= $status\n");
   }
