@@ -14,6 +14,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		C4990EBDB31E3A962A5FCC39 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E39C693ECF3B32FAF2A3B55F /* Pods_Runner.framework */; };
+		F1CD8C61284872AA00A009B8 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = F1CD8C60284872AA00A009B8 /* libsqlite3.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -47,6 +48,7 @@
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E39C693ECF3B32FAF2A3B55F /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1CD8C60284872AA00A009B8 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1CD8C61284872AA00A009B8 /* libsqlite3.tbd in Frameworks */,
 				C4990EBDB31E3A962A5FCC39 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -64,6 +67,7 @@
 		49D630B754EA43A3C522E9FC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F1CD8C60284872AA00A009B8 /* libsqlite3.tbd */,
 				E39C693ECF3B32FAF2A3B55F /* Pods_Runner.framework */,
 			);
 			name = Frameworks;
