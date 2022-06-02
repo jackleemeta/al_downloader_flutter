@@ -682,10 +682,9 @@ class ALDownloader {
     }
 
     if (!aBool)
-      aBool = Platform.isIOS &&
-          (innerStatus == _ALDownloaderInnerStatus.undefined ||
-              innerStatus == _ALDownloaderInnerStatus.enqueued ||
-              innerStatus == _ALDownloaderInnerStatus.running);
+      aBool = innerStatus == _ALDownloaderInnerStatus.undefined ||
+          innerStatus == _ALDownloaderInnerStatus.enqueued ||
+          innerStatus == _ALDownloaderInnerStatus.running;
 
     return aBool;
   }
