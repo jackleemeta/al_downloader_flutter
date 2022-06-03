@@ -136,6 +136,15 @@ class ALDownloaderBatcher {
             }
           },
           failedHandler: () {
+            final progress = binder._progress;
+
+            aldDebugPrint(
+                "ALDownloaderBatcher | download progress = $progress, current url = $url",
+                isFrequentPrint: true);
+
+            final progressHandler = downloaderHandlerInterface?.progressHandler;
+            if (progressHandler != null) progressHandler(progress);
+
             binder._callBackCount++;
 
             if (binder._isCallBackCompleted) {
