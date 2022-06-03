@@ -773,7 +773,7 @@ class ALDownloader {
 
   static Future<void> _removeTask(_ALDownloadTask task) async {
     final taskId = task.taskId;
-    final url = task.taskId;
+    final url = task.url;
 
     _completedKVs[url] = false;
     task.innerStatus = _ALDownloaderInnerStatus.deprecated;
