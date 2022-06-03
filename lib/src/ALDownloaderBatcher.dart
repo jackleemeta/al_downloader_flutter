@@ -109,7 +109,7 @@ class ALDownloaderBatcher {
         final aProgress = binder.progress;
 
         aldDebugPrint(
-            "ALDownloaderBatcher | progress = $aProgress, progress for url = $progress, url = $url",
+            "ALDownloaderBatcher | download progress = $aProgress, download progress for url = $progress, url = $url",
             isFrequentPrint: true);
 
         final progressHandler = downloaderHandlerInterface?.progressHandler;
