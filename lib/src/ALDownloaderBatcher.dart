@@ -104,46 +104,55 @@ class ALDownloaderBatcher {
     final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
 
     for (final url in aNonDuplicatedUrls) {
-      final aDownloaderHandlerInterface =
-          ALDownloaderHandlerInterface(progressHandler: (progress) {
-        final aProgress = binder.progress;
+      final aDownloaderHandlerInterface = ALDownloaderHandlerInterface(
+          progressHandler: (progress) {},
+          succeededHandler: () {
+            final progress = binder.progress;
 
-        aldDebugPrint(
-            "ALDownloaderBatcher | download progress = $aProgress, download progress for url = $progress, url = $url",
-            isFrequentPrint: true);
+            aldDebugPrint(
+                "ALDownloaderBatcher | download progress = $progress, current url = $url",
+                isFrequentPrint: true);
 
-        final progressHandler = downloaderHandlerInterface?.progressHandler;
-        if (progressHandler != null) progressHandler(aProgress);
-      }, succeededHandler: () {
-        aldDebugPrint("ALDownloaderBatcher | download succeeded, url = $url");
+            final progressHandler = downloaderHandlerInterface?.progressHandler;
+            if (progressHandler != null) progressHandler(progress);
 
-        binder._callBackCount++;
+            binder._callBackCount++;
 
-        if (binder._isCallBackCompleted) {
-          if (binder._isSucceeded) {
-            final succeededHandler =
-                downloaderHandlerInterface?.succeededHandler;
-            if (succeededHandler != null) succeededHandler();
-          } else {
-            final failedHandler = downloaderHandlerInterface?.failedHandler;
-            if (failedHandler != null) failedHandler();
-          }
-        }
-      }, failedHandler: () {
-        aldDebugPrint("ALDownloaderBatcher | download failed, url = $url");
+            if (binder._isCallBackCompleted) {
+              if (binder._isSucceeded) {
+                aldDebugPrint(
+                    "ALDownloaderBatcher | download succeeded, urls = $urls");
 
-        binder._callBackCount++;
+                final succeededHandler =
+                    downloaderHandlerInterface?.succeededHandler;
+                if (succeededHandler != null) succeededHandler();
+              } else {
+                aldDebugPrint(
+                    "ALDownloaderBatcher | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
 
-        if (binder._isCallBackCompleted) {
-          final failedHandler = downloaderHandlerInterface?.failedHandler;
-          if (failedHandler != null) failedHandler();
-        }
-      }, pausedHandler: () {
-        aldDebugPrint("ALDownloaderBatcher | download paused, url = $url");
+                final failedHandler = downloaderHandlerInterface?.failedHandler;
+                if (failedHandler != null) failedHandler();
+              }
+            }
+          },
+          failedHandler: () {
+            binder._callBackCount++;
 
-        final pausedHandler = downloaderHandlerInterface?.pausedHandler;
-        if (pausedHandler != null) pausedHandler();
-      });
+            if (binder._isCallBackCompleted) {
+              aldDebugPrint(
+                  "ALDownloaderBatcher | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
+
+              final failedHandler = downloaderHandlerInterface?.failedHandler;
+              if (failedHandler != null) failedHandler();
+            }
+          },
+          pausedHandler: () {
+            aldDebugPrint(
+                "ALDownloaderBatcher | download paused, current url = $url");
+
+            final pausedHandler = downloaderHandlerInterface?.pausedHandler;
+            if (pausedHandler != null) pausedHandler();
+          });
 
       ALDownloader.addDownloaderHandlerInterface(
           aDownloaderHandlerInterface, url);
@@ -230,11 +239,13 @@ class _ALDownloaderBatcherBinder {
           .map((e) => e.key)
           .toList();
 
-      aldDebugPrint("get _succeededUrls result = $aList",
+      aldDebugPrint(
+          "_ALDownloaderBatcherBinder | get _succeededUrls, result = $aList",
           isFrequentPrint: true);
     } catch (error) {
       aList = <String>[];
-      aldDebugPrint("get _succeededUrls error = $error");
+      aldDebugPrint(
+          "_ALDownloaderBatcherBinder | get _succeededUrls, error = $error");
     }
 
     return aList;
