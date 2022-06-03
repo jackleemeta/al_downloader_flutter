@@ -83,7 +83,7 @@ class ALDownloaderBatcher {
   static double getProgressForUrls(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
     final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
-    final progress = binder.progress;
+    final progress = binder._progress;
     return progress;
   }
 
@@ -107,7 +107,7 @@ class ALDownloaderBatcher {
       final aDownloaderHandlerInterface = ALDownloaderHandlerInterface(
           progressHandler: (progress) {},
           succeededHandler: () {
-            final progress = binder.progress;
+            final progress = binder._progress;
 
             aldDebugPrint(
                 "ALDownloaderBatcher | download progress = $progress, current url = $url",
@@ -278,7 +278,7 @@ class _ALDownloaderBatcherBinder {
   /// Get progress
   ///
   /// progress = number of succeeded urls / number of all urls
-  double get progress {
+  double get _progress {
     double aDouble = 0;
 
     try {
