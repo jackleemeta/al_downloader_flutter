@@ -1,3 +1,9 @@
+## 1.5.6
+
+- fix bug
+- optimize batch download
+- update document
+
 ## 1.5.5
 
 - make Android and iOS consistent
