@@ -106,14 +106,14 @@ class ALDownloaderBatcher {
     for (final url in aNonDuplicatedUrls) {
       final aDownloaderHandlerInterface =
           ALDownloaderHandlerInterface(progressHandler: (progress) {
-        final batchDownloadProgress = binder.progress;
+        final aProgress = binder.progress;
 
         aldDebugPrint(
-            "ALDownloaderBatcher | batch download progress = $batchDownloadProgress, progress = $progress url = $url",
+            "ALDownloaderBatcher | progress = $aProgress, progress for url = $progress, url = $url",
             isFrequentPrint: true);
 
         final progressHandler = downloaderHandlerInterface?.progressHandler;
-        if (progressHandler != null) progressHandler(batchDownloadProgress);
+        if (progressHandler != null) progressHandler(aProgress);
       }, succeededHandler: () {
         aldDebugPrint("ALDownloaderBatcher | download succeeded, url = $url");
 
