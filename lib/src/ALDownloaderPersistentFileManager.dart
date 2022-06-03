@@ -165,7 +165,7 @@ class ALDownloaderPersistentFileManager {
   /// **return**
   ///
   /// the result whether [path] is in the root path
-  static Future<bool> isInRootPathWithPath(String path) async {
+  static Future<bool> isInRootPathForPath(String path) async {
     final theRootDir = await _theRootDir;
     final aBool = path.startsWith(theRootDir);
     return aBool;

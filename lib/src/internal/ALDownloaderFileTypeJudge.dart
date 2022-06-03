@@ -105,6 +105,11 @@ enum ALDownloaderFileType { common, image, audio, video, other, unknown }
 /// A class of file type model
 class ALDownloaderFileTypeModel {
   ALDownloaderFileTypeModel(this.type, this.description);
+
   ALDownloaderFileType type = ALDownloaderFileType.unknown;
-  String? description; // e.g. mp4、json、webp、wav
+
+  /// Description
+  ///
+  /// e.g. mp4、json、webp、wav
+  String? description;
 }

@@ -510,7 +510,7 @@ class ALDownloader {
         "ALDownloader | _processDataFromPort | original, taskId = $taskId, original status = $originalStatus, original progress = $progress",
         isFrequentPrint: true);
 
-    _ALDownloaderInnerStatus innerStatus = transferStatus(originalStatus);
+    _ALDownloaderInnerStatus innerStatus = _transferStatus(originalStatus);
 
     final task = _getTaskFromTaskId(taskId);
 
@@ -569,7 +569,7 @@ class ALDownloader {
         final task = _ALDownloadTask(originalUrl);
         task.taskId = originalTaskId;
         task.savedDir = originalSavedDir;
-        task.innerStatus = transferStatus(originalStatus);
+        task.innerStatus = _transferStatus(originalStatus);
         task.progress = originalProgress;
         _tasks.add(task);
 
@@ -711,7 +711,7 @@ class ALDownloader {
     if (path.contains("/flutter/al_")) return false;
 
     final isSavedDirInRootPath =
-        await ALDownloaderPersistentFileManager.isInRootPathWithPath(path);
+        await ALDownloaderPersistentFileManager.isInRootPathForPath(path);
 
     return isSavedDirInRootPath;
   }
@@ -794,7 +794,7 @@ class ALDownloader {
     _binders.removeWhere((element) => element.url == url && !element.isForever);
   }
 
-  static _ALDownloaderInnerStatus transferStatus(DownloadTaskStatus status) {
+  static _ALDownloaderInnerStatus _transferStatus(DownloadTaskStatus status) {
     if (status == DownloadTaskStatus.enqueued) {
       return _ALDownloaderInnerStatus.enqueued;
     } else if (status == DownloadTaskStatus.running) {
