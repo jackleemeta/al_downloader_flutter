@@ -18,7 +18,7 @@ class ALDownloader {
       await FlutterDownloader.initialize(debug: false, ignoreSsl: true);
 
       // Register FlutterDownloader callback.
-      FlutterDownloader.registerCallback(_downloadCallback);
+      FlutterDownloader.registerCallback(_downloadCallback, step: 1);
 
       // Register the isolate communication service.
       _addIsolateNameServerPortService();
