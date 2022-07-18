@@ -243,8 +243,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// About print
   void aboutPrint() {
-    ALDownloaderPrintConfig.enable = true;
-    ALDownloaderPrintConfig.frequentEnable = false;
+    ALDownloaderPrintConfig.enabled = true;
+    ALDownloaderPrintConfig.frequentEnabled = false;
   }
 
   /// Add a forever downloader handler interface

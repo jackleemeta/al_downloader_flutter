@@ -217,7 +217,7 @@ class ALDownloaderPersistentFileManager {
     return sb.toString();
   }
 
-  /// A set of key-value pairs which type and file path
+  /// A set of key-value pairs for type and file path
   static final _alDownloaderFileTypeDirKVs = {
     ALDownloaderFileType.common: _kExtensionCommonFilePath,
     ALDownloaderFileType.image: _kExtensionImageFilePath,
@@ -276,7 +276,7 @@ class ALDownloaderPathComponentModel {
 }
 
 class _ALDownloaderFilePathManager {
-  /// Try to create a directory.
+  /// Try to create a directory
   static Future<Directory?> tryToCreateCustomDirectory(String path,
       {bool recursive = false}) async {
     final dir = Directory(path);

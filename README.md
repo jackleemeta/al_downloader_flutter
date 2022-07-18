@@ -199,10 +199,10 @@ debugPrint(
 
 ```
 /// Enable print
-ALDownloaderPrintConfig.enable = true;
+ALDownloaderPrintConfig.enabled = true;
 
 /// Disable frequent print
-ALDownloaderPrintConfig.frequentEnable = false;
+ALDownloaderPrintConfig.frequentEnabled = false;
 ```
 
 ## *Note*:

@@ -311,7 +311,7 @@ class _ALDownloaderBatcherBinder {
   /// If it is equal to [_targetUrls.length], represent all the call back completed.
   int _callBackCount = 0;
 
-  /// Check whether all the call back completed.
+  /// Check whether all the call back completed
   bool get _isCallBackCompleted => _callBackCount == _targetUrls.length;
 
   /// Get result whether [_targetUrls] are all completed

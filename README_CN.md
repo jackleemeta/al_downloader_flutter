@@ -197,10 +197,10 @@ debugPrint(
 
 ```
 /// 开启打印
-ALDownloaderPrintConfig.enable = true;
+ALDownloaderPrintConfig.enabled = true;
 
 /// 关闭频繁打印
-ALDownloaderPrintConfig.frequentEnable = false;
+ALDownloaderPrintConfig.frequentEnabled = false;
 ```
 
 ## *提示*:

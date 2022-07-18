@@ -1,20 +1,20 @@
 /// ALDownloaderPrint Config
 class ALDownloaderPrintConfig {
   /// Get/Set whether enable print
-  static bool enable = true;
+  static bool enabled = true;
 
   /// Get whether enable frequent print
   ///
-  /// If [enable] is false, [frequentEnable] is also false.
-  static bool get frequentEnable {
-    if (!enable) return false;
-    return _innerFrequentEnable;
+  /// If [enabled] is false, [frequentEnabled] is also false.
+  static bool get frequentEnabled {
+    if (!enabled) return false;
+    return _innerFrequentEnabled;
   }
 
   /// Set whether enable frequent print
-  static set frequentEnable(bool value) {
-    _innerFrequentEnable = value;
+  static set frequentEnabled(bool value) {
+    _innerFrequentEnabled = value;
   }
 
-  static bool _innerFrequentEnable = true;
+  static bool _innerFrequentEnabled = true;
 }

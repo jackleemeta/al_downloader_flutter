@@ -9,9 +9,9 @@ import '../config/ALDownloaderPrintConfig.dart';
 ///
 /// [isFrequentPrint] a tag for frequent print
 void aldDebugPrint(String? message, {bool isFrequentPrint = false}) {
-  if (!ALDownloaderPrintConfig.enable) return;
+  if (!ALDownloaderPrintConfig.enabled) return;
 
-  if (isFrequentPrint && !ALDownloaderPrintConfig.frequentEnable) return;
+  if (isFrequentPrint && !ALDownloaderPrintConfig.frequentEnabled) return;
 
   final aMessage = "$message\n";
 
