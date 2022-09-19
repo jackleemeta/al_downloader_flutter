@@ -17,11 +17,11 @@ class ALDownloader {
       // Initialize flutterDownloader.
       await FlutterDownloader.initialize(debug: false, ignoreSsl: true);
 
-      // Register FlutterDownloader callback.
-      FlutterDownloader.registerCallback(_downloadCallback, step: 1);
-
       // Register the isolate communication service.
       _addIsolateNameServerPortService();
+
+      // Register FlutterDownloader callback.
+      await FlutterDownloader.registerCallback(_downloadCallback, step: 1);
 
       // Extract all current tasks from database and execute the tasks that need to execute.
       await _loadAndTryToRunTask();
@@ -496,6 +496,7 @@ class ALDownloader {
   }
 
   /// The callback binded by [FlutterDownloader]
+  @pragma('vm:entry-point')
   static void _downloadCallback(
       String taskId, DownloadTaskStatus originalStatus, int progress) {
     final SendPort? send =

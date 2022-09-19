@@ -13,7 +13,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_downloader: ^1.8.1
+  flutter_downloader: ^1.8.4
   path_provider: ^2.0.9
   convert: ^3.0.1
   crypto: ^3.0.1
