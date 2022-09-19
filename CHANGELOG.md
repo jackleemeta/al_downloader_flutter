@@ -1,3 +1,7 @@
+## 1.5.9
+
+- update document
+
 ## 1.5.8
 
 - add annotation @pragma('vm:entry-point')
