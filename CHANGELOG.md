@@ -1,3 +1,8 @@
+## 1.5.8
+
+- add annotation @pragma('vm:entry-point')
+- update dependency
+
 ## 1.5.7
 
 - update dependency
