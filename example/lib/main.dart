@@ -76,13 +76,13 @@ class _MyHomePageState extends State<MyHomePage> {
                             padding: const EdgeInsets.all(0),
                             minWidth: 20,
                             height: 50,
+                            color: Colors.blue,
+                            textTheme: ButtonTextTheme.primary,
+                            onPressed: e[1],
                             child: Text(
                               e[0],
                               style: const TextStyle(fontSize: 10),
                             ),
-                            color: Colors.blue,
-                            textTheme: ButtonTextTheme.primary,
-                            onPressed: e[1],
                           ),
                         )))
                     .toList()))
