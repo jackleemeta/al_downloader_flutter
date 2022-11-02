@@ -1,6 +1,7 @@
 ## 1.6.1
 
 - update dependency
+- update example
 
 ## 1.6.0
 
