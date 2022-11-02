@@ -1,3 +1,7 @@
+## 1.6.1
+
+- update dependency
+
 ## 1.6.0
 
 - fix bug
