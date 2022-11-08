@@ -116,9 +116,9 @@ class ALDownloaderBatcher {
             final progressHandler = downloaderHandlerInterface?.progressHandler;
             if (progressHandler != null) progressHandler(progress);
 
-            binder._callBackCount++;
+            binder._completedCallBackCount++;
 
-            if (binder._isCallBackCompleted) {
+            if (binder._isCallBacksCompleted) {
               if (binder._isSucceeded) {
                 aldDebugPrint(
                     "ALDownloaderBatcher | download succeeded, urls = $urls");
@@ -145,9 +145,9 @@ class ALDownloaderBatcher {
             final progressHandler = downloaderHandlerInterface?.progressHandler;
             if (progressHandler != null) progressHandler(progress);
 
-            binder._callBackCount++;
+            binder._completedCallBackCount++;
 
-            if (binder._isCallBackCompleted) {
+            if (binder._isCallBacksCompleted) {
               aldDebugPrint(
                   "ALDownloaderBatcher | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
 
@@ -156,11 +156,19 @@ class ALDownloaderBatcher {
             }
           },
           pausedHandler: () {
-            aldDebugPrint(
-                "ALDownloaderBatcher | download paused, current url = $url");
+            if (!binder._isDownloading) {
+              if (!binder._isIgnoreUnnecessaryPauseCallBack) {
+                aldDebugPrint(
+                    "ALDownloaderBatcher | download paused, all the targetUrls are not downloading, the targetUrls = ${binder._targetUrls}, the paused urls = ${binder._pausedUrls}, the last paused url = $url");
 
-            final pausedHandler = downloaderHandlerInterface?.pausedHandler;
-            if (pausedHandler != null) pausedHandler();
+                binder._isIgnoreUnnecessaryPauseCallBack = true;
+
+                final pausedHandler = downloaderHandlerInterface?.pausedHandler;
+                if (pausedHandler != null) pausedHandler();
+              }
+            } else {
+              binder._isIgnoreUnnecessaryPauseCallBack = false;
+            }
           });
 
       ALDownloader.addDownloaderHandlerInterface(
@@ -242,7 +250,7 @@ class _ALDownloaderBatcherBinder {
     List<String> aList;
 
     try {
-      aList = _completeKVs.entries
+      aList = _allCompletedKVs.entries
           .where(
               (element) => element.value && _targetUrls.contains(element.key))
           .map((e) => e.key)
@@ -266,7 +274,7 @@ class _ALDownloaderBatcherBinder {
     List<String> aList;
 
     try {
-      aList = _completeKVs.entries
+      aList = _allCompletedKVs.entries
           .where(
               (element) => !element.value && _targetUrls.contains(element.key))
           .map((e) => e.key)
@@ -306,23 +314,41 @@ class _ALDownloaderBatcherBinder {
     return aDouble;
   }
 
-  /// Get succeeded/failed call back count
+  /// Whether exist downloading url
+  bool get _isDownloading {
+    for (final element in _targetUrls) {
+      final status = ALDownloader.getDownloadStatusForUrl(element);
+      if (status == ALDownloaderStatus.downloading) return true;
+    }
+
+    return false;
+  }
+
+  /// The paused urls among [_targetUrls]
+  List<String> get _pausedUrls {
+    final aList = <String>[];
+    for (final element in _targetUrls) {
+      final status = ALDownloader.getDownloadStatusForUrl(element);
+      if (status == ALDownloaderStatus.paused) aList.add(element);
+    }
+
+    return aList;
+  }
+
+  /// Whether ignore unnecessary pause call back
+  bool _isIgnoreUnnecessaryPauseCallBack = false;
+
+  /// Get completed(succeeded/failed) call back count
   ///
   /// If it is equal to [_targetUrls.length], represent all the call back completed.
-  int _callBackCount = 0;
+  int _completedCallBackCount = 0;
 
   /// Check whether all the call back completed
-  bool get _isCallBackCompleted => _callBackCount == _targetUrls.length;
-
-  /// Get result whether [_targetUrls] are all completed
-  ///
-  /// Just completed, it may be succeeded or failed.
-  // ignore: unused_element
-  bool get _isCompleted =>
-      _completeKVs.keys.toSet().containsAll(_targetUrls.toSet());
+  bool get _isCallBacksCompleted =>
+      _completedCallBackCount == _targetUrls.length;
 
   /// A set of completed key-value pairs of [ALDownloader]
-  Map<String, bool> get _completeKVs => ALDownloader.completedKVs;
+  Map<String, bool> get _allCompletedKVs => ALDownloader.completedKVs;
 
   /// Urls that need to download
   final List<String> _targetUrls;

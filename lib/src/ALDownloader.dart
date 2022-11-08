@@ -322,7 +322,7 @@ class ALDownloader {
           }
         } else if (task.innerStatus == _ALDownloaderInnerStatus.undefined ||
             task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
-          await _removeTaskWithCallHandler(task);
+          await _removeTask(task);
         }
       }
     } catch (error) {
@@ -578,8 +578,7 @@ class ALDownloader {
             await _isShouldRemoveDataForInitialization(
                 task.savedDir, task.url, task.innerStatus);
         if (isShouldRemoveDataForSavedDir) {
-          // If the task should be deleted, call back throught calling [_removeTaskWithCallHandler].
-          await _removeTaskWithCallHandler(task);
+          await _removeTask(task);
         } else {
           if (task.innerStatus == _ALDownloaderInnerStatus.complete) {
             _completedKVs[task.url] = true;
@@ -587,7 +586,17 @@ class ALDownloader {
               task.innerStatus == _ALDownloaderInnerStatus.canceled) {
             _completedKVs[task.url] = false;
           }
+        }
 
+        aldDebugPrint(
+            "ALDownloader | _loadAndTryToRunTask, url = ${task.url}, taskId = ${task.taskId}, innerStatus = ${task.innerStatus}, isShouldRemoveDataForSavedDir = $isShouldRemoveDataForSavedDir");
+      }
+
+      aldDebugPrint(
+          "ALDownloader | _loadAndTryToRunTask, tasks length = ${_tasks.length}");
+
+      for (final task in _tasks) {
+        if (task.innerStatus != _ALDownloaderInnerStatus.deprecated) {
           // If the task is normal, call back directly.
           // ignore: non_constant_identifier_names
           final double_progress =
@@ -595,14 +604,8 @@ class ALDownloader {
           _callHandlerBusiness1(
               task.taskId, task.url, task.innerStatus, double_progress);
         }
-
-        aldDebugPrint(
-            "ALDownloader | _loadAndTryToRunTask, url = ${task.url}, taskId = ${task.taskId}, innerStatus = ${task.innerStatus}, isShouldRemoveDataForSavedDir = $isShouldRemoveDataForSavedDir");
       }
     }
-
-    aldDebugPrint(
-        "ALDownloader | _loadAndTryToRunTask, tasks length = ${_tasks.length}");
   }
 
   /// Process business 1 for call handler
@@ -675,7 +678,8 @@ class ALDownloader {
     if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
     bool aBool;
-    if (innerStatus == _ALDownloaderInnerStatus.complete) {
+    if (innerStatus == _ALDownloaderInnerStatus.paused ||
+        innerStatus == _ALDownloaderInnerStatus.complete) {
       aBool = !(await ALDownloaderPersistentFileManager
           .isExistAbsolutePhysicalPathOfFileForUrl(url));
     } else {
@@ -695,7 +699,8 @@ class ALDownloader {
       String savedDir, String url, _ALDownloaderInnerStatus innerStatus) async {
     if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
-    if (innerStatus == _ALDownloaderInnerStatus.complete) {
+    if (innerStatus == _ALDownloaderInnerStatus.paused ||
+        innerStatus == _ALDownloaderInnerStatus.complete) {
       final aBool = await ALDownloaderPersistentFileManager
           .isExistAbsolutePhysicalPathOfFileForUrl(url);
       return !aBool;
