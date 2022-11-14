@@ -1,6 +1,7 @@
 ## 1.6.2
 
 - optimize pause
+- update dependency
 
 ## 1.6.1
 
