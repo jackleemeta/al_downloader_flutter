@@ -1,3 +1,12 @@
+## 1.6.4
+
+- update document
+
+## 1.6.3
+
+- optimize status and progress
+- update document
+
 ## 1.6.2
 
 - optimize pause
