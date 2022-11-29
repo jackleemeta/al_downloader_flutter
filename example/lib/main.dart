@@ -228,10 +228,10 @@ class _MyHomePageState extends State<MyHomePage> {
     // about print
     aboutPrint();
 
-    // Why [downloader handler interface] and [downloader handler interface for batch] are added before ALDownloader initialized?
+    // Why [downloader handler interface] and [downloader handler interface for batch] are added before ALDownloader initialization?
     //
-    // Because some downloads may download automatically when initializing, downloader handler interface needs
-    // to be added before initialization to ensure that receive the information in the handler first time.
+    // Because some information may call back synchronously when initializing, [interface] being added before initialization can
+    // ensure receiving the information in the [interface] first time.
 
     // It is for download. It is a forever interface.
     addForeverDownloaderHandlerInterface();
