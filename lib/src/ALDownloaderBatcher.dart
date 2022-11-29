@@ -37,12 +37,12 @@ class ALDownloaderBatcher {
   /// **return**
   ///
   /// [ALDownloaderStatus] download status
-  static ALDownloaderStatus getDownloadStatusForUrls(List<String> urls) {
+  static ALDownloaderStatus getStatusForUrls(List<String> urls) {
     final Map<String, ALDownloaderStatus> aMap = {};
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     for (final url in aNonDuplicatedUrls) {
-      final aStatus = ALDownloader.getDownloadStatusForUrl(url);
+      final aStatus = ALDownloader.getStatusForUrl(url);
 
       if (aStatus == ALDownloaderStatus.downloading) {
         // Contain downloading task.
@@ -317,7 +317,7 @@ class _ALDownloaderBatcherBinder {
   /// Whether exist downloading url
   bool get _isDownloading {
     for (final element in _targetUrls) {
-      final status = ALDownloader.getDownloadStatusForUrl(element);
+      final status = ALDownloader.getStatusForUrl(element);
       if (status == ALDownloaderStatus.downloading) return true;
     }
 
@@ -328,7 +328,7 @@ class _ALDownloaderBatcherBinder {
   List<String> get _pausedUrls {
     final aList = <String>[];
     for (final element in _targetUrls) {
-      final status = ALDownloader.getDownloadStatusForUrl(element);
+      final status = ALDownloader.getStatusForUrl(element);
       if (status == ALDownloaderStatus.paused) aList.add(element);
     }
 

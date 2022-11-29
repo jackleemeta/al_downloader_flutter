@@ -96,12 +96,12 @@ ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 
 ```
 /// Get download status
-final status = ALDownloader.getDownloadStatusForUrl(url);
+final status = ALDownloader.getStatusForUrl(url);
 ```
 
 ```
 /// Get download progress
-final progress = ALDownloader.getDownloadProgressForUrl(url);
+final progress = ALDownloader.getProgressForUrl(url);
 ```
 
 ```
@@ -159,7 +159,7 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 
 ```
 /// Get download status for a set of urls
-final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
+final status = ALDownloaderBatcher.getStatusForUrls(urls);
 ```
 
 ### ALDownloaderPersistentFileManager - A manager that manages persistent file by url

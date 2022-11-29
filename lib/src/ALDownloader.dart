@@ -63,13 +63,14 @@ class ALDownloader {
     }
 
     if (task == null ||
+        task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
         task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
       if (task == null) {
         aldDebugPrint(
             "ALDownloader | try to download url, the url is initial, url = $url, taskId = null");
       } else {
         aldDebugPrint(
-            "ALDownloader | try to download url, the url is deprecated, url = $url, taskId = ${task.taskId}");
+            "ALDownloader | try to download url, the url is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}");
       }
 
       // Add a prepared task to represent placeholder.
@@ -96,10 +97,23 @@ class ALDownloader {
 
         _addOrUpdateTaskForUrl(
             url, taskId, _ALDownloaderInnerStatus.enqueued, 0, dir);
+
+        _callProgressHandler(url, 0);
       } else {
         aldDebugPrint(
             "ALDownloader | try to download url, but a download task of the url generates failed, url = $url, taskId = null");
       }
+    } else if (task.innerStatus == _ALDownloaderInnerStatus.complete) {
+      aldDebugPrint(
+          "ALDownloader | try to download url, but the url is succeeded, url = $url, taskId = ${task.taskId}");
+
+      // ignore: non_constant_identifier_names
+      final int_progress = task.progress;
+      // ignore: non_constant_identifier_names
+      final double_progress =
+          double.tryParse(((int_progress / 100).toStringAsFixed(2))) ?? 0;
+
+      _callSucceededHandler(url, double_progress);
     } else if (task.innerStatus == _ALDownloaderInnerStatus.canceled ||
         task.innerStatus == _ALDownloaderInnerStatus.failed) {
       final previousTaskId = task.taskId;
@@ -108,8 +122,17 @@ class ALDownloader {
       final taskIdForRetry = await FlutterDownloader.retry(taskId: task.taskId);
 
       if (taskIdForRetry != null) {
+        final progress = task.progress;
+
         _addOrUpdateTaskForUrl(url, taskIdForRetry,
-            _ALDownloaderInnerStatus.enqueued, task.progress, "");
+            _ALDownloaderInnerStatus.enqueued, progress, "");
+
+        // ignore: non_constant_identifier_names
+        final double_progress =
+            double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
+
+        _callProgressHandler(url, double_progress);
+
         aldDebugPrint(
             "ALDownloader | try to download url, the url is $previousStatusDescription previously and retries succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForRetry, innerStatus = enqueued");
       } else {
@@ -131,42 +154,9 @@ class ALDownloader {
         aldDebugPrint(
             "ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, taskId = null");
       }
-    } else if (task.innerStatus == _ALDownloaderInnerStatus.complete) {
-      aldDebugPrint(
-          "ALDownloader | try to download url, but the url is succeeded, url = $url, taskId = ${task.taskId}");
-
-      _binders.forEach((element) {
-        if (element.url == url) {
-          final progressHandler =
-              element.downloaderHandlerHolder.progressHandler;
-          if (progressHandler != null) {
-            // ignore: non_constant_identifier_names
-            final int_progress = task == null ? 0 : task.progress;
-            // ignore: non_constant_identifier_names
-            final double_progress =
-                double.tryParse(((int_progress / 100).toStringAsFixed(2))) ?? 0;
-            progressHandler(double_progress);
-          }
-
-          final succeededHandler =
-              element.downloaderHandlerHolder.succeededHandler;
-          if (succeededHandler != null) succeededHandler();
-        }
-      });
-      _binders
-          .removeWhere((element) => element.url == url && !element.isForever);
-    } else if (task.innerStatus == _ALDownloaderInnerStatus.running) {
-      aldDebugPrint(
-          "ALDownloader | try to download url, but the url is running, url = $url, taskId = ${task.taskId}");
-    } else if (task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
-      aldDebugPrint(
-          "ALDownloader | try to download url, but the url is enqueued, url = $url, taskId = ${task.taskId}");
-    } else if (task.innerStatus == _ALDownloaderInnerStatus.prepared) {
-      aldDebugPrint(
-          "ALDownloader | try to download url, but the url is prepared, url = $url, taskId = ${task.taskId}");
     } else {
       aldDebugPrint(
-          "ALDownloader | try to download url, but the url is unknown, url = $url, taskId = ${task.taskId}");
+          "ALDownloader | try to download url, but the url is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}");
     }
   }
 
@@ -222,7 +212,7 @@ class ALDownloader {
   /// **return**
   ///
   /// [ALDownloaderStatus] download status
-  static ALDownloaderStatus getDownloadStatusForUrl(String url) {
+  static ALDownloaderStatus getStatusForUrl(String url) {
     ALDownloaderStatus status;
 
     try {
@@ -232,22 +222,22 @@ class ALDownloader {
       if (innerStatus == null ||
           innerStatus == _ALDownloaderInnerStatus.prepared ||
           innerStatus == _ALDownloaderInnerStatus.undefined ||
-          innerStatus == _ALDownloaderInnerStatus.enqueued ||
           innerStatus == _ALDownloaderInnerStatus.deprecated)
         status = ALDownloaderStatus.unstarted;
-      else if (innerStatus == _ALDownloaderInnerStatus.running)
+      else if (innerStatus == _ALDownloaderInnerStatus.enqueued ||
+          innerStatus == _ALDownloaderInnerStatus.running)
         status = ALDownloaderStatus.downloading;
-      else if (innerStatus == _ALDownloaderInnerStatus.paused)
-        status = ALDownloaderStatus.paused;
       else if (innerStatus == _ALDownloaderInnerStatus.canceled ||
           innerStatus == _ALDownloaderInnerStatus.failed)
         status = ALDownloaderStatus.failed;
+      else if (innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
+          innerStatus == _ALDownloaderInnerStatus.paused)
+        status = ALDownloaderStatus.paused;
       else
         status = ALDownloaderStatus.succeeded;
     } catch (error) {
       status = ALDownloaderStatus.unstarted;
-      aldDebugPrint(
-          "ALDownloader | getDownloadStatusForUrl = $url, error = $error");
+      aldDebugPrint("ALDownloader | getStatusForUrl = $url, error = $error");
     }
 
     return status;
@@ -262,7 +252,7 @@ class ALDownloader {
   /// **return**
   ///
   /// [double] download progress
-  static double getDownloadProgressForUrl(String url) {
+  static double getProgressForUrl(String url) {
     // ignore: non_constant_identifier_names
     double double_progress;
 
@@ -297,32 +287,32 @@ class ALDownloader {
       final task = _getTaskFromUrl(url);
 
       if (task == null ||
+          task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
           task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
         if (task == null) {
           aldDebugPrint(
               "ALDownloader | pause, url = $url, but url's task is null");
         } else {
           aldDebugPrint(
-              "ALDownloader | pause, url = $url, but url is deprecated");
+              "ALDownloader | pause, url = $url, but url is ${task.innerStatus.alDescription}");
         }
-
-        _callFailedHandler(url);
+      } else if (task.innerStatus == _ALDownloaderInnerStatus.undefined) {
+        await _removeTask(task);
       } else {
         final taskId = task.taskId;
-        if (task.innerStatus == _ALDownloaderInnerStatus.running) {
+        if (task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
+          _pauseTaskPretendedlyWithCallHandler(task);
+        } else if (task.innerStatus == _ALDownloaderInnerStatus.running) {
           if (Platform.isAndroid) {
             if (await ALDownloaderPersistentFileManager
                 .isExistAbsolutePhysicalPathOfFileForUrl(url)) {
               await FlutterDownloader.pause(taskId: taskId);
             } else {
-              await _removeTaskWithCallHandler(task);
+              _pauseTaskPretendedlyWithCallHandler(task);
             }
           } else {
             await FlutterDownloader.pause(taskId: taskId);
           }
-        } else if (task.innerStatus == _ALDownloaderInnerStatus.undefined ||
-            task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
-          await _removeTask(task);
         }
       }
     } catch (error) {
@@ -366,11 +356,11 @@ class ALDownloader {
               "ALDownloader | cancel, url = $url, but url is deprecated");
         }
 
-        _callFailedHandler(url);
+        _callFailedHandler(url, 0);
       } else {
-        if (task.innerStatus == _ALDownloaderInnerStatus.running ||
-            task.innerStatus == _ALDownloaderInnerStatus.enqueued ||
-            task.innerStatus == _ALDownloaderInnerStatus.undefined) {
+        if (task.innerStatus == _ALDownloaderInnerStatus.enqueued ||
+            task.innerStatus == _ALDownloaderInnerStatus.undefined ||
+            task.innerStatus == _ALDownloaderInnerStatus.running) {
           await _removeTaskWithCallHandler(task);
         }
       }
@@ -415,7 +405,7 @@ class ALDownloader {
               "ALDownloader | remove, url = $url, but url is deprecated");
         }
 
-        _callFailedHandler(url);
+        _callFailedHandler(url, 0);
       } else {
         await _removeTaskWithCallHandler(task);
       }
@@ -521,9 +511,10 @@ class ALDownloader {
       return;
     }
 
-    if (task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
+    if (task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
+        task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
       aldDebugPrint(
-          "ALDownloader | _processDataFromPort, the func return, because task is deprecated, taskId = $taskId");
+          "ALDownloader | _processDataFromPort, the func return, because task is ${task.innerStatus.alDescription}, taskId = $taskId");
       return;
     }
 
@@ -615,58 +606,16 @@ class ALDownloader {
       _ALDownloaderInnerStatus innerStatus,
       // ignore: non_constant_identifier_names
       double double_progress) {
-    if (innerStatus == _ALDownloaderInnerStatus.complete) {
-      _binders.forEach((element) {
-        if (element.url == url) {
-          final progressHandler =
-              element.downloaderHandlerHolder.progressHandler;
-          if (progressHandler != null) progressHandler(double_progress);
-
-          final succeededHandler =
-              element.downloaderHandlerHolder.succeededHandler;
-          if (succeededHandler != null) succeededHandler();
-        }
-      });
-    } else if (innerStatus == _ALDownloaderInnerStatus.paused) {
-      _binders.forEach((element) {
-        if (element.url == url) {
-          if (double_progress > -0.01) {
-            final progressHandler =
-                element.downloaderHandlerHolder.progressHandler;
-            if (progressHandler != null) progressHandler(double_progress);
-          }
-
-          final pausedHandler = element.downloaderHandlerHolder.pausedHandler;
-          if (pausedHandler != null) pausedHandler();
-        }
-      });
+    if (innerStatus == _ALDownloaderInnerStatus.enqueued ||
+        innerStatus == _ALDownloaderInnerStatus.running) {
+      _callProgressHandler(url, double_progress);
+    } else if (innerStatus == _ALDownloaderInnerStatus.complete) {
+      _callSucceededHandler(url, double_progress);
     } else if (innerStatus == _ALDownloaderInnerStatus.canceled ||
         innerStatus == _ALDownloaderInnerStatus.failed) {
-      _binders.forEach((element) {
-        if (element.url == url) {
-          final progressHandler =
-              element.downloaderHandlerHolder.progressHandler;
-          if (progressHandler != null) progressHandler(-0.01);
-
-          final failedHandler = element.downloaderHandlerHolder.failedHandler;
-          if (failedHandler != null) failedHandler();
-        }
-      });
-    } else if (innerStatus == _ALDownloaderInnerStatus.running) {
-      _binders.forEach((element) {
-        if (element.url == url) {
-          final progressHandler =
-              element.downloaderHandlerHolder.progressHandler;
-          if (progressHandler != null) progressHandler(double_progress);
-        }
-      });
-    }
-
-    if (innerStatus == _ALDownloaderInnerStatus.complete ||
-        innerStatus == _ALDownloaderInnerStatus.failed ||
-        innerStatus == _ALDownloaderInnerStatus.canceled) {
-      _binders
-          .removeWhere((element) => element.url == url && !element.isForever);
+      _callFailedHandler(url, -0.01);
+    } else if (innerStatus == _ALDownloaderInnerStatus.paused) {
+      _callPausedHandler(url, double_progress);
     }
   }
 
@@ -678,8 +627,8 @@ class ALDownloader {
     if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
     bool aBool;
-    if (innerStatus == _ALDownloaderInnerStatus.paused ||
-        innerStatus == _ALDownloaderInnerStatus.complete) {
+    if (innerStatus == _ALDownloaderInnerStatus.complete ||
+        innerStatus == _ALDownloaderInnerStatus.paused) {
       aBool = !(await ALDownloaderPersistentFileManager
           .isExistAbsolutePhysicalPathOfFileForUrl(url));
     } else {
@@ -699,8 +648,8 @@ class ALDownloader {
       String savedDir, String url, _ALDownloaderInnerStatus innerStatus) async {
     if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
-    if (innerStatus == _ALDownloaderInnerStatus.paused ||
-        innerStatus == _ALDownloaderInnerStatus.complete) {
+    if (innerStatus == _ALDownloaderInnerStatus.complete ||
+        innerStatus == _ALDownloaderInnerStatus.paused) {
       final aBool = await ALDownloaderPersistentFileManager
           .isExistAbsolutePhysicalPathOfFileForUrl(url);
       return !aBool;
@@ -774,7 +723,7 @@ class ALDownloader {
 
     await _removeTask(task);
 
-    _callFailedHandler(url);
+    _callFailedHandler(url, 0);
   }
 
   static Future<void> _removeTask(_ALDownloadTask task) async {
@@ -786,11 +735,56 @@ class ALDownloader {
     await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
   }
 
-  static void _callFailedHandler(String url) {
+  static Future<void> _pauseTaskPretendedlyWithCallHandler(
+      _ALDownloadTask task) async {
+    final url = task.url;
+
+    await _pauseTaskPretendedly(task);
+
+    // ignore: non_constant_identifier_names
+    final double_progress =
+        double.tryParse(((task.progress / 100).toStringAsFixed(2))) ?? 0;
+    _callPausedHandler(url, double_progress);
+  }
+
+  static Future<void> _pauseTaskPretendedly(_ALDownloadTask task) async {
+    final taskId = task.taskId;
+    final url = task.url;
+
+    _completedKVs[url] = false;
+    task.innerStatus = _ALDownloaderInnerStatus.pretendedPaused;
+    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
+  }
+
+  static void _callProgressHandler(String url, double progress) {
     _binders.forEach((element) {
       if (element.url == url) {
         final progressHandler = element.downloaderHandlerHolder.progressHandler;
-        if (progressHandler != null) progressHandler(0);
+        if (progressHandler != null) progressHandler(progress);
+      }
+    });
+  }
+
+  static void _callSucceededHandler(String url, double progress) {
+    _binders.forEach((element) {
+      if (element.url == url) {
+        final progressHandler = element.downloaderHandlerHolder.progressHandler;
+        if (progressHandler != null) progressHandler(progress);
+
+        final succeededHandler =
+            element.downloaderHandlerHolder.succeededHandler;
+        if (succeededHandler != null) succeededHandler();
+      }
+    });
+
+    _binders.removeWhere((element) => element.url == url && !element.isForever);
+  }
+
+  static void _callFailedHandler(String url, double progress) {
+    _binders.forEach((element) {
+      if (element.url == url) {
+        final progressHandler = element.downloaderHandlerHolder.progressHandler;
+        if (progressHandler != null) progressHandler(progress);
 
         final failedHandler = element.downloaderHandlerHolder.failedHandler;
         if (failedHandler != null) failedHandler();
@@ -798,6 +792,21 @@ class ALDownloader {
     });
 
     _binders.removeWhere((element) => element.url == url && !element.isForever);
+  }
+
+  static void _callPausedHandler(String url, double progress) {
+    _binders.forEach((element) {
+      if (element.url == url) {
+        if (progress > -0.01) {
+          final progressHandler =
+              element.downloaderHandlerHolder.progressHandler;
+          if (progressHandler != null) progressHandler(progress);
+        }
+
+        final pausedHandler = element.downloaderHandlerHolder.pausedHandler;
+        if (pausedHandler != null) pausedHandler();
+      }
+    });
   }
 
   static _ALDownloaderInnerStatus _transferStatus(DownloadTaskStatus status) {
@@ -879,6 +888,7 @@ enum _ALDownloaderInnerStatus {
   failed,
   canceled,
   paused,
+  pretendedPaused,
   deprecated
 }
 
@@ -893,6 +903,7 @@ extension _ALDownloaderInnerStatusExtension on _ALDownloaderInnerStatus {
         "failed",
         "canceled",
         "paused",
+        "pretendedPaused",
         "deprecated"
       ][index];
 }

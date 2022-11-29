@@ -94,12 +94,12 @@ ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 
 ```
 /// 获取下载状态
-final status = ALDownloader.getDownloadStatusForUrl(url);
+final status = ALDownloader.getStatusForUrl(url);
 ```
 
 ```
 /// 获取下载进度
-final progress = ALDownloader.getDownloadProgressForUrl(url);
+final progress = ALDownloader.getProgressForUrl(url);
 ```
 
 ```
@@ -157,7 +157,7 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 
 ```
 /// 获取一组url的下载状态
-final status = ALDownloaderBatcher.getDownloadStatusForUrls(urls);
+final status = ALDownloaderBatcher.getStatusForUrls(urls);
 ```
 
 ### ALDownloaderPersistentFileManager - 基于url的持久化文件管理器

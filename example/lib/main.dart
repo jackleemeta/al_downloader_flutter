@@ -269,7 +269,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }, failedHandler: () {
             debugPrint("ALDownloader | download failed, url = $url\n");
 
-            model.status = ALDownloader.getDownloadStatusForUrl(url);
+            model.status = ALDownloader.getStatusForUrl(url);
 
             setState(() {});
           }, pausedHandler: () {
@@ -386,7 +386,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
-    final status = ALDownloader.getDownloadStatusForUrl(url);
+    final status = ALDownloader.getStatusForUrl(url);
     debugPrint(
         "ALDownloader | get download status for [url], url = $url, status= $status\n");
   }
