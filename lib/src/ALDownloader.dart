@@ -749,9 +749,6 @@ class ALDownloader {
 
   static Future<void> _pauseTaskPretendedly(_ALDownloadTask task) async {
     final taskId = task.taskId;
-    final url = task.url;
-
-    _completedKVs[url] = false;
     task.innerStatus = _ALDownloaderInnerStatus.pretendedPaused;
     await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
   }
