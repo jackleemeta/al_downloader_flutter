@@ -296,19 +296,17 @@ class ALDownloader {
           aldDebugPrint(
               "ALDownloader | pause, url = $url, but url is ${task.innerStatus.alDescription}");
         }
-      } else if (task.innerStatus == _ALDownloaderInnerStatus.undefined) {
-        await _removeTask(task);
       } else {
         final taskId = task.taskId;
         if (task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
-          _pauseTaskPretendedlyWithCallHandler(task);
+          await _pauseTaskPretendedlyWithCallHandler(task);
         } else if (task.innerStatus == _ALDownloaderInnerStatus.running) {
           if (Platform.isAndroid) {
             if (await ALDownloaderPersistentFileManager
                 .isExistAbsolutePhysicalPathOfFileForUrl(url)) {
               await FlutterDownloader.pause(taskId: taskId);
             } else {
-              _pauseTaskPretendedlyWithCallHandler(task);
+              await _removeTaskWithCallHandler(task);
             }
           } else {
             await FlutterDownloader.pause(taskId: taskId);
@@ -357,12 +355,9 @@ class ALDownloader {
         }
 
         _callFailedHandler(url, 0);
-      } else {
-        if (task.innerStatus == _ALDownloaderInnerStatus.enqueued ||
-            task.innerStatus == _ALDownloaderInnerStatus.undefined ||
-            task.innerStatus == _ALDownloaderInnerStatus.running) {
-          await _removeTaskWithCallHandler(task);
-        }
+      } else if (task.innerStatus == _ALDownloaderInnerStatus.enqueued ||
+          task.innerStatus == _ALDownloaderInnerStatus.running) {
+        await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
       aldDebugPrint("ALDownloader | cancel, url = $url, error = $error");
@@ -425,11 +420,6 @@ class ALDownloader {
       await remove(url);
     }
   }
-
-  /// Get a completed set of key-value pairs which the structure is [url: succeeded/failed]
-  ///
-  /// Url and result(succeeded/failed) are added to the pool.
-  static Map<String, bool> get completedKVs => _completedKVs;
 
   /// Manager custom download tasks
   ///
@@ -522,18 +512,11 @@ class ALDownloader {
 
     _addOrUpdateTaskForUrl(url, taskId, innerStatus, progress, "");
 
-    if (innerStatus == _ALDownloaderInnerStatus.complete) {
-      _completedKVs[url] = true;
-    } else if (innerStatus == _ALDownloaderInnerStatus.failed ||
-        innerStatus == _ALDownloaderInnerStatus.canceled) {
-      _completedKVs[url] = false;
-    }
-
     // ignore: non_constant_identifier_names
     final double_progress =
         double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
 
-    _callHandlerBusiness1(taskId, url, innerStatus, double_progress);
+    _callHandlerForBusiness1(taskId, url, innerStatus, double_progress);
 
     aldDebugPrint(
         "ALDownloader | _processDataFromPort | processed, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress",
@@ -568,16 +551,7 @@ class ALDownloader {
         final isShouldRemoveDataForSavedDir =
             await _isShouldRemoveDataForInitialization(
                 task.savedDir, task.url, task.innerStatus);
-        if (isShouldRemoveDataForSavedDir) {
-          await _removeTask(task);
-        } else {
-          if (task.innerStatus == _ALDownloaderInnerStatus.complete) {
-            _completedKVs[task.url] = true;
-          } else if (task.innerStatus == _ALDownloaderInnerStatus.failed ||
-              task.innerStatus == _ALDownloaderInnerStatus.canceled) {
-            _completedKVs[task.url] = false;
-          }
-        }
+        if (isShouldRemoveDataForSavedDir) await _removeTask(task);
 
         aldDebugPrint(
             "ALDownloader | _loadAndTryToRunTask, url = ${task.url}, taskId = ${task.taskId}, innerStatus = ${task.innerStatus}, isShouldRemoveDataForSavedDir = $isShouldRemoveDataForSavedDir");
@@ -587,20 +561,22 @@ class ALDownloader {
           "ALDownloader | _loadAndTryToRunTask, tasks length = ${_tasks.length}");
 
       for (final task in _tasks) {
-        if (task.innerStatus != _ALDownloaderInnerStatus.deprecated) {
-          // If the task is normal, call back directly.
-          // ignore: non_constant_identifier_names
-          final double_progress =
-              double.tryParse(((task.progress / 100).toStringAsFixed(2))) ?? 0;
-          _callHandlerBusiness1(
+        // ignore: non_constant_identifier_names
+        final double_progress =
+            double.tryParse(((task.progress / 100).toStringAsFixed(2))) ?? 0;
+        if (task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
+          _callFailedHandler(task.url, 0);
+        } else {
+          // If the task is normal, call handler directly.
+          _callHandlerForBusiness1(
               task.taskId, task.url, task.innerStatus, double_progress);
         }
       }
     }
   }
 
-  /// Process business 1 for call handler
-  static void _callHandlerBusiness1(
+  /// Call handler for business
+  static void _callHandlerForBusiness1(
       String taskId,
       String url,
       _ALDownloaderInnerStatus innerStatus,
@@ -636,8 +612,7 @@ class ALDownloader {
     }
 
     if (!aBool)
-      aBool = innerStatus == _ALDownloaderInnerStatus.undefined ||
-          innerStatus == _ALDownloaderInnerStatus.enqueued ||
+      aBool = innerStatus == _ALDownloaderInnerStatus.enqueued ||
           innerStatus == _ALDownloaderInnerStatus.running;
 
     return aBool;
@@ -728,9 +703,7 @@ class ALDownloader {
 
   static Future<void> _removeTask(_ALDownloadTask task) async {
     final taskId = task.taskId;
-    final url = task.url;
 
-    _completedKVs[url] = false;
     task.innerStatus = _ALDownloaderInnerStatus.deprecated;
     await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
   }
@@ -832,9 +805,6 @@ class ALDownloader {
 
   /// A binder list for binding element such as url, downloader interface, forever flag and so on
   static final List<_ALDownloaderBinder> _binders = [];
-
-  /// This is same as [completedKVs], see [completedKVs]
-  static final Map<String, bool> _completedKVs = {};
 
   /// Send port key
   static final _kDownloaderSendPort = "al_downloader_send_port";

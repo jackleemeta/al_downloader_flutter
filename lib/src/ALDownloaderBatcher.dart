@@ -110,25 +110,25 @@ class ALDownloaderBatcher {
             final progress = binder._progress;
 
             aldDebugPrint(
-                "ALDownloaderBatcher | download progress = $progress, current url = $url",
+                "ALDownloaderBatcher | in succeededHandler | download progress = $progress, url = $url",
                 isFrequentPrint: true);
 
             final progressHandler = downloaderHandlerInterface?.progressHandler;
             if (progressHandler != null) progressHandler(progress);
 
-            binder._completedCallBackCount++;
+            binder._completedKVs[url] = true;
 
-            if (binder._isCallBacksCompleted) {
+            if (binder._isCompletedHandlerCalled) {
               if (binder._isSucceeded) {
                 aldDebugPrint(
-                    "ALDownloaderBatcher | download succeeded, urls = $urls");
+                    "ALDownloaderBatcher | in succeededHandler | download succeeded, urls = $urls");
 
                 final succeededHandler =
                     downloaderHandlerInterface?.succeededHandler;
                 if (succeededHandler != null) succeededHandler();
               } else {
                 aldDebugPrint(
-                    "ALDownloaderBatcher | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
+                    "ALDownloaderBatcher | in succeededHandler | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
 
                 final failedHandler = downloaderHandlerInterface?.failedHandler;
                 if (failedHandler != null) failedHandler();
@@ -139,17 +139,17 @@ class ALDownloaderBatcher {
             final progress = binder._progress;
 
             aldDebugPrint(
-                "ALDownloaderBatcher | download progress = $progress, current url = $url",
+                "ALDownloaderBatcher | in failedHandler | download progress = $progress, url = $url",
                 isFrequentPrint: true);
 
             final progressHandler = downloaderHandlerInterface?.progressHandler;
             if (progressHandler != null) progressHandler(progress);
 
-            binder._completedCallBackCount++;
+            binder._completedKVs[url] = false;
 
-            if (binder._isCallBacksCompleted) {
+            if (binder._isCompletedHandlerCalled) {
               aldDebugPrint(
-                  "ALDownloaderBatcher | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
+                  "ALDownloaderBatcher | in failedHandler | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
 
               final failedHandler = downloaderHandlerInterface?.failedHandler;
               if (failedHandler != null) failedHandler();
@@ -157,17 +157,17 @@ class ALDownloaderBatcher {
           },
           pausedHandler: () {
             if (!binder._isDownloading) {
-              if (!binder._isIgnoreUnnecessaryPauseCallBack) {
+              if (!binder._isIgnoreUnnecessaryPausedHandlerCalled) {
                 aldDebugPrint(
                     "ALDownloaderBatcher | download paused, all the targetUrls are not downloading, the targetUrls = ${binder._targetUrls}, the paused urls = ${binder._pausedUrls}, the last paused url = $url");
 
-                binder._isIgnoreUnnecessaryPauseCallBack = true;
+                binder._isIgnoreUnnecessaryPausedHandlerCalled = true;
 
                 final pausedHandler = downloaderHandlerInterface?.pausedHandler;
                 if (pausedHandler != null) pausedHandler();
               }
             } else {
-              binder._isIgnoreUnnecessaryPauseCallBack = false;
+              binder._isIgnoreUnnecessaryPausedHandlerCalled = false;
             }
           });
 
@@ -250,9 +250,8 @@ class _ALDownloaderBatcherBinder {
     List<String> aList;
 
     try {
-      aList = _allCompletedKVs.entries
-          .where(
-              (element) => element.value && _targetUrls.contains(element.key))
+      aList = _completedKVs.entries
+          .where((element) => element.value)
           .map((e) => e.key)
           .toList();
 
@@ -274,9 +273,8 @@ class _ALDownloaderBatcherBinder {
     List<String> aList;
 
     try {
-      aList = _allCompletedKVs.entries
-          .where(
-              (element) => !element.value && _targetUrls.contains(element.key))
+      aList = _completedKVs.entries
+          .where((element) => !element.value)
           .map((e) => e.key)
           .toList();
 
@@ -335,20 +333,15 @@ class _ALDownloaderBatcherBinder {
     return aList;
   }
 
-  /// Whether ignore unnecessary pause call back
-  bool _isIgnoreUnnecessaryPauseCallBack = false;
+  /// Whether ignore unnecessary paused handler called
+  bool _isIgnoreUnnecessaryPausedHandlerCalled = false;
 
-  /// Get completed(succeeded/failed) call back count
-  ///
-  /// If it is equal to [_targetUrls.length], represent all the call back completed.
-  int _completedCallBackCount = 0;
+  /// Check whether all the completed handler called
+  bool get _isCompletedHandlerCalled =>
+      _completedKVs.length == _targetUrls.length;
 
-  /// Check whether all the call back completed
-  bool get _isCallBacksCompleted =>
-      _completedCallBackCount == _targetUrls.length;
-
-  /// A set of completed key-value pairs of [ALDownloader]
-  Map<String, bool> get _allCompletedKVs => ALDownloader.completedKVs;
+  /// A set of completed key-value pairs
+  final Map<String, bool> _completedKVs = {};
 
   /// Urls that need to download
   final List<String> _targetUrls;
