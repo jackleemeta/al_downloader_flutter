@@ -463,7 +463,7 @@ class ALDownloader {
 
   /// Register send port and receive port for [IsolateNameServer]
   ///
-  /// It is used for communication between download isolate and main isolate.
+  /// It is used for communication between entrypoint isolate and download isolate .
   static void _addIsolateNameServerPortService() {
     IsolateNameServer.registerPortWithName(
         _receivePort.sendPort, _kDownloaderSendPort);

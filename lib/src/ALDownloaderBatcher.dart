@@ -58,7 +58,7 @@ class ALDownloaderBatcher {
     final allStatus = aMap.values.toSet();
 
     if (allStatus.contains(ALDownloaderStatus.failed)) {
-      // Do not Contained downloaded task && Do not contain paused task && Contain failed task.
+      // Do not contain downloaded task && Do not contain paused task && Contain failed task.
       return ALDownloaderStatus.failed;
     } else if (allStatus.difference({ALDownloaderStatus.succeeded}).length ==
         0) {
