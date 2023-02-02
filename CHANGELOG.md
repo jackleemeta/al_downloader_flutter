@@ -1,3 +1,7 @@
+## 1.6.8
+
+- update document
+
 ## 1.6.7
 
 - fix bug
