@@ -469,8 +469,12 @@ class ALDownloader {
         _receivePort.sendPort, _kDownloaderSendPort);
     _receivePort.listen((dynamic data) {
       final taskId = data[0];
-      final originalStatus = data[1];
+
+      final originalStatusValue = data[1];
+      final originalStatus = DownloadTaskStatus(originalStatusValue);
+
       final progress = data[2];
+
       _processDataFromPort(taskId, originalStatus, progress);
     });
   }
@@ -481,7 +485,9 @@ class ALDownloader {
       String taskId, DownloadTaskStatus originalStatus, int progress) {
     final SendPort? send =
         IsolateNameServer.lookupPortByName(_kDownloaderSendPort);
-    send?.send([taskId, originalStatus, progress]);
+
+    final originalStatusValue = originalStatus.value;
+    send?.send([taskId, originalStatusValue, progress]);
   }
 
   /// Process the [FlutterDownloader]'s callback
