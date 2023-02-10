@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:queue/queue.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderPersistentFileManager.dart';
 import 'ALDownloaderStatus.dart';
@@ -12,10 +13,253 @@ class ALDownloader {
   /// Initialize
   ///
   /// It can be called actively or called lazily when [download] is called.
-  static Future<void> initialize() async {
+  static void initialize() {
+    _queue.add(() => _initialize()).catchError((error) {
+      aldDebugPrint("ALDownloader | queue error | execute _initialize",
+          isFrequentPrint: true);
+    });
+  }
+
+  /// Download
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  ///
+  /// [downloaderHandlerInterface] downloader handler interface
+  ///
+  /// It is an one-off interface which will be destroyed when the download succeeded/failed.
+  static void download(String? url,
+      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
+    if (url == null)
+      throw "ALDownloader | try to download url, but url is null";
+
+    var task = _getTaskFromUrl(url);
+
+    if (downloaderHandlerInterface != null) {
+      final aBinder =
+          _ALDownloaderBinder(url, downloaderHandlerInterface, false);
+      _binders.add(aBinder);
+    }
+
+    if (task == null ||
+        task.innerStatus == _ALDownloaderInnerStatus.deprecated ||
+        task.innerStatus == _ALDownloaderInnerStatus.ignored) {
+      _addOrUpdateTaskForUrl(url, "", _ALDownloaderInnerStatus.prepared, 0, "");
+    } else if (task.innerStatus ==
+        _ALDownloaderInnerStatus.preparedPretendedPaused) {
+      _addOrUpdateTaskForUrl(
+          url, "", _ALDownloaderInnerStatus.pretendedPaused, 0, "");
+    }
+
+    _queue.add(() => _download(url)).catchError((error) {
+      aldDebugPrint("ALDownloader | queue error | execute _download",
+          isFrequentPrint: true);
+    });
+  }
+
+  /// Add a downloader handler interface
+  ///
+  /// **parameters**
+  ///
+  /// [downloaderHandlerInterface] downloader handler interface
+  ///
+  /// It is an one-off interface which will be destroyed when the download succeeded/failed.
+  ///
+  /// [url] url
+  static void addDownloaderHandlerInterface(
+      ALDownloaderHandlerInterface? downloaderHandlerInterface, String? url) {
+    if (downloaderHandlerInterface == null || url == null) return;
+    final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface, false);
+    _binders.add(aBinder);
+  }
+
+  /// Add a forever downloader handler interface
+  ///
+  /// **parameters**
+  ///
+  /// [downloaderHandlerInterface] downloader handler interface
+  ///
+  /// It is a forever interface which never is destroyed unless [removeDownloaderHandlerInterfaceForUrl] or [removeDownloaderHandlerInterfaceForAll] is called.
+  ///
+  /// [url] url
+  static void addForeverDownloaderHandlerInterface(
+      ALDownloaderHandlerInterface? downloaderHandlerInterface, String? url) {
+    if (downloaderHandlerInterface == null || url == null) return;
+    final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface, true);
+    _binders.add(aBinder);
+  }
+
+  /// Remove downloader handler interface
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  static void removeDownloaderHandlerInterfaceForUrl(String url) =>
+      _binders.removeWhere((element) => url == element.url);
+
+  /// Remove all downloader handler interfaces
+  static void removeDownloaderHandlerInterfaceForAll() => _binders.clear();
+
+  /// Get download status
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  ///
+  /// **return**
+  ///
+  /// [ALDownloaderStatus] download status
+  static ALDownloaderStatus getStatusForUrl(String url) {
+    ALDownloaderStatus status;
+
+    try {
+      final task = _getTaskFromUrl(url);
+      final innerStatus = task?.innerStatus;
+
+      if (innerStatus == null ||
+          innerStatus == _ALDownloaderInnerStatus.prepared ||
+          innerStatus == _ALDownloaderInnerStatus.undefined ||
+          innerStatus == _ALDownloaderInnerStatus.deprecated ||
+          innerStatus == _ALDownloaderInnerStatus.ignored)
+        status = ALDownloaderStatus.unstarted;
+      else if (innerStatus == _ALDownloaderInnerStatus.enqueued ||
+          innerStatus == _ALDownloaderInnerStatus.running)
+        status = ALDownloaderStatus.downloading;
+      else if (innerStatus == _ALDownloaderInnerStatus.canceled ||
+          innerStatus == _ALDownloaderInnerStatus.failed)
+        status = ALDownloaderStatus.failed;
+      else if (innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
+          innerStatus == _ALDownloaderInnerStatus.paused ||
+          innerStatus == _ALDownloaderInnerStatus.preparedPretendedPaused)
+        status = ALDownloaderStatus.paused;
+      else
+        status = ALDownloaderStatus.succeeded;
+    } catch (error) {
+      status = ALDownloaderStatus.unstarted;
+      aldDebugPrint("ALDownloader | getStatusForUrl = $url, error = $error");
+    }
+
+    return status;
+  }
+
+  /// Get download progress
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  ///
+  /// **return**
+  ///
+  /// [double] download progress
+  static double getProgressForUrl(String url) {
+    // ignore: non_constant_identifier_names
+    double double_progress;
+
+    try {
+      final task = _getTaskFromUrl(url);
+
+      int progress = task == null ? 0 : task.progress;
+
+      double_progress =
+          double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
+    } catch (error) {
+      double_progress = 0;
+      aldDebugPrint(
+          "ALDownloader | get download progress for url = $url, error = $error");
+    }
+
+    return double_progress;
+  }
+
+  /// Pause download
+  ///
+  /// Stop download, but the incomplete data will not be deleted.
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  static void pause(String url) {
+    _preprocessSomeActionForUrl(url);
+
+    _queue.add(() => _pause1(url)).catchError((error) {
+      aldDebugPrint("ALDownloader | queue error | execute _pause1",
+          isFrequentPrint: true);
+    });
+  }
+
+  /// Pause all downloads
+  ///
+  /// This is a multiple of [pause], see [pause].
+  static void pauseAll() {
+    _preprocessSomeActionForAll();
+
+    _queue.add(() => _pauseAll1()).catchError((error) {
+      aldDebugPrint("ALDownloader | queue error | execute _pauseAll1",
+          isFrequentPrint: true);
+    });
+  }
+
+  /// Cancel download
+  ///
+  /// Stop download, and the incomplete data will be deleted.
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  static void cancel(String url) {
+    _preprocessSomeActionForUrl(url);
+
+    _queue.add(() => _cancel1(url));
+  }
+
+  /// Cancel all downloads
+  ///
+  /// This is a multiple of [cancel], see [cancel].
+  static void cancelAll() {
+    _preprocessSomeActionForAll();
+
+    _queue.add(() => _cancelAll1()).catchError((error) {
+      aldDebugPrint("ALDownloader | queue error | execute _cancelAll1",
+          isFrequentPrint: true);
+    });
+  }
+
+  /// Remove download
+  ///
+  /// Remove download, and all the data will be deleted.
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  static void remove(String url) {
+    _preprocessSomeActionForUrl(url);
+
+    _queue.add(() => _remove1(url)).catchError((error) {
+      aldDebugPrint("ALDownloader | queue error | execute _remove1",
+          isFrequentPrint: true);
+    });
+  }
+
+  /// Remove all downloads
+  ///
+  /// This is a multiple of [remove], see [remove].
+  static void removeAll() {
+    _preprocessSomeActionForAll();
+
+    _queue.add(() => _removeAll1()).catchError((error) {
+      aldDebugPrint("ALDownloader | queue error | execute _removeAll1",
+          isFrequentPrint: true);
+    });
+  }
+
+  static Future<void> _initialize() async {
     if (!_isInitial) {
-      // Initialize flutterDownloader.
-      await FlutterDownloader.initialize(debug: false, ignoreSsl: true);
+      // Initialize FlutterDownloader.
+      await FlutterDownloader.initialize(
+        debug: false,
+        ignoreSsl: true,
+      );
 
       // Register the isolate communication service.
       _addIsolateNameServerPortService();
@@ -31,27 +275,10 @@ class ALDownloader {
     }
   }
 
-  /// Download
-  ///
-  /// **parameters**
-  ///
-  /// [url] url
-  ///
-  /// [downloaderHandlerInterface] downloader handler interface
-  ///
-  /// It is an one-off interface which will be destroyed when the download succeeded/failed.
-  static Future<void> download(String? url,
-      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
-    if (url == null)
-      throw "ALDownloader | try to download url, but url is null";
-
-    if (downloaderHandlerInterface != null) {
-      final aBinder =
-          _ALDownloaderBinder(url, downloaderHandlerInterface, false);
-      _binders.add(aBinder);
-    }
-
-    await initialize();
+  static Future<void> _download(
+    String url,
+  ) async {
+    await _initialize();
 
     var task = _getTaskFromUrl(url);
 
@@ -63,6 +290,7 @@ class ALDownloader {
     }
 
     if (task == null ||
+        task.innerStatus == _ALDownloaderInnerStatus.prepared ||
         task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
         task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
       if (task == null) {
@@ -72,9 +300,6 @@ class ALDownloader {
         aldDebugPrint(
             "ALDownloader | try to download url, the url is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}");
       }
-
-      // Add a prepared task to represent placeholder.
-      _addOrUpdateTaskForUrl(url, "", _ALDownloaderInnerStatus.prepared, 0, "");
 
       // Get 'physical directory path' and 'file name' of the file by url.
       final alDownloaderPathComponentModel =
@@ -160,142 +385,16 @@ class ALDownloader {
     }
   }
 
-  /// Add a downloader handler interface
-  ///
-  /// **parameters**
-  ///
-  /// [downloaderHandlerInterface] downloader handler interface
-  ///
-  /// It is an one-off interface which will be destroyed when the download succeeded/failed.
-  ///
-  /// [url] url
-  static void addDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface? downloaderHandlerInterface, String? url) {
-    if (downloaderHandlerInterface == null || url == null) return;
-    final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface, false);
-    _binders.add(aBinder);
-  }
-
-  /// Add a forever downloader handler interface
-  ///
-  /// **parameters**
-  ///
-  /// [downloaderHandlerInterface] downloader handler interface
-  ///
-  /// It is a forever interface which never is destroyed unless [removeDownloaderHandlerInterfaceForUrl] or [removeDownloaderHandlerInterfaceForAll] is called.
-  ///
-  /// [url] url
-  static void addForeverDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface? downloaderHandlerInterface, String? url) {
-    if (downloaderHandlerInterface == null || url == null) return;
-    final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface, true);
-    _binders.add(aBinder);
-  }
-
-  /// Remove downloader handler interface
-  ///
-  /// **parameters**
-  ///
-  /// [url] url
-  static void removeDownloaderHandlerInterfaceForUrl(String url) =>
-      _binders.removeWhere((element) => url == element.url);
-
-  /// Remove all downloader handler interfaces
-  static void removeDownloaderHandlerInterfaceForAll() => _binders.clear();
-
-  /// Get download status
-  ///
-  /// **parameters**
-  ///
-  /// [url] url
-  ///
-  /// **return**
-  ///
-  /// [ALDownloaderStatus] download status
-  static ALDownloaderStatus getStatusForUrl(String url) {
-    ALDownloaderStatus status;
-
-    try {
-      final task = _getTaskFromUrl(url);
-      final innerStatus = task?.innerStatus;
-
-      if (innerStatus == null ||
-          innerStatus == _ALDownloaderInnerStatus.prepared ||
-          innerStatus == _ALDownloaderInnerStatus.undefined ||
-          innerStatus == _ALDownloaderInnerStatus.deprecated)
-        status = ALDownloaderStatus.unstarted;
-      else if (innerStatus == _ALDownloaderInnerStatus.enqueued ||
-          innerStatus == _ALDownloaderInnerStatus.running)
-        status = ALDownloaderStatus.downloading;
-      else if (innerStatus == _ALDownloaderInnerStatus.canceled ||
-          innerStatus == _ALDownloaderInnerStatus.failed)
-        status = ALDownloaderStatus.failed;
-      else if (innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
-          innerStatus == _ALDownloaderInnerStatus.paused)
-        status = ALDownloaderStatus.paused;
-      else
-        status = ALDownloaderStatus.succeeded;
-    } catch (error) {
-      status = ALDownloaderStatus.unstarted;
-      aldDebugPrint("ALDownloader | getStatusForUrl = $url, error = $error");
-    }
-
-    return status;
-  }
-
-  /// Get download progress
-  ///
-  /// **parameters**
-  ///
-  /// [url] url
-  ///
-  /// **return**
-  ///
-  /// [double] download progress
-  static double getProgressForUrl(String url) {
-    // ignore: non_constant_identifier_names
-    double double_progress;
-
-    try {
-      final task = _getTaskFromUrl(url);
-
-      int progress = task == null ? 0 : task.progress;
-
-      double_progress =
-          double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
-    } catch (error) {
-      double_progress = 0;
-      aldDebugPrint(
-          "ALDownloader | get download progress for url = $url, error = $error");
-    }
-
-    return double_progress;
-  }
-
-  /// Pause download
-  ///
-  /// Stop download, but the incomplete data will not be deleted.
-  ///
-  /// **parameters**
-  ///
-  /// [url] url
-  static Future<void> pause(String url) async {
+  static Future<void> _pause1(String url) async {
     assert(_isInitial,
         "ALDownloader | ALDownloader.initialize or ALDownloader.download must be called first");
 
     try {
       final task = _getTaskFromUrl(url);
 
-      if (task == null ||
-          task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
-          task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
-        if (task == null) {
-          aldDebugPrint(
-              "ALDownloader | pause, url = $url, but url's task is null");
-        } else {
-          aldDebugPrint(
-              "ALDownloader | pause, url = $url, but url is ${task.innerStatus.alDescription}");
-        }
+      if (task == null) {
+        aldDebugPrint(
+            "ALDownloader | _pause1, url = $url, but url's task is null");
       } else {
         final taskId = task.taskId;
         if (task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
@@ -306,38 +405,31 @@ class ALDownloader {
                 .isExistAbsolutePhysicalPathOfFileForUrl(url)) {
               await FlutterDownloader.pause(taskId: taskId);
             } else {
-              await _removeTaskWithCallHandler(task);
+              await _pauseTaskPretendedlyWithCallHandler(task);
             }
           } else {
             await FlutterDownloader.pause(taskId: taskId);
           }
+        } else {
+          aldDebugPrint(
+              "ALDownloader | _pause1, url = $url, but url is ${task.innerStatus.alDescription}");
         }
       }
     } catch (error) {
-      aldDebugPrint("ALDownloader | pause, url = $url, error = $error");
+      aldDebugPrint("ALDownloader | _pause1, url = $url, error = $error");
     }
   }
 
-  /// Pause all downloads
-  ///
-  /// This is a multiple of [pause], see [pause].
-  static Future<void> pauseAll() async {
+  static Future<void> _pauseAll1() async {
     final aTemp = <_ALDownloadTask>[];
     aTemp.addAll(_tasks);
     for (final task in aTemp) {
       final url = task.url;
-      await pause(url);
+      await _pause1(url);
     }
   }
 
-  /// Cancel download
-  ///
-  /// Stop download, and the incomplete data will be deleted.
-  ///
-  /// **parameters**
-  ///
-  /// [url] url
-  static Future<void> cancel(String url) async {
+  static Future<void> _cancel1(String url) async {
     assert(_isInitial,
         "ALDownloader | ALDownloader.initialize or ALDownloader.download must be called first");
 
@@ -348,10 +440,10 @@ class ALDownloader {
           task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
         if (task == null) {
           aldDebugPrint(
-              "ALDownloader | cancel, url = $url, but url's task is null");
+              "ALDownloader | _cancel1, url = $url, but url's task is null");
         } else {
           aldDebugPrint(
-              "ALDownloader | cancel, url = $url, but url is deprecated");
+              "ALDownloader | _cancel1, url = $url, but url is deprecated");
         }
 
         _callFailedHandler(url, 0);
@@ -360,30 +452,20 @@ class ALDownloader {
         await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
-      aldDebugPrint("ALDownloader | cancel, url = $url, error = $error");
+      aldDebugPrint("ALDownloader | _cancel1, url = $url, error = $error");
     }
   }
 
-  /// Cancel all downloads
-  ///
-  /// This is a multiple of [cancel], see [cancel].
-  static Future<void> cancelAll() async {
+  static Future<void> _cancelAll1() async {
     final aTemp = <_ALDownloadTask>[];
     aTemp.addAll(_tasks);
     for (final task in aTemp) {
       final url = task.url;
-      await cancel(url);
+      await _cancel1(url);
     }
   }
 
-  /// Remove download
-  ///
-  /// Remove download, and all the data will be deleted.
-  ///
-  /// **parameters**
-  ///
-  /// [url] url
-  static Future<void> remove(String url) async {
+  static Future<void> _remove1(String url) async {
     assert(_isInitial,
         "ALDownloader | ALDownloader.initialize or ALDownloader.download must be called first");
 
@@ -394,10 +476,10 @@ class ALDownloader {
           task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
         if (task == null) {
           aldDebugPrint(
-              "ALDownloader | remove, url = $url, but url's task is null");
+              "ALDownloader | _remove1, url = $url, but url's task is null");
         } else {
           aldDebugPrint(
-              "ALDownloader | remove, url = $url, but url is deprecated");
+              "ALDownloader | _remove1, url = $url, but url is deprecated");
         }
 
         _callFailedHandler(url, 0);
@@ -405,19 +487,35 @@ class ALDownloader {
         await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
-      aldDebugPrint("ALDownloader | remove, url = $url, error = $error");
+      aldDebugPrint("ALDownloader | _remove1, url = $url, error = $error");
     }
   }
 
-  /// Remove all downloads
-  ///
-  /// This is a multiple of [remove], see [remove].
-  static Future<void> removeAll() async {
+  static Future<void> _removeAll1() async {
     final aTemp = <_ALDownloadTask>[];
     aTemp.addAll(_tasks);
     for (final task in aTemp) {
       final url = task.url;
-      await remove(url);
+      await _remove1(url);
+    }
+  }
+
+  static void _preprocessSomeActionForUrl(String url) {
+    final task = _getTaskFromUrl(url);
+    if (task != null) _preprocessSomeActionForTask(task);
+  }
+
+  static void _preprocessSomeActionForAll() {
+    for (final task in _tasks) _preprocessSomeActionForTask(task);
+  }
+
+  static void _preprocessSomeActionForTask(_ALDownloadTask task) {
+    final url = task.url;
+    if (task.innerStatus == _ALDownloaderInnerStatus.prepared) {
+      _addOrUpdateTaskForUrl(url, "", _ALDownloaderInnerStatus.ignored, 0, "");
+    } else if (task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused) {
+      _addOrUpdateTaskForUrl(
+          url, "", _ALDownloaderInnerStatus.preparedPretendedPaused, 0, "");
     }
   }
 
@@ -427,7 +525,7 @@ class ALDownloader {
   ///
   /// avoid frequent I/O
   ///
-  /// **discusstion**
+  /// **discussion**
   ///
   /// Add or update the task for [url].
   static void _addOrUpdateTaskForUrl(String? url, String taskId,
@@ -463,7 +561,7 @@ class ALDownloader {
 
   /// Register send port and receive port for [IsolateNameServer]
   ///
-  /// It is used for communication between entrypoint isolate and download isolate .
+  /// It is used for communication between entrypoint isolate and download isolate.
   static void _addIsolateNameServerPortService() {
     IsolateNameServer.registerPortWithName(
         _receivePort.sendPort, _kDownloaderSendPort);
@@ -507,8 +605,11 @@ class ALDownloader {
       return;
     }
 
-    if (task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
-        task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
+    if (task.innerStatus == _ALDownloaderInnerStatus.prepared ||
+        task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
+        task.innerStatus == _ALDownloaderInnerStatus.deprecated ||
+        task.innerStatus == _ALDownloaderInnerStatus.ignored ||
+        task.innerStatus == _ALDownloaderInnerStatus.preparedPretendedPaused) {
       aldDebugPrint(
           "ALDownloader | _processDataFromPort, the func return, because task is ${task.innerStatus.alDescription}, taskId = $taskId");
       return;
@@ -581,7 +682,7 @@ class ALDownloader {
     }
   }
 
-  /// Call handler for business
+  /// Call handler for business 1
   static void _callHandlerForBusiness1(
       String taskId,
       String url,
@@ -606,7 +707,10 @@ class ALDownloader {
   /// for initialization
   static Future<bool> _isShouldRemoveDataForInitialization(
       String savedDir, String url, _ALDownloaderInnerStatus innerStatus) async {
-    if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
+    if (innerStatus == _ALDownloaderInnerStatus.prepared ||
+        innerStatus == _ALDownloaderInnerStatus.ignored ||
+        innerStatus == _ALDownloaderInnerStatus.preparedPretendedPaused)
+      return false;
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
     bool aBool;
     if (innerStatus == _ALDownloaderInnerStatus.complete ||
@@ -627,8 +731,13 @@ class ALDownloader {
   /// Verify data and then determine whether to delete data from disk
   static Future<bool> _isShouldRemoveData(
       String savedDir, String url, _ALDownloaderInnerStatus innerStatus) async {
-    if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
+    if (innerStatus == _ALDownloaderInnerStatus.prepared ||
+        innerStatus == _ALDownloaderInnerStatus.ignored ||
+        innerStatus == _ALDownloaderInnerStatus.preparedPretendedPaused)
+      return false;
+
     if (!(await ALDownloader._isInRootPathForPath(savedDir))) return true;
+
     if (innerStatus == _ALDownloaderInnerStatus.complete ||
         innerStatus == _ALDownloaderInnerStatus.paused) {
       final aBool = await ALDownloaderPersistentFileManager
@@ -806,6 +915,9 @@ class ALDownloader {
   /// A dirty flag that guarantees that this scope is executed only once
   static bool _isInitial = false;
 
+  /// ALDownloader event queue
+  static final _queue = Queue();
+
   /// Custom download tasks
   static final List<_ALDownloadTask> _tasks = [];
 
@@ -851,7 +963,13 @@ class _ALDownloaderBinder {
 ///
 /// It is used to supplement some statuses for [DownloadTaskStatus].
 ///
-/// It has supplemented [prepared] and [deprecated] at present and may supplement more statuses in the future.
+/// **discussion**
+///
+/// It has supplemented the fllowing statuses at present.
+///
+/// [prepared], [deprecated], [pretendedPaused], [ignored], [preparedPretendedPaused]
+///
+/// It may supplement more statuses in the future.
 enum _ALDownloaderInnerStatus {
   prepared,
   undefined,
@@ -862,7 +980,9 @@ enum _ALDownloaderInnerStatus {
   canceled,
   paused,
   pretendedPaused,
-  deprecated
+  deprecated,
+  ignored,
+  preparedPretendedPaused
 }
 
 /// An enumeration extension of inner status
@@ -877,6 +997,8 @@ extension _ALDownloaderInnerStatusExtension on _ALDownloaderInnerStatus {
         "canceled",
         "paused",
         "pretendedPaused",
-        "deprecated"
+        "deprecated",
+        "ignored",
+        "preparedPretendedPaused"
       ][index];
 }

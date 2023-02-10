@@ -161,70 +161,59 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Action
   // ignore: unused_element
-  _downloadAction() async {
-    await download();
+  void _downloadAction() {
+    download();
   }
 
   /// Action
   // ignore: unused_element
-  _downloadAllAction() async {
-    await downloadAll();
+  void _downloadAllAction() {
+    downloadAll();
   }
 
   /// Action
   // ignore: unused_element
-  _pauseAction() async {
+  void _pauseAction() {
     final url = models.first.url;
-    await ALDownloader.pause(url);
+    ALDownloader.pause(url);
   }
 
   /// Action
   // ignore: unused_element
-  _pauseAllAction() async {
-    await ALDownloader.pauseAll();
+  void _pauseAllAction() {
+    ALDownloader.pauseAll();
   }
 
   /// Action
   // ignore: unused_element
-  _cancelAction() async {
+  void _cancelAction() {
     final url = models.first.url;
-    await ALDownloader.cancel(url);
+    ALDownloader.cancel(url);
   }
 
   /// Action
   // ignore: unused_element
-  _cancelAllAction() async {
-    await ALDownloader.cancelAll();
+  void _cancelAllAction() {
+    ALDownloader.cancelAll();
   }
 
   /// Action
   // ignore: unused_element
-  _removeAction() async {
+  void _removeAction() {
     final url = models.first.url;
-    await ALDownloader.remove(url);
+    ALDownloader.remove(url);
   }
 
   /// Action
   // ignore: unused_element
-  _removeAllAction() async {
-    await ALDownloader.removeAll();
+  void _removeAllAction() {
+    ALDownloader.removeAll();
   }
 
   /* ----------------------------------------------Method for test---------------------------------------------- */
 
-  /// Execute some methods together serially
-  ///
-  /// When executing the following methods together, try to keep them serial.
-  Future<void> executeSomeMethodsTogetherSerially() async {
-    final urls = models.map((e) => e.url).toList();
-    final url = urls.first;
-    await ALDownloader.initialize();
-    await ALDownloader.remove(url);
-    await ALDownloader.download(url);
-  }
-
   /// Initialize
-  Future<void> initialize() async {
+  void initialize() {
     // about print
     aboutPrint();
 
@@ -238,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // It is for batch download. It is an one-off interface.
     addBatchDownloaderHandlerInterface();
 
-    await ALDownloader.initialize();
+    ALDownloader.initialize();
   }
 
   /// About print
@@ -300,11 +289,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// Download
-  Future<void> download() async {
+  void download() {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
-    await ALDownloader.download(url,
+    ALDownloader.download(url,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint(
@@ -319,9 +308,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   /// Download all
-  Future<void> downloadAll() async {
+  void downloadAll() {
     final urls = models.map((e) => e.url).toList();
-    await ALDownloaderBatcher.downloadUrls(urls,
+    ALDownloaderBatcher.downloadUrls(urls,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint("ALDownloader | batch | download progress = $progress\n");

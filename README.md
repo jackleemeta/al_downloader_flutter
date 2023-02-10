@@ -43,7 +43,7 @@ import 'package:al_downloader/al_downloader.dart';
 
 ```
 /// Download
-await ALDownloader.download(url,
+ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -108,28 +108,28 @@ final progress = ALDownloader.getProgressForUrl(url);
 /// Pause download
 ///
 /// Stop download, but the incomplete data will not be deleted.
-await ALDownloader.pause(url);
+ALDownloader.pause(url);
 ```
 
 ```
 /// Cancel download
 ///
 /// Stop download, and the incomplete data will be deleted.
-await ALDownloader.cancel(url);
+ALDownloader.cancel(url);
 ```
 
 ```
 /// Remove download
 ///
 /// Remove download, and all the data will be deleted.
-await ALDownloader.remove(url);
+ALDownloader.remove(url);
 ```
 
 ### ALDownloaderBatcher
 
 ```
 /// Batch download
-await ALDownloaderBatcher.downloadUrls(urls,
+ALDownloaderBatcher.downloadUrls(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint("ALDownloader | batch | download progress = $progress\n");
@@ -207,18 +207,7 @@ ALDownloaderPrintConfig.frequentEnabled = false;
 
 ## *Note*:
 
-*1. Method needs to add qualifier `await` when executing in a coroutine.*
-
-*For example that*
-```
-Future<void> executeSomeMethodsTogetherSerially() async {
-  await ALDownloader.initialize();
-  await ALDownloader.remove(url);
-  await ALDownloader.download(url);
-}
-```
-
-*2. If the persistent file was removed by exceptional means, such as the cache folder being deleted by some business code, call [remove] and then call [download] to re-download for fixing the problem.*
+*1. If the persistent file was removed by exceptional means, such as the cache folder being deleted by some business code, call [remove] and then call [download] to re-download for fixing the problem.*
 
 ## Key File Of Example
 

@@ -8,7 +8,7 @@ class ALDownloaderHandlerInterface {
   final ALDownloaderProgressHandler? progressHandler;
   final ALDownloaderSucceededHandler? succeededHandler;
   final ALDownloaderFailedHandler? failedHandler;
-  final ALDownloaderPasusedHandler? pausedHandler;
+  final ALDownloaderPausedHandler? pausedHandler;
 }
 
 /// Downloader progress handler
@@ -21,4 +21,4 @@ typedef ALDownloaderSucceededHandler = void Function();
 typedef ALDownloaderFailedHandler = void Function();
 
 /// Downloader paused handler
-typedef ALDownloaderPasusedHandler = void Function();
+typedef ALDownloaderPausedHandler = void Function();

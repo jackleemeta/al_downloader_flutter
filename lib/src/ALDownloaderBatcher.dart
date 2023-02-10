@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'ALDownloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderStatus.dart';
@@ -17,13 +16,13 @@ class ALDownloaderBatcher {
   /// [downloaderHandlerInterface] downloader handler interface
   ///
   /// It is an one-off interface which will be destroyed when the download succeeded/failed.
-  static Future<void> downloadUrls(List<String> urls,
-      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
+  static void downloadUrls(List<String> urls,
+      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
     addDownloaderHandlerInterface(downloaderHandlerInterface, urls);
 
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final url in aNonDuplicatedUrls) await ALDownloader.download(url);
+    for (final url in aNonDuplicatedUrls) ALDownloader.download(url);
   }
 
   /// Get download status
@@ -107,6 +106,8 @@ class ALDownloaderBatcher {
       final aDownloaderHandlerInterface = ALDownloaderHandlerInterface(
           progressHandler: (progress) {},
           succeededHandler: () {
+            binder._completedKVs[url] = true;
+
             final progress = binder._progress;
 
             aldDebugPrint(
@@ -115,8 +116,6 @@ class ALDownloaderBatcher {
 
             final progressHandler = downloaderHandlerInterface?.progressHandler;
             if (progressHandler != null) progressHandler(progress);
-
-            binder._completedKVs[url] = true;
 
             if (binder._isCompletedHandlerCalled) {
               if (binder._isSucceeded) {
@@ -136,6 +135,8 @@ class ALDownloaderBatcher {
             }
           },
           failedHandler: () {
+            binder._completedKVs[url] = false;
+
             final progress = binder._progress;
 
             aldDebugPrint(
@@ -144,8 +145,6 @@ class ALDownloaderBatcher {
 
             final progressHandler = downloaderHandlerInterface?.progressHandler;
             if (progressHandler != null) progressHandler(progress);
-
-            binder._completedKVs[url] = false;
 
             if (binder._isCompletedHandlerCalled) {
               aldDebugPrint(
@@ -195,10 +194,10 @@ class ALDownloaderBatcher {
   /// **parameters**
   ///
   /// [urls] urls
-  static Future<void> pause(List<String> urls) async {
+  static void pause(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final url in aNonDuplicatedUrls) await ALDownloader.pause(url);
+    for (final url in aNonDuplicatedUrls) ALDownloader.pause(url);
   }
 
   /// Cancel downloads
@@ -208,10 +207,10 @@ class ALDownloaderBatcher {
   /// **parameters**
   ///
   /// [urls] urls
-  static Future<void> cancel(List<String> urls) async {
+  static void cancel(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final url in aNonDuplicatedUrls) await ALDownloader.cancel(url);
+    for (final url in aNonDuplicatedUrls) ALDownloader.cancel(url);
   }
 
   /// Remove downloads
@@ -221,10 +220,10 @@ class ALDownloaderBatcher {
   /// **parameters**
   ///
   /// [urls] urls
-  static Future<void> remove(List<String> urls) async {
+  static void remove(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final url in aNonDuplicatedUrls) await ALDownloader.remove(url);
+    for (final url in aNonDuplicatedUrls) ALDownloader.remove(url);
   }
 
   /// Remove duplicated urls
