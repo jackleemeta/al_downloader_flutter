@@ -15,8 +15,8 @@ class ALDownloader {
   /// It can be called actively or called lazily when [download] is called.
   static void initialize() {
     _queue.add(() => _initialize()).catchError((error) {
-      aldDebugPrint("ALDownloader | queue error | execute _initialize",
-          isFrequentPrint: true);
+      aldDebugPrint(
+          "ALDownloader | queue error | execute _initialize, error = $error");
     });
   }
 
@@ -53,8 +53,8 @@ class ALDownloader {
     }
 
     _queue.add(() => _download(url)).catchError((error) {
-      aldDebugPrint("ALDownloader | queue error | execute _download",
-          isFrequentPrint: true);
+      aldDebugPrint(
+          "ALDownloader | queue error | execute _download, error = $error");
     });
   }
 
@@ -183,8 +183,8 @@ class ALDownloader {
     _preprocessSomeActionForUrl(url);
 
     _queue.add(() => _pause1(url)).catchError((error) {
-      aldDebugPrint("ALDownloader | queue error | execute _pause1",
-          isFrequentPrint: true);
+      aldDebugPrint(
+          "ALDownloader | queue error | execute _pause1, error = $error");
     });
   }
 
@@ -195,8 +195,8 @@ class ALDownloader {
     _preprocessSomeActionForAll();
 
     _queue.add(() => _pauseAll1()).catchError((error) {
-      aldDebugPrint("ALDownloader | queue error | execute _pauseAll1",
-          isFrequentPrint: true);
+      aldDebugPrint(
+          "ALDownloader | queue error | execute _pauseAll1, error = $error");
     });
   }
 
@@ -210,7 +210,10 @@ class ALDownloader {
   static void cancel(String url) {
     _preprocessSomeActionForUrl(url);
 
-    _queue.add(() => _cancel1(url));
+    _queue.add(() => _cancel1(url)).catchError((error) {
+      aldDebugPrint(
+          "ALDownloader | queue error | execute _cancel1, error = $error");
+    });
   }
 
   /// Cancel all downloads
@@ -220,8 +223,8 @@ class ALDownloader {
     _preprocessSomeActionForAll();
 
     _queue.add(() => _cancelAll1()).catchError((error) {
-      aldDebugPrint("ALDownloader | queue error | execute _cancelAll1",
-          isFrequentPrint: true);
+      aldDebugPrint(
+          "ALDownloader | queue error | execute _cancelAll1, error = $error");
     });
   }
 
@@ -236,8 +239,8 @@ class ALDownloader {
     _preprocessSomeActionForUrl(url);
 
     _queue.add(() => _remove1(url)).catchError((error) {
-      aldDebugPrint("ALDownloader | queue error | execute _remove1",
-          isFrequentPrint: true);
+      aldDebugPrint(
+          "ALDownloader | queue error | execute _remove1, error = $error");
     });
   }
 
@@ -248,8 +251,8 @@ class ALDownloader {
     _preprocessSomeActionForAll();
 
     _queue.add(() => _removeAll1()).catchError((error) {
-      aldDebugPrint("ALDownloader | queue error | execute _removeAll1",
-          isFrequentPrint: true);
+      aldDebugPrint(
+          "ALDownloader | queue error | execute _removeAll1, error = $error");
     });
   }
 
@@ -379,6 +382,11 @@ class ALDownloader {
         aldDebugPrint(
             "ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, taskId = null");
       }
+    } else if (task.innerStatus == _ALDownloaderInnerStatus.running) {
+      aldDebugPrint(
+          "ALDownloader | try to download url, but the url is running, url may re-download after being paused, url = $url, taskId = ${task.taskId}");
+
+      task.isNeedRedownloadAfterPaused = true;
     } else {
       aldDebugPrint(
           "ALDownloader | try to download url, but the url is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}");
@@ -397,6 +405,7 @@ class ALDownloader {
             "ALDownloader | _pause1, url = $url, but url's task is null");
       } else {
         final taskId = task.taskId;
+
         if (task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
           await _pauseTaskPretendedlyWithCallHandler(task);
         } else if (task.innerStatus == _ALDownloaderInnerStatus.running) {
@@ -404,11 +413,13 @@ class ALDownloader {
             if (await ALDownloaderPersistentFileManager
                 .isExistAbsolutePhysicalPathOfFileForUrl(url)) {
               await FlutterDownloader.pause(taskId: taskId);
+              task.isNeedRedownloadAfterPaused = false;
             } else {
               await _pauseTaskPretendedlyWithCallHandler(task);
             }
           } else {
             await FlutterDownloader.pause(taskId: taskId);
+            task.isNeedRedownloadAfterPaused = false;
           }
         } else {
           aldDebugPrint(
@@ -624,6 +635,12 @@ class ALDownloader {
         double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
 
     _callHandlerForBusiness1(taskId, url, innerStatus, double_progress);
+
+    if (task.isNeedRedownloadAfterPaused &&
+        task.innerStatus == _ALDownloaderInnerStatus.paused) {
+      task.isNeedRedownloadAfterPaused = false;
+      download(url);
+    }
 
     aldDebugPrint(
         "ALDownloader | _processDataFromPort | processed, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress",
@@ -941,6 +958,8 @@ class _ALDownloadTask {
   String savedDir = "";
 
   String taskId = "";
+
+  bool isNeedRedownloadAfterPaused = false;
 
   int progress = 0;
 
