@@ -160,35 +160,32 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 final status = ALDownloaderBatcher.getStatusForUrls(urls);
 ```
 
-### ALDownloaderPersistentFileManager - 基于url的持久化文件管理器
+### ALDownloaderFileManager - 基于url的文件管理器
 
 ```
-final model = await ALDownloaderPersistentFileManager
-    .lazyGetALDownloaderPathModelForUrl(url);
+final model = await ALDownloaderFileManager.lazyGetPathModelForUrl(url);
 debugPrint(
     "ALDownloader | 获取[url]的“物理目录路径”和“虚拟/物理文件名”, url = $url, model = $model\n");
 
-final path2 = await ALDownloaderPersistentFileManager
-    .lazyGetAbsolutePathOfDirectoryForUrl(url);
+final path2 =
+    await ALDownloaderFileManager.lazyGetPhysicalDirectoryPathForUrl(url);
 debugPrint(
     "ALDownloader | 获取[url]的“物理目录路径”, url = $url, path = $path2\n");
 
-final path3 = await ALDownloaderPersistentFileManager
-    .getAbsoluteVirtualPathOfFileForUrl(url);
+final path3 = await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
 debugPrint(
     "ALDownloader | 获取[url]的“虚拟文件路径”, url = $url, path = $path3\n");
 
-final path4 = await ALDownloaderPersistentFileManager
-    .getAbsolutePhysicalPathOfFileForUrl(url);
+final path4 = await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
 debugPrint(
     "ALDownloader | 获取[url]的“物理文件路径”, url = $url, path = $path4\n");
 
-final isExist = await ALDownloaderPersistentFileManager
-    .isExistAbsolutePhysicalPathOfFileForUrl(url);
+final isExist =
+    await ALDownloaderFileManager.isExistPhysicalFilePathForUrl(url);
 debugPrint(
     "ALDownloader | 检查[url]是否存在“物理文件路径”, url = $url, is Exist = $isExist\n");
 
-final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
+final fileName = ALDownloaderFileManager.getFileNameForUrl(url);
 debugPrint(
     "ALDownloader | 获取[url]的“虚拟/物理文件名”, url = $url, file name = $fileName\n");
 ```

@@ -328,32 +328,29 @@ class _MyHomePageState extends State<MyHomePage> {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
-    final model = await ALDownloaderPersistentFileManager
-        .lazyGetALDownloaderPathModelForUrl(url);
+    final model = await ALDownloaderFileManager.lazyGetPathModelForUrl(url);
     debugPrint(
         "ALDownloader | get 'physical directory path' and 'virtual/physical file name' of the file for [url], url = $url, model = $model\n");
 
-    final path2 = await ALDownloaderPersistentFileManager
-        .lazyGetAbsolutePathOfDirectoryForUrl(url);
+    final path2 =
+        await ALDownloaderFileManager.lazyGetPhysicalDirectoryPathForUrl(url);
     debugPrint(
         "ALDownloader | get 'physical directory path' for [url], url = $url, path = $path2\n");
 
-    final path3 = await ALDownloaderPersistentFileManager
-        .getAbsoluteVirtualPathOfFileForUrl(url);
+    final path3 = await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
     debugPrint(
         "ALDownloader | get 'virtual file path' for [url], url = $url, path = $path3\n");
 
-    final path4 = await ALDownloaderPersistentFileManager
-        .getAbsolutePhysicalPathOfFileForUrl(url);
+    final path4 = await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
     debugPrint(
         "ALDownloader | get 'physical file path' for [url], url = $url, path = $path4\n");
 
-    final isExist = await ALDownloaderPersistentFileManager
-        .isExistAbsolutePhysicalPathOfFileForUrl(url);
+    final isExist =
+        await ALDownloaderFileManager.isExistPhysicalFilePathForUrl(url);
     debugPrint(
         "ALDownloader | check whether [url] exists a 'physical file path', url = $url, is Exist = $isExist\n");
 
-    final fileName = ALDownloaderPersistentFileManager.getFileNameForUrl(url);
+    final fileName = ALDownloaderFileManager.getFileNameForUrl(url);
     debugPrint(
         "ALDownloader | get 'virtual/physical file name' for [url], url = $url, file name = $fileName\n");
   }

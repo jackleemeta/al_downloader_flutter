@@ -13,8 +13,7 @@ class ALDownloaderFileTypeJudge {
   /// **return**
   ///
   /// [ALDownloaderFileTypeModel] file type model
-  static ALDownloaderFileTypeModel getALDownloaderFileTypeModelFromUrl(
-      String url) {
+  static ALDownloaderFileTypeModel getFileTypeModelForUrl(String url) {
     final File file = File(url);
     final anExtension = extension(file.path);
 
@@ -27,7 +26,7 @@ class ALDownloaderFileTypeJudge {
           return ALDownloaderFileTypeModel(type, anExtension);
       } catch (error) {
         aldDebugPrint(
-            "ALDownloader | getALDownloaderFileTypeModelFromUrl, type = $type, error = $error");
+            "ALDownloader | getFileTypeModelForUrl, url = $url, type = $type, error = $error");
       }
     }
 
