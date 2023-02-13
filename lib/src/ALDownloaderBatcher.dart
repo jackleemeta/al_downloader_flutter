@@ -24,7 +24,7 @@ class ALDownloaderBatcher {
 
   /// Download
   ///
-  /// [vos] the input value object
+  /// [vos] the input value object list
   ///
   /// [downloaderHandlerInterface] downloader handler interface
   ///

@@ -1,3 +1,4 @@
+/// ALDownloader batcher input value object
 class ALDownloaderBatcherInputVO {
   final String url;
 
