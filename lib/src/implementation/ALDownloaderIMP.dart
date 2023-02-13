@@ -292,7 +292,7 @@ class ALDownloaderIMP {
             "ALDownloader | try to download url, the url is paused previously and resumes succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForResumption, innerStatus = running");
 
         _addOrUpdateTaskForUrl(url, taskIdForResumption,
-            _ALDownloaderInnerStatus.running, task.progress, "");
+            _ALDownloaderInnerStatus.paused, task.progress, "");
       } else {
         aldDebugPrint(
             "ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, taskId = null");
