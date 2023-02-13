@@ -41,8 +41,8 @@ import 'package:al_downloader/al_downloader.dart';
 
 ### ALDownloader
 
+#### Download
 ```
-/// Download
 ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
@@ -57,8 +57,8 @@ ALDownloader.download(url,
     }));
 ```
 
+#### Add a downloader handler interface
 ```
-/// Add a downloader handler interface
 ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -73,8 +73,8 @@ ALDownloader.addDownloaderHandlerInterface(
     url);
 ```
 
+#### Add a forever downloader handler interface
 ```
-/// Add a forever downloader handler interface
 ALDownloader.addForeverDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -89,46 +89,43 @@ ALDownloader.addForeverDownloaderHandlerInterface(
     url);
 ```
 
+#### Remove downloader handler interface
 ```
-/// Remove downloader handler interface
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 ```
 
+#### Get download status
 ```
-/// Get download status
 final status = ALDownloader.getStatusForUrl(url);
 ```
 
+#### Get download progress
 ```
-/// Get download progress
 final progress = ALDownloader.getProgressForUrl(url);
 ```
 
+#### Pause download
 ```
-/// Pause download
-///
 /// Stop download, but the incomplete data will not be deleted.
 ALDownloader.pause(url);
 ```
 
+#### Cancel download
 ```
-/// Cancel download
-///
 /// Stop download, and the incomplete data will be deleted.
 ALDownloader.cancel(url);
 ```
 
+#### Remove download
 ```
-/// Remove download
-///
 /// Remove download, and all the data will be deleted.
 ALDownloader.remove(url);
 ```
 
 ### ALDownloaderBatcher
 
+#### Batch download
 ```
-/// Batch download
 ALDownloaderBatcher.download(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
@@ -142,8 +139,8 @@ ALDownloaderBatcher.download(urls,
     }));
 ```
 
+#### Add a downloader handler interface for batch
 ```
-/// Add a downloader handler interface for batch
 ALDownloaderBatcher.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint("ALDownloader | batch | download progress = $progress\n");
@@ -157,23 +154,14 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
     urls);
 ```
 
+#### Get download status for a set of urls
 ```
-/// Get download status for a set of urls
 final status = ALDownloaderBatcher.getStatusForUrls(urls);
 ```
 
 ### ALDownloaderFileManager - A manager that manages file by url
 
 ```
-final model = await ALDownloaderFileManager.lazyGetPathModelForUrl(url);
-debugPrint(
-    "ALDownloader | get 'physical directory path' and 'virtual/physical file name' of the file for [url], url = $url, model = $model\n");
-
-final path2 =
-    await ALDownloaderFileManager.lazyGetPhysicalDirectoryPathForUrl(url);
-debugPrint(
-    "ALDownloader | get 'physical directory path' for [url], url = $url, path = $path2\n");
-
 final path3 = await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
 debugPrint(
     "ALDownloader | get 'virtual file path' for [url], url = $url, path = $path3\n");
@@ -181,24 +169,17 @@ debugPrint(
 final path4 = await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
 debugPrint(
     "ALDownloader | get 'physical file path' for [url], url = $url, path = $path4\n");
-
-final isExist =
-    await ALDownloaderFileManager.isExistPhysicalFilePathForUrl(url);
-debugPrint(
-    "ALDownloader | check whether [url] exists a 'physical file path', url = $url, is Exist = $isExist\n");
-
-final fileName = ALDownloaderFileManager.getFileNameForUrl(url);
-debugPrint(
-    "ALDownloader | get 'virtual/physical file name' for [url], url = $url, file name = $fileName\n");
 ```
 
 ### ALDownloaderPrintConfig
 
+#### Enable print
 ```
-/// Enable print
 ALDownloaderPrintConfig.enabled = true;
+```
 
-/// Disable frequent print
+#### Disable frequent print
+```
 ALDownloaderPrintConfig.frequentEnabled = false;
 ```
 

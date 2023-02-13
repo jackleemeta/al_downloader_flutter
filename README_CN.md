@@ -39,8 +39,8 @@ import 'package:al_downloader/al_downloader.dart';
 
 ### ALDownloader
 
+#### 下载
 ```
-/// 下载
 ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
@@ -55,8 +55,8 @@ ALDownloader.download(url,
     }));
 ```
 
+#### 添加一个下载句柄池
 ```
-/// 添加一个下载句柄池
 ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -71,8 +71,8 @@ ALDownloader.addDownloaderHandlerInterface(
     url);
 ```
 
+#### 添加一个持久下载句柄池
 ```
-/// 添加一个持久下载句柄池
 ALDownloader.addForeverDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
@@ -87,37 +87,35 @@ ALDownloader.addForeverDownloaderHandlerInterface(
     url);
 ```
 
+#### 移除下载句柄池
 ```
-/// 移除下载句柄池
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 ```
 
+#### 获取下载状态
 ```
-/// 获取下载状态
 final status = ALDownloader.getStatusForUrl(url);
 ```
 
+#### 获取下载进度
 ```
-/// 获取下载进度
 final progress = ALDownloader.getProgressForUrl(url);
 ```
 
+#### 暂停下载
 ```
-/// 暂停下载
-///
 /// 停止下载，不删除未下载完成的数据
 ALDownloader.pause(url);
 ```
 
+#### 取消下载
 ```
-/// 取消下载
-///
 /// 停止下载，删除未下载完成的数据
 ALDownloader.cancel(url);
 ```
 
 ```
-/// 移除下载
+#### 移除下载
 ///
 /// 删除下载，删除所有数据
 ALDownloader.remove(url);
@@ -125,8 +123,8 @@ ALDownloader.remove(url);
 
 ### ALDownloaderBatcher
 
+#### 批量下载
 ```
-/// 批量下载
 ALDownloaderBatcher.download(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
@@ -140,8 +138,8 @@ ALDownloaderBatcher.download(urls,
     }));
 ```
 
+#### 对批量下载添加一个下载句柄池
 ```
-/// 对批量下载添加一个下载句柄池
 ALDownloaderBatcher.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint("ALDownloader | 批量 | 下载进度 = $progress\n");
@@ -155,23 +153,14 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
     urls);
 ```
 
+#### 获取一组url的下载状态
 ```
-/// 获取一组url的下载状态
 final status = ALDownloaderBatcher.getStatusForUrls(urls);
 ```
 
 ### ALDownloaderFileManager - 基于url的文件管理器
 
 ```
-final model = await ALDownloaderFileManager.lazyGetPathModelForUrl(url);
-debugPrint(
-    "ALDownloader | 获取[url]的“物理目录路径”和“虚拟/物理文件名”, url = $url, model = $model\n");
-
-final path2 =
-    await ALDownloaderFileManager.lazyGetPhysicalDirectoryPathForUrl(url);
-debugPrint(
-    "ALDownloader | 获取[url]的“物理目录路径”, url = $url, path = $path2\n");
-
 final path3 = await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
 debugPrint(
     "ALDownloader | 获取[url]的“虚拟文件路径”, url = $url, path = $path3\n");
@@ -179,24 +168,17 @@ debugPrint(
 final path4 = await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
 debugPrint(
     "ALDownloader | 获取[url]的“物理文件路径”, url = $url, path = $path4\n");
-
-final isExist =
-    await ALDownloaderFileManager.isExistPhysicalFilePathForUrl(url);
-debugPrint(
-    "ALDownloader | 检查[url]是否存在“物理文件路径”, url = $url, is Exist = $isExist\n");
-
-final fileName = ALDownloaderFileManager.getFileNameForUrl(url);
-debugPrint(
-    "ALDownloader | 获取[url]的“虚拟/物理文件名”, url = $url, file name = $fileName\n");
 ```
 
 ### ALDownloaderPrintConfig
 
+#### 开启打印
 ```
-/// 开启打印
 ALDownloaderPrintConfig.enabled = true;
+```
 
-/// 关闭频繁打印
+#### 关闭频繁打印
+```
 ALDownloaderPrintConfig.frequentEnabled = false;
 ```
 
