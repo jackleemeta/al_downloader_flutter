@@ -21,13 +21,7 @@ class ALDownloaderIMP {
     if (url == null)
       throw "ALDownloader | try to download url, but url is null";
 
-    var task = _getTaskFromUrl(url);
-
-    if (downloaderHandlerInterface != null) {
-      final aBinder =
-          _ALDownloaderBinder(url, downloaderHandlerInterface, false);
-      _binders.add(aBinder);
-    }
+    final task = _getTaskFromUrl(url);
 
     if (task == null ||
         task.innerStatus == _ALDownloaderInnerStatus.deprecated ||
@@ -47,23 +41,48 @@ class ALDownloaderIMP {
 
   static void addDownloaderHandlerInterface(
       ALDownloaderHandlerInterface? downloaderHandlerInterface, String? url) {
-    if (downloaderHandlerInterface == null || url == null) return;
-    final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface, false);
-    _binders.add(aBinder);
+    _queue.add(() async {
+      if (downloaderHandlerInterface == null || url == null) return;
+      final aBinder =
+          _ALDownloaderBinder(url, downloaderHandlerInterface, false);
+      _binders.add(aBinder);
+    }).catchError((error) {
+      aldDebugPrint(
+          "ALDownloader | queue error | execute addDownloaderHandlerInterface, error = $error");
+    });
   }
 
   static void addForeverDownloaderHandlerInterface(
       ALDownloaderHandlerInterface? downloaderHandlerInterface, String? url) {
-    if (downloaderHandlerInterface == null || url == null) return;
-    final aBinder = _ALDownloaderBinder(url, downloaderHandlerInterface, true);
-    _binders.add(aBinder);
+    _queue.add(() async {
+      if (downloaderHandlerInterface == null || url == null) return;
+      final aBinder =
+          _ALDownloaderBinder(url, downloaderHandlerInterface, true);
+      _binders.add(aBinder);
+    }).catchError((error) {
+      aldDebugPrint(
+          "ALDownloader | queue error | execute addForeverDownloaderHandlerInterface, error = $error");
+    });
   }
 
-  static void removeDownloaderHandlerInterfaceForUrl(String url) =>
+  static void removeDownloaderHandlerInterfaceForUrl(String url) {
+    _queue.add(() async {
       _binders.removeWhere((element) => url == element.url);
+    }).catchError((error) {
+      aldDebugPrint(
+          "ALDownloader | queue error | execute removeDownloaderHandlerInterfaceForUrl, error = $error");
+    });
+  }
 
   /// Remove all downloader handler interfaces
-  static void removeDownloaderHandlerInterfaceForAll() => _binders.clear();
+  static void removeDownloaderHandlerInterfaceForAll() {
+    _queue.add(() async {
+      _binders.clear();
+    }).catchError((error) {
+      aldDebugPrint(
+          "ALDownloader | queue error | execute removeDownloaderHandlerInterfaceForAll, error = $error");
+    });
+  }
 
   static ALDownloaderStatus getStatusForUrl(String url) {
     ALDownloaderStatus status;
@@ -194,9 +213,14 @@ class ALDownloaderIMP {
     }
   }
 
-  static Future<void> _download(
-    String url,
-  ) async {
+  static Future<void> _download(String url,
+      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
+    if (downloaderHandlerInterface != null) {
+      final aBinder =
+          _ALDownloaderBinder(url, downloaderHandlerInterface, false);
+      _binders.add(aBinder);
+    }
+
     await _initialize();
 
     var task = _getTaskFromUrl(url);

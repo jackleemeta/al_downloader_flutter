@@ -41,6 +41,7 @@ class ALDownloaderBatcherIMP {
       // Do not contain downloading task && Do not contain paused task && Do not contain failed task && Tasks are all succeeded.
       return ALDownloaderStatus.succeeded;
     }
+
     // Do not contain downloading task && Do not contain failed task && Do not contain paused task && Contain task which is not succeeded.
     return ALDownloaderStatus.unstarted;
   }
