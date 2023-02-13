@@ -14,9 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'al_downloader',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const MyHomePage(title: 'al_downloader'),
     );
   }
@@ -42,23 +40,19 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
+      appBar: AppBar(title: Text(widget.title)),
       body: Stack(fit: StackFit.expand, children: [
         Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 10),
-              const Text(
-                "You are testing batch download",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
+              const Text("You are testing batch download",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black)),
               Expanded(child: theListview)
             ]),
         Positioned(
@@ -70,21 +64,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: theActionLists
                     .map((e) => Expanded(
-                            child: Padding(
-                          padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
-                          child: MaterialButton(
-                            padding: const EdgeInsets.all(0),
-                            minWidth: 20,
-                            height: 50,
-                            color: Colors.blue,
-                            textTheme: ButtonTextTheme.primary,
-                            onPressed: e[1],
-                            child: Text(
-                              e[0],
-                              style: const TextStyle(fontSize: 10),
-                            ),
-                          ),
-                        )))
+                        child: Padding(
+                            padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+                            child: MaterialButton(
+                                padding: const EdgeInsets.all(0),
+                                minWidth: 20,
+                                height: 50,
+                                color: Colors.blue,
+                                textTheme: ButtonTextTheme.primary,
+                                onPressed: e[1],
+                                child: Text(
+                                  e[0],
+                                  style: const TextStyle(fontSize: 10),
+                                )))))
                     .toList()))
       ]),
     );
@@ -135,13 +127,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       ),
                       Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          model.statusDescription,
-                          style: const TextStyle(
-                              fontSize: 13, color: Colors.white),
-                        ),
-                      )
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            model.statusDescription,
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.white),
+                          ))
                     ]))
               ]);
         },
