@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:path_provider/path_provider.dart';
-import '../ALDownloaderPathModel.dart';
+import '../chore/ALDownloaderPathModel.dart';
 import '../internal/ALDownloaderFileTypeJudge.dart';
 import '../internal/ALDownloaderPrint.dart';
 

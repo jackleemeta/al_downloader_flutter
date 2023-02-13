@@ -1,16 +1,28 @@
 import 'ALDownloaderIMP.dart';
 import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
+import '../chore/ALDownloaderBatcherInputVO.dart';
 import '../internal/ALDownloaderPrint.dart';
 
 class ALDownloaderBatcherIMP {
-  static void downloadUrls(List<String> urls,
+  static void download(List<String> urls,
       {ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
     addDownloaderHandlerInterface(downloaderHandlerInterface, urls);
 
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     for (final url in aNonDuplicatedUrls) ALDownloaderIMP.download(url);
+  }
+
+  static void downloadUrlsWithVOs(List<ALDownloaderBatcherInputVO> vos,
+      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
+    final urls = vos.map((e) => e.url).toList();
+    addDownloaderHandlerInterface(downloaderHandlerInterface, urls);
+
+    final aNonDuplicatedVOs = _getNonDuplicatedVOsFromVOs(vos);
+
+    for (final vo in aNonDuplicatedVOs)
+      ALDownloaderIMP.download(vo.url, headers: vo.headers);
   }
 
   static ALDownloaderStatus getStatusForUrls(List<String> urls) {
@@ -156,6 +168,26 @@ class ALDownloaderBatcherIMP {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     for (final url in aNonDuplicatedUrls) ALDownloaderIMP.remove(url);
+  }
+
+  /// Remove duplicated vos
+  ///
+  /// If the following url is the same as the previous one, the following url will not be added.
+  static List<ALDownloaderBatcherInputVO> _getNonDuplicatedVOsFromVOs(
+      List<ALDownloaderBatcherInputVO> vos) {
+    final aNonDuplicatedVOs = <ALDownloaderBatcherInputVO>[];
+    final aNonDuplicatedUrls = <String>[];
+    for (final element in vos) {
+      final url = element.url;
+
+      if (!aNonDuplicatedUrls.contains(url)) {
+        aNonDuplicatedVOs.add(element);
+
+        aNonDuplicatedUrls.add(url);
+      }
+    }
+
+    return aNonDuplicatedVOs;
   }
 
   /// Remove duplicated urls

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../config/ALDownloaderPrintConfig.dart';
+import '../chore/ALDownloaderPrintConfig.dart';
 
 /// ALDownloader debug print
 ///

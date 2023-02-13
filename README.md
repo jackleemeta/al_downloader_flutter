@@ -129,7 +129,7 @@ ALDownloader.remove(url);
 
 ```
 /// Batch download
-ALDownloaderBatcher.downloadUrls(urls,
+ALDownloaderBatcher.download(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint("ALDownloader | batch | download progress = $progress\n");

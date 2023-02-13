@@ -1,6 +1,7 @@
 import 'ALDownloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderStatus.dart';
+import 'chore/ALDownloaderBatcherInputVO.dart';
 import 'implementation/ALDownloaderBatcherIMP.dart';
 
 /// ALDownloaderBatcher
@@ -16,9 +17,21 @@ class ALDownloaderBatcher {
   /// [downloaderHandlerInterface] downloader handler interface
   ///
   /// It is an one-off interface which will be destroyed when the download succeeded/failed.
-  static void downloadUrls(List<String> urls,
+  static void download(List<String> urls,
           {ALDownloaderHandlerInterface? downloaderHandlerInterface}) =>
-      ALDownloaderBatcherIMP.downloadUrls(urls,
+      ALDownloaderBatcherIMP.download(urls,
+          downloaderHandlerInterface: downloaderHandlerInterface);
+
+  /// Download
+  ///
+  /// [vos] the input value object
+  ///
+  /// [downloaderHandlerInterface] downloader handler interface
+  ///
+  /// It is an one-off interface which will be destroyed when the download succeeded/failed.
+  static void downloadUrlsWithVOs(List<ALDownloaderBatcherInputVO> vos,
+          {ALDownloaderHandlerInterface? downloaderHandlerInterface}) =>
+      ALDownloaderBatcherIMP.downloadUrlsWithVOs(vos,
           downloaderHandlerInterface: downloaderHandlerInterface);
 
   /// Get download status

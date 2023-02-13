@@ -127,7 +127,7 @@ ALDownloader.remove(url);
 
 ```
 /// 批量下载
-ALDownloaderBatcher.downloadUrls(urls,
+ALDownloaderBatcher.download(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint("ALDownloader | 批量 | 下载进度 = $progress\n");

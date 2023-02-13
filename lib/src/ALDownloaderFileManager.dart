@@ -1,5 +1,5 @@
+import 'chore/ALDownloaderPathModel.dart';
 import 'implementation/ALDownloaderFileManagerIMP.dart';
-import 'ALDownloaderPathModel.dart';
 
 /// A manager that manages persistent file by url
 class ALDownloaderFileManager {

@@ -17,11 +17,15 @@ class ALDownloader {
   ///
   /// [downloaderHandlerInterface] downloader handler interface
   ///
+  /// [headers] downloader headers
+  ///
   /// It is an one-off interface which will be destroyed when the download succeeded/failed.
   static void download(String? url,
-          {ALDownloaderHandlerInterface? downloaderHandlerInterface}) =>
+          {ALDownloaderHandlerInterface? downloaderHandlerInterface,
+          Map<String, String> headers = const {}}) =>
       ALDownloaderIMP.download(url,
-          downloaderHandlerInterface: downloaderHandlerInterface);
+          downloaderHandlerInterface: downloaderHandlerInterface,
+          headers: headers);
 
   /// Add a downloader handler interface
   ///

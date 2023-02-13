@@ -310,7 +310,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Download all
   void downloadAll() {
     final urls = models.map((e) => e.url).toList();
-    ALDownloaderBatcher.downloadUrls(urls,
+    ALDownloaderBatcher.download(urls,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint("ALDownloader | batch | download progress = $progress\n");

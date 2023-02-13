@@ -17,7 +17,8 @@ class ALDownloaderIMP {
   }
 
   static void download(String? url,
-      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
+      {ALDownloaderHandlerInterface? downloaderHandlerInterface,
+      Map<String, String> headers = const {}}) {
     if (url == null)
       throw "ALDownloader | try to download url, but url is null";
 
@@ -214,7 +215,8 @@ class ALDownloaderIMP {
   }
 
   static Future<void> _download(String url,
-      {ALDownloaderHandlerInterface? downloaderHandlerInterface}) async {
+      {ALDownloaderHandlerInterface? downloaderHandlerInterface,
+      Map<String, String> headers = const {}}) async {
     if (downloaderHandlerInterface != null) {
       final aBinder =
           _ALDownloaderBinder(url, downloaderHandlerInterface, false);
@@ -255,6 +257,7 @@ class ALDownloaderIMP {
           url: url,
           savedDir: dir,
           fileName: model.fileName,
+          headers: headers,
           showNotification: false,
           openFileFromNotification: false);
 
