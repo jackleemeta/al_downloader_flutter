@@ -777,18 +777,6 @@ class ALDownloaderIMP {
     return url;
   }
 
-  // ignore: unused_element
-  static List<_ALDownloadTask> _getGoingTask() {
-    final tasks = <_ALDownloadTask>[];
-    for (final task in _tasks) {
-      if (task.innerStatus == _ALDownloaderInnerStatus.enqueued ||
-          task.innerStatus == _ALDownloaderInnerStatus.running) {
-        tasks.add(task);
-      }
-    }
-    return tasks;
-  }
-
   static bool get _isLimitedForGoingTasks {
     bool isLimited = _goingTasks.length >= kMaxConcurrentTaskCount;
 
