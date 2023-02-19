@@ -404,7 +404,6 @@ abstract class ALDownloaderIMP {
     // Register FlutterDownloader callback.
     await FlutterDownloader.registerCallback(_downloadCallback, step: 1);
 
-    // Extract all current tasks from database and try to the execute the tasks.
     await _loadTasks();
   }
 
