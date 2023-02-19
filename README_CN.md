@@ -171,13 +171,15 @@ final status = ALDownloaderBatcher.getStatusForUrls(urls);
 ### ALDownloaderFileManager - 基于url的文件管理器
 
 ```
-final path3 = await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
+final virtualFilePath =
+    await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
 debugPrint(
-    "ALDownloader | 获取[url]的'虚拟文件路径', url = $url, path = $path3\n");
+    "ALDownloader | 获取[url]的'虚拟文件路径', url = $url, path = $virtualFilePath\n");
 
-final path4 = await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
+final physicalFilePath =
+    await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
 debugPrint(
-    "ALDownloader | 获取[url]的'物理文件路径', url = $url, path = $path4\n");
+    "ALDownloader | 获取[url]的'物理文件路径', url = $url, path = $virtualFilePath\n");
 ```
 
 ## *提示*:

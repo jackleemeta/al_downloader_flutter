@@ -252,7 +252,8 @@ abstract class ALDownloaderIMP {
 
   static void cRemoveAll() => _qRemoveAll();
 
-  static void _configForIsolatesChores() => configForIsolatesChores();
+  static void _configForIsolatesChores() =>
+      ALDownloaderIsolateLauncher.configForIsolatesChores();
 
   static void _qInitialize() {
     _queue.add(() async {
@@ -287,7 +288,7 @@ abstract class ALDownloaderIMP {
     if (_isLimitedForGoingTasks) {
       if (!_waitingTasks.contains(task)) _waitingTasks.add(task);
       aldDebugPrint(
-          'ALDownloader | in phase 1 | try to download url, going tasks are limited, those will download later, url = $url, taskId = ${task.taskId}');
+          'ALDownloader | in phase 1 | try to download url, but the going urls are limited, the url will download later, url = $url, taskId = ${task.taskId}');
       return;
     }
 
@@ -1128,8 +1129,7 @@ abstract class ALDownloaderIMP {
   }
 
   static bool get _isLimitedForGoingTasks {
-    bool isLimited = _goingTasks.length >= _kMaxConcurrentTaskCount;
-
+    final isLimited = _goingTasks.length >= _kMaxConcurrentTaskCount;
     return isLimited;
   }
 

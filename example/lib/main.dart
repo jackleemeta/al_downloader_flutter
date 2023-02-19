@@ -312,13 +312,15 @@ class _MyHomePageState extends State<MyHomePage> {
     final urls = models.map((e) => e.url).toList();
     final url = urls.first;
 
-    final path3 = await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
+    final virtualFilePath =
+        await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
     debugPrint(
-        "ALDownloader | get 'virtual file path' for [url], url = $url, path = $path3\n");
+        "ALDownloader | get 'virtual file path' for [url], url = $url, path = $virtualFilePath\n");
 
-    final path4 = await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
+    final physicalFilePath =
+        await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
     debugPrint(
-        "ALDownloader | get 'physical file path' for [url], url = $url, path = $path4\n");
+        "ALDownloader | get 'physical file path' for [url], url = $url, path = $physicalFilePath\n");
   }
 
   /// Remove downloader handler interface
