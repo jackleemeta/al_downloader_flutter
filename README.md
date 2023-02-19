@@ -41,19 +41,29 @@ import 'package:al_downloader/al_downloader.dart';
 
 ### ALDownloader
 
+#### Initialize
+```
+ALDownloader.initialize();
+```
+
+#### Configure print
+```
+ALDownloader.configurePrint(enabled: true, frequentEnabled: false);
+```
+
 #### Download
 ```
 ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | download progress = $progress, url = $url\n");
+          'ALDownloader | download progress = $progress, url = $url\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | download succeeded, url = $url\n");
+      debugPrint('ALDownloader | download succeeded, url = $url\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | download failed, url = $url\n");
+      debugPrint('ALDownloader | download failed, url = $url\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, url = $url\n");
+      debugPrint('ALDownloader | download paused, url = $url\n');
     }));
 ```
 
@@ -62,13 +72,13 @@ ALDownloader.download(url,
 ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | download progress = $progress, url = $url\n");
+          'ALDownloader | download progress = $progress, url = $url\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | download succeeded, url = $url\n");
+      debugPrint('ALDownloader | download succeeded, url = $url\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | download failed, url = $url\n");
+      debugPrint('ALDownloader | download failed, url = $url\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, url = $url\n");
+      debugPrint('ALDownloader | download paused, url = $url\n');
     }),
     url);
 ```
@@ -78,13 +88,13 @@ ALDownloader.addDownloaderHandlerInterface(
 ALDownloader.addForeverDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | download progress = $progress, url = $url\n");
+          'ALDownloader | download progress = $progress, url = $url\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | download succeeded, url = $url\n");
+      debugPrint('ALDownloader | download succeeded, url = $url\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | download failed, url = $url\n");
+      debugPrint('ALDownloader | download failed, url = $url\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | download paused, url = $url\n");
+      debugPrint('ALDownloader | download paused, url = $url\n');
     }),
     url);
 ```
@@ -129,13 +139,13 @@ ALDownloader.remove(url);
 ALDownloaderBatcher.download(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | batch | download progress = $progress\n");
+      debugPrint('ALDownloader | batch | download progress = $progress\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | batch | download succeeded\n");
+      debugPrint('ALDownloader | batch | download succeeded\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | batch | download failed\n");
+      debugPrint('ALDownloader | batch | download failed\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | batch | download paused\n");
+      debugPrint('ALDownloader | batch | download paused\n');
     }));
 ```
 
@@ -143,13 +153,13 @@ ALDownloaderBatcher.download(urls,
 ```
 ALDownloaderBatcher.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | batch | download progress = $progress\n");
+      debugPrint('ALDownloader | batch | download progress = $progress\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | batch | download succeeded\n");
+      debugPrint('ALDownloader | batch | download succeeded\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | batch | download failed\n");
+      debugPrint('ALDownloader | batch | download failed\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | batch | download paused\n");
+      debugPrint('ALDownloader | batch | download paused\n');
     }),
     urls);
 ```
@@ -169,18 +179,6 @@ debugPrint(
 final path4 = await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
 debugPrint(
     "ALDownloader | get 'physical file path' for [url], url = $url, path = $path4\n");
-```
-
-### ALDownloaderPrintConfig
-
-#### Enable print
-```
-ALDownloaderPrintConfig.enabled = true;
-```
-
-#### Disable frequent print
-```
-ALDownloaderPrintConfig.frequentEnabled = false;
 ```
 
 ## *Note*:

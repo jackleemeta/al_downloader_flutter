@@ -14,10 +14,11 @@ dependencies:
     sdk: flutter
   convert: ^3.0.1
   crypto: ^3.0.1
-  flutter_downloader: ">1.9.0 <1.10.0"
+  flutter_downloader: ^1.10.2
   path: ^1.8.0
   path_provider: ^2.0.9
   queue: ^3.1.0+2
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:

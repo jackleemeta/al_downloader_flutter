@@ -9,7 +9,7 @@ import 'implementation/ALDownloaderBatcherIMP.dart';
 /// batch download
 ///
 /// progress = number of succeeded urls / number of all urls
-class ALDownloaderBatcher {
+abstract class ALDownloaderBatcher {
   /// Download
   ///
   /// [urls] urls
@@ -34,6 +34,29 @@ class ALDownloaderBatcher {
       ALDownloaderBatcherIMP.downloadUrlsWithVOs(vos,
           downloaderHandlerInterface: downloaderHandlerInterface);
 
+  /// Add a downloader handler interface
+  ///
+  /// **parameters**
+  ///
+  /// [downloaderHandlerInterface] downloader handler interface
+  ///
+  /// It is an one-off interface which will be destroyed when the download succeeded/failed.
+  ///
+  /// [urls] urls
+  static void addDownloaderHandlerInterface(
+          ALDownloaderHandlerInterface downloaderHandlerInterface,
+          List<String> urls) =>
+      ALDownloaderBatcherIMP.addDownloaderHandlerInterface(
+          downloaderHandlerInterface, urls);
+
+  /// Remove downloader handler interfaces
+  ///
+  /// **parameters**
+  ///
+  /// [urls] urls
+  static void removeDownloaderHandlerInterfaceForUrls(List<String> urls) =>
+      ALDownloaderBatcherIMP.removeDownloaderHandlerInterfaceForUrls(urls);
+
   /// Get download status
   ///
   /// Summarize the download status for a set of urls.
@@ -44,7 +67,7 @@ class ALDownloaderBatcher {
   ///
   /// **return**
   ///
-  /// [ALDownloaderStatus] download status
+  /// [ALDownloaderStatus] status
   static ALDownloaderStatus getStatusForUrls(List<String> urls) =>
       ALDownloaderBatcherIMP.getStatusForUrls(urls);
 
@@ -58,32 +81,9 @@ class ALDownloaderBatcher {
   ///
   /// **return**
   ///
-  /// [double] download progress
+  /// [double] progress
   static double getProgressForUrls(List<String> urls) =>
       ALDownloaderBatcherIMP.getProgressForUrls(urls);
-
-  /// Add a downloader handler interface
-  ///
-  /// **parameters**
-  ///
-  /// [downloaderHandlerInterface] downloader handler interface
-  ///
-  /// It is an one-off interface which will be destroyed when the download succeeded/failed.
-  ///
-  /// [urls] urls
-  static void addDownloaderHandlerInterface(
-          ALDownloaderHandlerInterface? downloaderHandlerInterface,
-          List<String> urls) =>
-      ALDownloaderBatcherIMP.addDownloaderHandlerInterface(
-          downloaderHandlerInterface, urls);
-
-  /// Remove downloader handler interfaces
-  ///
-  /// **parameters**
-  ///
-  /// [urls] urls
-  static void removeDownloaderHandlerInterfaceForUrls(List<String> urls) =>
-      ALDownloaderBatcherIMP.removeDownloaderHandlerInterfaceForUrls(urls);
 
   /// Pause downloads
   ///
@@ -111,4 +111,7 @@ class ALDownloaderBatcher {
   ///
   /// [urls] urls
   static void remove(List<String> urls) => ALDownloaderBatcherIMP.remove(urls);
+
+  /// Privatize constructor
+  ALDownloaderBatcher._();
 }

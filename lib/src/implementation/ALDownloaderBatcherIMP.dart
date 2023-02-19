@@ -2,31 +2,78 @@ import 'ALDownloaderIMP.dart';
 import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
 import '../chore/ALDownloaderBatcherInputVO.dart';
+import '../internal/ALDownloaderConstant.dart';
+import '../internal/ALDownloaderHeader.dart';
+import '../internal/ALDownloaderMessage.dart';
 import '../internal/ALDownloaderPrint.dart';
 
-class ALDownloaderBatcherIMP {
+abstract class ALDownloaderBatcherIMP {
   static void download(List<String> urls,
       {ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
-    addDownloaderHandlerInterface(downloaderHandlerInterface, urls);
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kDownload;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
 
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+    if (downloaderHandlerInterface != null) {
+      final id = ALDownloaderHeader.uuid.v1();
+      _interfaceKVs[id] = downloaderHandlerInterface;
+      message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
+    }
 
-    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.download(url);
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
   static void downloadUrlsWithVOs(List<ALDownloaderBatcherInputVO> vos,
       {ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
-    final urls = vos.map((e) => e.url).toList();
-    addDownloaderHandlerInterface(downloaderHandlerInterface, urls);
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kDownloadUrlsWithVOs;
+    message.content = <String, dynamic>{
+      ALDownloaderConstant.kALDownloaderBatcherInputVOs: vos
+    };
 
-    final aNonDuplicatedVOs = _getNonDuplicatedVOsFromVOs(vos);
+    if (downloaderHandlerInterface != null) {
+      final id = ALDownloaderHeader.uuid.v1();
+      _interfaceKVs[id] = downloaderHandlerInterface;
+      message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
+    }
 
-    for (final vo in aNonDuplicatedVOs)
-      ALDownloaderIMP.download(vo.url, headers: vo.headers);
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+  }
+
+  static void addDownloaderHandlerInterface(
+      ALDownloaderHandlerInterface downloaderHandlerInterface,
+      List<String> urls) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kAddDownloaderHandlerInterface;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
+
+    final id = ALDownloaderHeader.uuid.v1();
+    _interfaceKVs[id] = downloaderHandlerInterface;
+    message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+  }
+
+  static void removeDownloaderHandlerInterfaceForUrls(List<String> urls) {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+
+    aNonDuplicatedUrls.forEach((element) =>
+        ALDownloaderIMP.removeDownloaderHandlerInterfaceForUrl(element));
+
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action =
+        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForUrls;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
   static ALDownloaderStatus getStatusForUrls(List<String> urls) {
-    final Map<String, ALDownloaderStatus> aMap = {};
+    final aMap = <String, ALDownloaderStatus>{};
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     for (final url in aNonDuplicatedUrls) {
@@ -60,14 +107,161 @@ class ALDownloaderBatcherIMP {
 
   static double getProgressForUrls(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
-    final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
-    final progress = binder._progress;
-    return progress;
+    int succeededCount = 0;
+    for (final url in aNonDuplicatedUrls) {
+      final aStatus = ALDownloaderIMP.getStatusForUrl(url);
+      if (aStatus == ALDownloaderStatus.succeeded) succeededCount++;
+    }
+
+    double aDouble;
+
+    try {
+      if (aNonDuplicatedUrls.length == 0) {
+        aDouble = 0;
+      } else {
+        dynamic result = succeededCount / aNonDuplicatedUrls.length;
+        result = result.toStringAsFixed(2);
+        aDouble = double.tryParse(result) ?? 0;
+      }
+    } catch (error) {
+      aDouble = 0;
+      aldDebugPrint('ALDownloaderBatcher | get progress for urls, $error');
+    }
+
+    return aDouble;
   }
 
-  static void addDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface? downloaderHandlerInterface,
-      List<String> urls) {
+  static void pause(List<String> urls) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kPause;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+  }
+
+  static void cancel(List<String> urls) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kCancel;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+  }
+
+  static void remove(List<String> urls) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kRemove;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+  }
+
+  /// Do work on root isolate
+  static void doWorkOnRootIsolate(ALDownloaderMessage message) {
+    final action = message.action;
+    final content = message.content;
+    if (action == ALDownloaderConstant.kCallInterface) {
+      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
+      final isNeedCallProgressHandler =
+          content[ALDownloaderConstant.kIsNeedCallProgressHandler];
+      final isNeedCallSucceededHandler =
+          content[ALDownloaderConstant.kIsNeedCallSucceededHandler];
+      final isNeedCallFailedHandler =
+          content[ALDownloaderConstant.kIsNeedCallFailedHandler];
+      final isNeedCallPausedHandler =
+          content[ALDownloaderConstant.kIsNeedCallPausedHandler];
+      final progress = content[ALDownloaderConstant.kProgress];
+      final isNeedRemoveInterfaceAfterCallForRoot =
+          content[ALDownloaderConstant.kIsNeedRemoveInterfaceAfterCallForRoot];
+
+      final downloaderHandlerInterface = _interfaceKVs[id];
+
+      ALDownloaderHeader.callInterfaceById(
+          downloaderHandlerInterface,
+          isNeedCallProgressHandler,
+          isNeedCallSucceededHandler,
+          isNeedCallFailedHandler,
+          isNeedCallPausedHandler,
+          progress);
+
+      if (isNeedRemoveInterfaceAfterCallForRoot) _interfaceKVs.remove(id);
+    }
+  }
+
+  /// Do work on ALDownloader isolate
+  static void doWorkOnALIsolate(ALDownloaderMessage message) {
+    final action = message.action;
+    final content = message.content;
+
+    if (action == ALDownloaderConstant.kAddDownloaderHandlerInterface) {
+      final urls = content[ALDownloaderConstant.kUrls];
+      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
+      _addDownloaderHandlerInterface(id, urls);
+    } else if (action ==
+        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForUrls) {
+      final urls = content[ALDownloaderConstant.kUrls];
+      _removeDownloaderHandlerInterfaceForUrls(urls);
+    } else {
+      if (ALDownloaderHeader.initializedCompleter.isCompleted) {
+        _doWorkWhichMustBeAfterInitializedOnALIsolate(message);
+      } else {
+        ALDownloaderHeader.initializedCompleter.future.then(
+            (_) => _doWorkWhichMustBeAfterInitializedOnALIsolate(message));
+      }
+    }
+  }
+
+  static void _doWorkWhichMustBeAfterInitializedOnALIsolate(
+      ALDownloaderMessage message) {
+    final action = message.action;
+    final content = message.content;
+
+    if (action == ALDownloaderConstant.kDownload) {
+      final urls = content[ALDownloaderConstant.kUrls];
+      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
+      _download(urls, downloaderHandlerInterfaceId: id);
+    } else if (action == ALDownloaderConstant.kDownloadUrlsWithVOs) {
+      final vos = content[ALDownloaderConstant.kALDownloaderBatcherInputVOs];
+      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
+      _downloadUrlsWithVOs(vos, downloaderHandlerInterfaceId: id);
+    } else if (action == ALDownloaderConstant.kPause) {
+      final urls = content[ALDownloaderConstant.kUrls];
+      _pause(urls);
+    } else if (action == ALDownloaderConstant.kCancel) {
+      final urls = content[ALDownloaderConstant.kUrls];
+      _cancel(urls);
+    } else if (action == ALDownloaderConstant.kRemove) {
+      final urls = content[ALDownloaderConstant.kUrls];
+      _remove(urls);
+    }
+  }
+
+  static void _download(List<String> urls,
+      {String? downloaderHandlerInterfaceId}) {
+    if (downloaderHandlerInterfaceId != null)
+      _addDownloaderHandlerInterface(downloaderHandlerInterfaceId, urls);
+
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+
+    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.cDownload(url);
+  }
+
+  static void _downloadUrlsWithVOs(List<ALDownloaderBatcherInputVO> vos,
+      {String? downloaderHandlerInterfaceId}) {
+    final urls = vos.map((e) => e.url).toList();
+    if (downloaderHandlerInterfaceId != null)
+      _addDownloaderHandlerInterface(downloaderHandlerInterfaceId, urls);
+
+    final aNonDuplicatedVOs = _getNonDuplicatedVOsFromVOs(vos);
+
+    for (final vo in aNonDuplicatedVOs)
+      ALDownloaderIMP.cDownload(vo.url, headers: vo.headers);
+  }
+
+  static void _addDownloaderHandlerInterface(
+      String downloaderHandlerInterfaceId, List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     final binder = _ALDownloaderBatcherBinder._(aNonDuplicatedUrls);
@@ -81,26 +275,45 @@ class ALDownloaderBatcherIMP {
             final progress = binder._progress;
 
             aldDebugPrint(
-                "ALDownloaderBatcher | in succeededHandler | download progress = $progress, url = $url",
+                'ALDownloaderBatcher | in succeededHandler | download progress = $progress, url = $url',
                 isFrequentPrint: true);
 
-            final progressHandler = downloaderHandlerInterface?.progressHandler;
-            if (progressHandler != null) progressHandler(progress);
+            ALDownloaderHeader.callInterfaceFromALToRoot(
+                ALDownloaderConstant.kALDownloaderBatcherIMP,
+                downloaderHandlerInterfaceId,
+                true,
+                false,
+                false,
+                false,
+                progress);
 
             if (binder._isCompletedHandlerCalled) {
               if (binder._isSucceeded) {
                 aldDebugPrint(
-                    "ALDownloaderBatcher | in succeededHandler | download succeeded, urls = $urls");
+                    'ALDownloaderBatcher | in succeededHandler | download succeeded, urls = $urls');
 
-                final succeededHandler =
-                    downloaderHandlerInterface?.succeededHandler;
-                if (succeededHandler != null) succeededHandler();
+                ALDownloaderHeader.callInterfaceFromALToRoot(
+                    ALDownloaderConstant.kALDownloaderBatcherIMP,
+                    downloaderHandlerInterfaceId,
+                    false,
+                    true,
+                    false,
+                    false,
+                    progress,
+                    isNeedRemoveInterfaceAfterCallForRoot: true);
               } else {
                 aldDebugPrint(
-                    "ALDownloaderBatcher | in succeededHandler | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
+                    'ALDownloaderBatcher | in succeededHandler | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}');
 
-                final failedHandler = downloaderHandlerInterface?.failedHandler;
-                if (failedHandler != null) failedHandler();
+                ALDownloaderHeader.callInterfaceFromALToRoot(
+                    ALDownloaderConstant.kALDownloaderBatcherIMP,
+                    downloaderHandlerInterfaceId,
+                    false,
+                    false,
+                    true,
+                    false,
+                    progress,
+                    isNeedRemoveInterfaceAfterCallForRoot: true);
               }
             }
           },
@@ -110,64 +323,83 @@ class ALDownloaderBatcherIMP {
             final progress = binder._progress;
 
             aldDebugPrint(
-                "ALDownloaderBatcher | in failedHandler | download progress = $progress, url = $url",
+                'ALDownloaderBatcher | in failedHandler | download progress = $progress, url = $url',
                 isFrequentPrint: true);
 
-            final progressHandler = downloaderHandlerInterface?.progressHandler;
-            if (progressHandler != null) progressHandler(progress);
+            ALDownloaderHeader.callInterfaceFromALToRoot(
+                ALDownloaderConstant.kALDownloaderBatcherIMP,
+                downloaderHandlerInterfaceId,
+                true,
+                false,
+                false,
+                false,
+                progress);
 
             if (binder._isCompletedHandlerCalled) {
               aldDebugPrint(
-                  "ALDownloaderBatcher | in failedHandler | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}");
+                  'ALDownloaderBatcher | in failedHandler | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}');
 
-              final failedHandler = downloaderHandlerInterface?.failedHandler;
-              if (failedHandler != null) failedHandler();
+              ALDownloaderHeader.callInterfaceFromALToRoot(
+                  ALDownloaderConstant.kALDownloaderBatcherIMP,
+                  downloaderHandlerInterfaceId,
+                  false,
+                  false,
+                  true,
+                  false,
+                  progress,
+                  isNeedRemoveInterfaceAfterCallForRoot: true);
             }
           },
           pausedHandler: () {
             if (!binder._isDownloading) {
               if (!binder._isIgnoreUnnecessaryPausedHandlerCalled) {
                 aldDebugPrint(
-                    "ALDownloaderBatcher | download paused, all the targetUrls are not downloading, the targetUrls = ${binder._targetUrls}, the paused urls = ${binder._pausedUrls}, the last paused url = $url");
+                    'ALDownloaderBatcher | download paused, all the targetUrls are not downloading, the targetUrls = ${binder._targetUrls}, the paused urls = ${binder._pausedUrls}, the last paused url = $url');
 
                 binder._isIgnoreUnnecessaryPausedHandlerCalled = true;
 
-                final pausedHandler = downloaderHandlerInterface?.pausedHandler;
-                if (pausedHandler != null) pausedHandler();
+                ALDownloaderHeader.callInterfaceFromALToRoot(
+                    ALDownloaderConstant.kALDownloaderBatcherIMP,
+                    downloaderHandlerInterfaceId,
+                    false,
+                    false,
+                    false,
+                    true,
+                    0);
               }
             } else {
               binder._isIgnoreUnnecessaryPausedHandlerCalled = false;
             }
           });
 
-      ALDownloaderIMP.addDownloaderHandlerInterface(
+      ALDownloaderIMP.cAddDownloaderHandlerInterface(
           aDownloaderHandlerInterface, url);
     }
   }
 
-  static void removeDownloaderHandlerInterfaceForUrls(List<String> urls) {
+  static void _removeDownloaderHandlerInterfaceForUrls(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     aNonDuplicatedUrls.forEach((element) =>
-        ALDownloaderIMP.removeDownloaderHandlerInterfaceForUrl(element));
+        ALDownloaderIMP.cRemoveDownloaderHandlerInterfaceForUrl(element));
   }
 
-  static void pause(List<String> urls) {
+  static void _pause(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.pause(url);
+    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.cPause(url);
   }
 
-  static void cancel(List<String> urls) {
+  static void _cancel(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.cancel(url);
+    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.cCancel(url);
   }
 
-  static void remove(List<String> urls) {
+  static void _remove(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.remove(url);
+    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.cRemove(url);
   }
 
   /// Remove duplicated vos
@@ -200,6 +432,12 @@ class ALDownloaderBatcherIMP {
     return aNonDuplicatedUrls;
   }
 
+  /// A map for storaging interfaces of root isolate
+  ///
+  /// Key is generated by [ALDownloaderHeader.uuid].
+  static final _interfaceKVs = <String, ALDownloaderHandlerInterface>{};
+
+  /// Privatize constructor
   ALDownloaderBatcherIMP._();
 }
 
@@ -219,12 +457,12 @@ class _ALDownloaderBatcherBinder {
           .toList();
 
       aldDebugPrint(
-          "_ALDownloaderBatcherBinder | get _succeededUrls, result = $aList",
+          '_ALDownloaderBatcherBinder | get _succeededUrls, result = $aList',
           isFrequentPrint: true);
     } catch (error) {
       aList = <String>[];
       aldDebugPrint(
-          "_ALDownloaderBatcherBinder | get _succeededUrls, error = $error");
+          '_ALDownloaderBatcherBinder | get _succeededUrls, error = $error');
     }
 
     return aList;
@@ -242,12 +480,12 @@ class _ALDownloaderBatcherBinder {
           .toList();
 
       aldDebugPrint(
-          "_ALDownloaderBatcherBinder | get _failedUrls, result = $aList",
+          '_ALDownloaderBatcherBinder | get _failedUrls, result = $aList',
           isFrequentPrint: true);
     } catch (error) {
       aList = <String>[];
       aldDebugPrint(
-          "_ALDownloaderBatcherBinder | get _failedUrls, error = $error");
+          '_ALDownloaderBatcherBinder | get _failedUrls, error = $error');
     }
 
     return aList;
@@ -269,7 +507,7 @@ class _ALDownloaderBatcherBinder {
       }
     } catch (error) {
       aDouble = 0;
-      aldDebugPrint("_ALDownloaderBatcherBinder | get progress, $error");
+      aldDebugPrint('_ALDownloaderBatcherBinder | get progress, $error');
     }
 
     return aDouble;
@@ -304,7 +542,7 @@ class _ALDownloaderBatcherBinder {
       _completedKVs.length == _targetUrls.length;
 
   /// A set of completed key-value pairs
-  final Map<String, bool> _completedKVs = {};
+  final _completedKVs = <String, bool>{};
 
   /// Urls that need to download
   final List<String> _targetUrls;

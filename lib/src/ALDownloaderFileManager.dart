@@ -2,8 +2,8 @@ import 'chore/ALDownloaderPathModel.dart';
 import 'implementation/ALDownloaderFileManagerIMP.dart';
 
 /// A manager that manages persistent file by url
-class ALDownloaderFileManager {
-  /// Get 'physical directory path' and 'virtual/physical file name' of the file for [url]
+abstract class ALDownloaderFileManager {
+  /// Get 'virtual/physical directory path' and 'virtual/physical file name' of the file for [url]
   ///
   /// Create the 'physical directory path' lazily in the disk by [url] when there is no 'physical directory path'.
   ///
@@ -97,4 +97,7 @@ class ALDownloaderFileManager {
 
   /// Get all disk directories
   static Future<List<String>?> get dirs => ALDownloaderFileManagerIMP.dirs;
+
+  /// Privatize constructor
+  ALDownloaderFileManager._();
 }

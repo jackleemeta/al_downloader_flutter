@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import '../chore/ALDownloaderPrintConfig.dart';
+import 'ALDownloaderPrintConfig.dart';
 
 /// ALDownloader debug print
 ///
@@ -13,7 +13,7 @@ void aldDebugPrint(String? message, {bool isFrequentPrint = false}) {
 
   if (isFrequentPrint && !ALDownloaderPrintConfig.frequentEnabled) return;
 
-  final aMessage = "$message\n";
+  final aMessage = '$message\n';
 
   debugPrint(aMessage);
 }

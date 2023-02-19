@@ -205,26 +205,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Initialize
   void initialize() {
-    // about print
-    aboutPrint();
+    ALDownloader.initialize();
 
-    // Why [downloader handler interface] and [downloader handler interface for batch] are added before ALDownloader initialization?
-    //
-    // Because some information may call back synchronously when initializing, [interface] being added before initialization can
-    // ensure receiving the information in the [interface] first time.
+    configurePrint();
 
     // It is for download. It is a forever interface.
     addForeverDownloaderHandlerInterface();
     // It is for batch download. It is an one-off interface.
     addBatchDownloaderHandlerInterface();
-
-    ALDownloader.initialize();
   }
 
-  /// About print
-  void aboutPrint() {
-    ALDownloaderPrintConfig.enabled = true;
-    ALDownloaderPrintConfig.frequentEnabled = false;
+  /// Configure print
+  void configurePrint() {
+    ALDownloader.configurePrint(enabled: true, frequentEnabled: false);
   }
 
   /// Add a forever downloader handler interface

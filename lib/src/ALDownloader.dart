@@ -3,11 +3,27 @@ import 'ALDownloaderStatus.dart';
 import 'implementation/ALDownloaderIMP.dart';
 
 /// ALDownloader
-class ALDownloader {
+abstract class ALDownloader {
   /// Initialize
   ///
-  /// It can be called actively or called lazily when [download] is called.
+  /// It must be called first.
   static void initialize() => ALDownloaderIMP.initialize();
+
+  /// Configure print
+  ///
+  /// **parameters**
+  ///
+  /// [enabled] set whether enable print
+  ///
+  /// [frequentEnabled] set whether enable frequent print
+  ///
+  /// **discussion**
+  ///
+  /// Printing before calling this function applys the default. Default is false.
+  static void configurePrint(
+          {bool enabled = false, bool frequentEnabled = false}) =>
+      ALDownloaderIMP.configurePrint(
+          enabled: enabled, frequentEnabled: frequentEnabled);
 
   /// Download
   ///
@@ -17,10 +33,10 @@ class ALDownloader {
   ///
   /// [downloaderHandlerInterface] downloader handler interface
   ///
-  /// [headers] downloader headers
+  /// [headers] download headers
   ///
   /// It is an one-off interface which will be destroyed when the download succeeded/failed.
-  static void download(String? url,
+  static void download(String url,
           {ALDownloaderHandlerInterface? downloaderHandlerInterface,
           Map<String, String> headers = const {}}) =>
       ALDownloaderIMP.download(url,
@@ -37,8 +53,8 @@ class ALDownloader {
   ///
   /// [url] url
   static void addDownloaderHandlerInterface(
-          ALDownloaderHandlerInterface? downloaderHandlerInterface,
-          String? url) =>
+          ALDownloaderHandlerInterface downloaderHandlerInterface,
+          String url) =>
       ALDownloaderIMP.addDownloaderHandlerInterface(
           downloaderHandlerInterface, url);
 
@@ -52,8 +68,8 @@ class ALDownloader {
   ///
   /// [url] url
   static void addForeverDownloaderHandlerInterface(
-          ALDownloaderHandlerInterface? downloaderHandlerInterface,
-          String? url) =>
+          ALDownloaderHandlerInterface downloaderHandlerInterface,
+          String url) =>
       ALDownloaderIMP.addForeverDownloaderHandlerInterface(
           downloaderHandlerInterface, url);
 
@@ -77,7 +93,7 @@ class ALDownloader {
   ///
   /// **return**
   ///
-  /// [ALDownloaderStatus] download status
+  /// [ALDownloaderStatus] status
   static ALDownloaderStatus getStatusForUrl(String url) =>
       ALDownloaderIMP.getStatusForUrl(url);
 
@@ -89,7 +105,7 @@ class ALDownloader {
   ///
   /// **return**
   ///
-  /// [double] download progress
+  /// [double] progress
   static double getProgressForUrl(String url) =>
       ALDownloaderIMP.getProgressForUrl(url);
 
@@ -134,4 +150,7 @@ class ALDownloader {
   ///
   /// This is a multiple of [remove], see [remove].
   static void removeAll() => ALDownloaderIMP.removeAll();
+
+  /// Privatize constructor
+  ALDownloader._();
 }

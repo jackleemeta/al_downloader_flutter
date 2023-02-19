@@ -39,19 +39,29 @@ import 'package:al_downloader/al_downloader.dart';
 
 ### ALDownloader
 
+#### 初始化
+```
+ALDownloader.initialize();
+```
+
+#### 配置打印
+```
+ALDownloader.configurePrint(enabled: true, frequentEnabled: false);
+```
+
 #### 下载
 ```
 ALDownloader.download(url,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | 下载进度 = $progress, url = $url\n");
+          'ALDownloader | 下载进度 = $progress, url = $url\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 下载成功, url = $url\n");
+      debugPrint('ALDownloader | 下载成功, url = $url\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | 下载失败, url = $url\n");
+      debugPrint('ALDownloader | 下载失败, url = $url\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 下载暂停, url = $url\n");
+      debugPrint('ALDownloader | 下载暂停, url = $url\n');
     }));
 ```
 
@@ -60,13 +70,13 @@ ALDownloader.download(url,
 ALDownloader.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | 下载进度 = $progress, url = $url\n");
+          'ALDownloader | 下载进度 = $progress, url = $url\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 下载成功, url = $url\n");
+      debugPrint('ALDownloader | 下载成功, url = $url\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | 下载失败, url = $url\n");
+      debugPrint('ALDownloader | 下载失败, url = $url\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 下载暂停, url = $url\n");
+      debugPrint('ALDownloader | 下载暂停, url = $url\n');
     }),
     url);
 ```
@@ -76,13 +86,13 @@ ALDownloader.addDownloaderHandlerInterface(
 ALDownloader.addForeverDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
-          "ALDownloader | 下载进度 = $progress, url = $url\n");
+          'ALDownloader | 下载进度 = $progress, url = $url\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 下载成功, url = $url\n");
+      debugPrint('ALDownloader | 下载成功, url = $url\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | 下载失败, url = $url\n");
+      debugPrint('ALDownloader | 下载失败, url = $url\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 下载暂停, url = $url\n");
+      debugPrint('ALDownloader | 下载暂停, url = $url\n');
     }),
     url);
 ```
@@ -128,13 +138,13 @@ ALDownloader.remove(url);
 ALDownloaderBatcher.download(urls,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | 批量 | 下载进度 = $progress\n");
+      debugPrint('ALDownloader | 批量 | 下载进度 = $progress\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载成功\n");
+      debugPrint('ALDownloader | 批量 | 下载成功\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载失败\n");
+      debugPrint('ALDownloader | 批量 | 下载失败\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载暂停\n");
+      debugPrint('ALDownloader | 批量 | 下载暂停\n');
     }));
 ```
 
@@ -142,13 +152,13 @@ ALDownloaderBatcher.download(urls,
 ```
 ALDownloaderBatcher.addDownloaderHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
-      debugPrint("ALDownloader | 批量 | 下载进度 = $progress\n");
+      debugPrint('ALDownloader | 批量 | 下载进度 = $progress\n');
     }, succeededHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载成功\n");
+      debugPrint('ALDownloader | 批量 | 下载成功\n');
     }, failedHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载失败\n");
+      debugPrint('ALDownloader | 批量 | 下载失败\n');
     }, pausedHandler: () {
-      debugPrint("ALDownloader | 批量 | 下载暂停\n");
+      debugPrint('ALDownloader | 批量 | 下载暂停\n');
     }),
     urls);
 ```
@@ -163,23 +173,11 @@ final status = ALDownloaderBatcher.getStatusForUrls(urls);
 ```
 final path3 = await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
 debugPrint(
-    "ALDownloader | 获取[url]的“虚拟文件路径”, url = $url, path = $path3\n");
+    "ALDownloader | 获取[url]的'虚拟文件路径', url = $url, path = $path3\n");
 
 final path4 = await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
 debugPrint(
-    "ALDownloader | 获取[url]的“物理文件路径”, url = $url, path = $path4\n");
-```
-
-### ALDownloaderPrintConfig
-
-#### 开启打印
-```
-ALDownloaderPrintConfig.enabled = true;
-```
-
-#### 关闭频繁打印
-```
-ALDownloaderPrintConfig.frequentEnabled = false;
+    "ALDownloader | 获取[url]的'物理文件路径', url = $url, path = $path4\n");
 ```
 
 ## *提示*:
