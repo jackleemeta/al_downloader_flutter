@@ -913,7 +913,7 @@ abstract class ALDownloaderIMP {
     if (task.isMayRedownloadAboutPause &&
         task.innerStatus == _ALDownloaderInnerStatus.paused) {
       task.isMayRedownloadAboutPause = false;
-      _qDownload(url);
+      _qDownload(url, headers: task.headers);
     }
 
     aldDebugPrint(
@@ -1298,7 +1298,8 @@ abstract class ALDownloaderIMP {
   }
 
   static void _downloadWaitingTasks() {
-    for (final element in _waitingTasks) _qDownload(element.url);
+    for (final element in _waitingTasks)
+      _qDownload(element.url, headers: element.headers);
   }
 
   static _ALDownloaderInnerStatus _transferStatus(DownloadTaskStatus status) {
