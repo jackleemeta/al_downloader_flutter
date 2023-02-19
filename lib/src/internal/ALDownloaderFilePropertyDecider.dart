@@ -157,7 +157,7 @@ abstract class _ALDownloaderFilePropertyDeciderConstant {
   ];
 
   static final videos = [
-    // '.mp4',
+    '.mp4',
     '.avi',
     '.wmv',
     '.mpg',
