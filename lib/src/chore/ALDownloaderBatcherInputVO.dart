@@ -2,7 +2,7 @@
 class ALDownloaderBatcherInputVO {
   final String url;
 
-  Map<String, String> headers = const {};
+  final Map<String, String> headers;
 
-  ALDownloaderBatcherInputVO(this.url);
+  ALDownloaderBatcherInputVO(this.url, this.headers);
 }
