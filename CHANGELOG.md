@@ -1,3 +1,8 @@
+## 1.6.9
+
+- isolate management
+- queue management 
+
 ## 1.6.8
 
 - update document
