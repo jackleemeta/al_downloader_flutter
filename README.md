@@ -21,7 +21,6 @@ If you need Chinese Document, click [here](README_CN.md).
 > Native Config: same as [flutter_downloader](https://pub.dev/packages/flutter_downloader) native config
 
 add the following line to your pubspec.yaml
-
 ```
 dependencies:
   al_downloader: ^1.6.9

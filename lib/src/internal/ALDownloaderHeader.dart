@@ -38,7 +38,7 @@ abstract class ALDownloaderHeader {
     }
   }
 
-  /// A convenient function that support to send the downloader handler interface from ALDownloader isolate to ioot isolate
+  /// A convenient function that supports to send the downloader handler interface from ALDownloader isolate to root isolate
   static void callInterfaceFromALToRoot(
       String scope,
       String downloaderHandlerInterfaceId,
@@ -68,7 +68,7 @@ abstract class ALDownloaderHeader {
     portALToRoot?.send(message);
   }
 
-  /// A convenient function that support to call call the downloader handler interface by id
+  /// A convenient function that supports to call the downloader handler interface by id
   static void callInterfaceById(
       ALDownloaderHandlerInterface? downloaderHandlerInterface,
       bool isNeedCallProgressHandler,

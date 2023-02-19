@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 10),
-              const Text("You are testing batch download",
+              const Text('You are testing batch download',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                       fontSize: 25,
@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "$order",
+                      '$order',
                       style: const TextStyle(
                           fontSize: 20,
                           color: Colors.black,
@@ -121,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "progress = ${model.progressForPercent}",
+                          'progress = ${model.progressForPercent}',
                           style: const TextStyle(
                               fontSize: 13, color: Colors.white),
                         ),
@@ -142,10 +142,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// The action lists
   late final theActionLists = <List>[
-    ["download", _downloadAllAction],
-    ["pause", _pauseAllAction],
-    ["cancel", _cancelAllAction],
-    ["remove", _removeAllAction]
+    ['download', _downloadAllAction],
+    ['pause', _pauseAllAction],
+    ['cancel', _cancelAllAction],
+    ['remove', _removeAllAction]
   ];
 
   /* ----------------------------------------------Action for test---------------------------------------------- */
@@ -211,6 +211,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // It is for download. It is a forever interface.
     addForeverDownloaderHandlerInterface();
+
     // It is for batch download. It is an one-off interface.
     addBatchDownloaderHandlerInterface();
   }
@@ -227,26 +228,26 @@ class _MyHomePageState extends State<MyHomePage> {
       ALDownloader.addForeverDownloaderHandlerInterface(
           ALDownloaderHandlerInterface(progressHandler: (progress) {
             debugPrint(
-                "ALDownloader | download progress = $progress, url = $url\n");
+                'ALDownloader | download progress = $progress, url = $url\n');
 
             model.status = ALDownloaderStatus.downloading;
             model.progress = progress;
 
             setState(() {});
           }, succeededHandler: () {
-            debugPrint("ALDownloader | download succeeded, url = $url\n");
+            debugPrint('ALDownloader | download succeeded, url = $url\n');
 
             model.status = ALDownloaderStatus.succeeded;
 
             setState(() {});
           }, failedHandler: () {
-            debugPrint("ALDownloader | download failed, url = $url\n");
+            debugPrint('ALDownloader | download failed, url = $url\n');
 
             model.status = ALDownloader.getStatusForUrl(url);
 
             setState(() {});
           }, pausedHandler: () {
-            debugPrint("ALDownloader | download paused, url = $url\n");
+            debugPrint('ALDownloader | download paused, url = $url\n');
 
             model.status = ALDownloaderStatus.paused;
 
@@ -261,13 +262,13 @@ class _MyHomePageState extends State<MyHomePage> {
     final urls = models.map((e) => e.url).toList();
     ALDownloaderBatcher.addDownloaderHandlerInterface(
         ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | batch | download progress = $progress\n");
+          debugPrint('ALDownloader | batch | download progress = $progress\n');
         }, succeededHandler: () {
-          debugPrint("ALDownloader | batch | download succeeded\n");
+          debugPrint('ALDownloader | batch | download succeeded\n');
         }, failedHandler: () {
-          debugPrint("ALDownloader | batch | download failed\n");
+          debugPrint('ALDownloader | batch | download failed\n');
         }, pausedHandler: () {
-          debugPrint("ALDownloader | batch | download paused\n");
+          debugPrint('ALDownloader | batch | download paused\n');
         }),
         urls);
   }
@@ -281,13 +282,13 @@ class _MyHomePageState extends State<MyHomePage> {
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint(
-              "ALDownloader | download progress = $progress, url = $url\n");
+              'ALDownloader | download progress = $progress, url = $url\n');
         }, succeededHandler: () {
-          debugPrint("ALDownloader | download succeeded, url = $url\n");
+          debugPrint('ALDownloader | download succeeded, url = $url\n');
         }, failedHandler: () {
-          debugPrint("ALDownloader | download failed, url = $url\n");
+          debugPrint('ALDownloader | download failed, url = $url\n');
         }, pausedHandler: () {
-          debugPrint("ALDownloader | download paused, url = $url\n");
+          debugPrint('ALDownloader | download paused, url = $url\n');
         }));
   }
 
@@ -297,13 +298,13 @@ class _MyHomePageState extends State<MyHomePage> {
     ALDownloaderBatcher.download(urls,
         downloaderHandlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint("ALDownloader | batch | download progress = $progress\n");
+          debugPrint('ALDownloader | batch | download progress = $progress\n');
         }, succeededHandler: () {
-          debugPrint("ALDownloader | batch | download succeeded\n");
+          debugPrint('ALDownloader | batch | download succeeded\n');
         }, failedHandler: () {
-          debugPrint("ALDownloader | batch | download failed\n");
+          debugPrint('ALDownloader | batch | download failed\n');
         }, pausedHandler: () {
-          debugPrint("ALDownloader | batch | download paused\n");
+          debugPrint('ALDownloader | batch | download paused\n');
         }));
   }
 
@@ -342,7 +343,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final status = ALDownloader.getStatusForUrl(url);
     debugPrint(
-        "ALDownloader | get download status for [url], url = $url, status= $status\n");
+        'ALDownloader | get download status for [url], url = $url, status= $status\n');
   }
 }
 
@@ -357,7 +358,7 @@ class DownloadModel {
 
   String get progressForPercent {
     int aProgress = (progress * 100).toInt();
-    return "$aProgress%";
+    return '$aProgress%';
   }
 
   ALDownloaderStatus status = ALDownloaderStatus.unstarted;
@@ -365,15 +366,15 @@ class DownloadModel {
   String get statusDescription {
     switch (status) {
       case ALDownloaderStatus.downloading:
-        return "downloading";
+        return 'downloading';
       case ALDownloaderStatus.paused:
-        return "paused";
+        return 'paused';
       case ALDownloaderStatus.failed:
-        return "failed";
+        return 'failed';
       case ALDownloaderStatus.succeeded:
-        return "succeeded";
+        return 'succeeded';
       default:
-        return "unstarted";
+        return 'unstarted';
     }
   }
 
@@ -385,24 +386,24 @@ class DownloadModel {
 final models = kTestVideos.map((e) => DownloadModel(e)).toList();
 
 final kTestPNGs = [
-  "https://upload-images.jianshu.io/upload_images/9955565-51a4b4f35bd7973f.png",
-  "https://upload-images.jianshu.io/upload_images/9955565-e99b6bd33b388feb.png",
-  "https://upload-images.jianshu.io/upload_images/9955565-3aafbc20dd329e58.png"
+  'https://upload-images.jianshu.io/upload_images/9955565-51a4b4f35bd7973f.png',
+  'https://upload-images.jianshu.io/upload_images/9955565-e99b6bd33b388feb.png',
+  'https://upload-images.jianshu.io/upload_images/9955565-3aafbc20dd329e58.png'
 ];
 
 final kTestVideos = [
-  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4",
-  "http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/21/mp4/190321153853126488.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/18/mp4/190318231014076505.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/09/mp4/190309153658147087.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/12/mp4/190312083533415853.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/12/mp4/190312143927981075.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/13/mp4/190313094901111138.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/14/mp4/190314102306987969.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/14/mp4/190314223540373995.mp4",
-  "http://vfx.mtime.cn/Video/2019/03/19/mp4/190319125415785691.mp4"
+  'http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4',
+  'http://vfx.mtime.cn/Video/2019/02/04/mp4/190204084208765161.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/21/mp4/190321153853126488.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/19/mp4/190319212559089721.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/18/mp4/190318231014076505.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/09/mp4/190309153658147087.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/12/mp4/190312083533415853.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/12/mp4/190312143927981075.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/13/mp4/190313094901111138.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/14/mp4/190314102306987969.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/14/mp4/190314223540373995.mp4',
+  'http://vfx.mtime.cn/Video/2019/03/19/mp4/190319125415785691.mp4'
 ];
 
-final kTestOthers = ["https://www.orimi.com/pdf-test.pdf"];
+final kTestOthers = ['https://www.orimi.com/pdf-test.pdf'];

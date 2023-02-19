@@ -19,7 +19,6 @@
 > 原生配置：和[flutter_downloader](https://pub.dev/packages/flutter_downloader)相同
 
 添加下面这行代码到pubspec.yaml中
-
 ```
 dependencies:
   al_downloader: ^1.6.9
