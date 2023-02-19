@@ -1,3 +1,8 @@
+## 1.7.0
+
+- update document
+- fix bug
+
 ## 1.6.9
 
 - isolate management
