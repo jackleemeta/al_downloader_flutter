@@ -7,7 +7,7 @@ import 'ALDownloaderMessage.dart';
 import 'ALDownloaderWorkCenter.dart';
 
 abstract class ALDownloaderIsolateLauncher {
-  static void configForIsolatesChores() {
+  static void launchALIsolate() {
     final aReveivePort = ReceivePort();
     final portALToRoot = aReveivePort.sendPort;
 

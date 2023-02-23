@@ -31,8 +31,7 @@ abstract class ALDownloaderConstant {
   static final kIsNeedCallFailedHandler = 'isNeedCallFailedHandler';
   static final kIsNeedCallPausedHandler = 'isNeedCallPausedHandler';
   static final kProgress = 'progress';
-  static final kIsNeedRemoveInterfaceAfterCallForRoot =
-      'isNeedRemoveInterfaceAfterCallForRoot';
+  static final kIsNeedRemoveInterface = 'isNeedRemoveInterface';
   static final kConfigurePrint = 'configurePrint';
   static final kEnabled = 'enabled';
   static final kFrequentEnabled = 'frequentEnabled';
@@ -40,7 +39,7 @@ abstract class ALDownloaderConstant {
   static final kALDownloaderBatcherIMP = 'ALDownloaderBatcherIMP';
   static final kDownloadUrlsWithVOs = 'downloadUrlsWithVOs';
   static final kALDownloaderBatcherInputVOs = 'ALDownloaderBatcherInputVOs';
-  static final kRemoveDownloaderHandlerInterfaceForUrls =
-      'removeDownloaderHandlerInterfaceForUrls';
+  static final kRemoveDownloaderHandlerInterfaceForId =
+      'removeDownloaderHandlerInterfaceForId';
   static final kGlobalScope = 'globalScope';
 }

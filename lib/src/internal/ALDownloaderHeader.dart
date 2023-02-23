@@ -21,7 +21,7 @@ abstract class ALDownloaderHeader {
 
   /// Simple, fast generation of RFC4122 UUIDs
   ///
-  /// AlDownloader creates uuid by [Uuid.v1].
+  /// AlDownloader creates [uuid] by [Uuid.v1].
   static final uuid = Uuid();
 
   /// A reliable way that sends message from root isolate to ALDownloader isolate
@@ -38,8 +38,8 @@ abstract class ALDownloaderHeader {
     }
   }
 
-  /// A convenient function that supports to send the downloader handler interface from ALDownloader isolate to root isolate
-  static void callInterfaceFromALToRoot(
+  /// A convenient function that supports to process the downloader handler interface on coming root isolate
+  static void processDownloaderHandlerInterfaceOnComingRootIsolate(
       String scope,
       String downloaderHandlerInterfaceId,
       bool isNeedCallProgressHandler,
@@ -47,7 +47,7 @@ abstract class ALDownloaderHeader {
       bool isNeedCallFailedHandler,
       bool isNeedCallPausedHandler,
       double progress,
-      {bool isNeedRemoveInterfaceAfterCallForRoot = false}) {
+      {bool isNeedRemoveInterface = false}) {
     final message = ALDownloaderMessage();
     message.scope = scope;
     message.action = ALDownloaderConstant.kCallInterface;
@@ -61,15 +61,14 @@ abstract class ALDownloaderHeader {
       ALDownloaderConstant.kIsNeedCallFailedHandler: isNeedCallFailedHandler,
       ALDownloaderConstant.kIsNeedCallPausedHandler: isNeedCallPausedHandler,
       ALDownloaderConstant.kProgress: progress,
-      ALDownloaderConstant.kIsNeedRemoveInterfaceAfterCallForRoot:
-          isNeedRemoveInterfaceAfterCallForRoot
+      ALDownloaderConstant.kIsNeedRemoveInterface: isNeedRemoveInterface
     };
 
     portALToRoot?.send(message);
   }
 
-  /// A convenient function that supports to call the downloader handler interface by id
-  static void callInterfaceById(
+  /// A convenient function that supports to call the downloader handler interface
+  static void callDownloaderHandlerInterface(
       ALDownloaderHandlerInterface? downloaderHandlerInterface,
       bool isNeedCallProgressHandler,
       bool isNeedCallSucceededHandler,

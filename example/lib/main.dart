@@ -12,10 +12,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const title = 'al_downloader';
     return MaterialApp(
-      title: 'al_downloader',
+      title: title,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MyHomePage(title: 'al_downloader'),
+      home: const MyHomePage(title: title),
     );
   }
 }
@@ -33,7 +34,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    // Initialize downloader and get initial download status/progress.
     initialize();
   }
 
@@ -129,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       Align(
                           alignment: Alignment.centerRight,
                           child: Text(
-                            model.statusDescription,
+                            model.status.alDescription,
                             style: const TextStyle(
                                 fontSize: 13, color: Colors.white),
                           ))
@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// The action lists
   late final theActionLists = <List>[
-    ['download', _downloadAllAction],
+    ['download', _batchDownloadAction],
     ['pause', _pauseAllAction],
     ['cancel', _cancelAllAction],
     ['remove', _removeAllAction]
@@ -150,53 +150,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /* ----------------------------------------------Action for test---------------------------------------------- */
 
-  /// Action
-  // ignore: unused_element
-  void _downloadAction() {
-    download();
+  void _batchDownloadAction() {
+    batchDownload();
   }
 
-  /// Action
-  // ignore: unused_element
-  void _downloadAllAction() {
-    downloadAll();
-  }
-
-  /// Action
-  // ignore: unused_element
-  void _pauseAction() {
-    final url = models.first.url;
-    ALDownloader.pause(url);
-  }
-
-  /// Action
-  // ignore: unused_element
   void _pauseAllAction() {
     ALDownloader.pauseAll();
   }
 
-  /// Action
-  // ignore: unused_element
-  void _cancelAction() {
-    final url = models.first.url;
-    ALDownloader.cancel(url);
-  }
-
-  /// Action
-  // ignore: unused_element
   void _cancelAllAction() {
     ALDownloader.cancelAll();
   }
 
-  /// Action
-  // ignore: unused_element
-  void _removeAction() {
-    final url = models.first.url;
-    ALDownloader.remove(url);
-  }
-
-  /// Action
-  // ignore: unused_element
   void _removeAllAction() {
     ALDownloader.removeAll();
   }
@@ -205,9 +170,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Initialize
   void initialize() {
+    /// ALDownloader initilize
     ALDownloader.initialize();
 
-    configurePrint();
+    /// Configure print
+    ALDownloader.configurePrint(enabled: false, frequentEnabled: false);
 
     // It is for download. It is a forever interface.
     addForeverDownloaderHandlerInterface();
@@ -216,9 +183,22 @@ class _MyHomePageState extends State<MyHomePage> {
     addBatchDownloaderHandlerInterface();
   }
 
-  /// Configure print
-  void configurePrint() {
-    ALDownloader.configurePrint(enabled: true, frequentEnabled: false);
+  /// Batch download
+  void batchDownload() {
+    final urls = models.map((e) => e.url).toList();
+    final id = ALDownloaderBatcher.download(urls,
+        downloaderHandlerInterface:
+            ALDownloaderHandlerInterface(progressHandler: (progress) {
+          debugPrint('ALDownloader | batch | download progress = $progress\n');
+        }, succeededHandler: () {
+          debugPrint('ALDownloader | batch | download succeeded\n');
+        }, failedHandler: () {
+          debugPrint('ALDownloader | batch | download failed\n');
+        }, pausedHandler: () {
+          debugPrint('ALDownloader | batch | download paused\n');
+        }));
+
+    if (id != null) _batchDownloaderHandlerInterfaceIds.add(id);
   }
 
   /// Add a forever downloader handler interface
@@ -260,7 +240,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Add a downloader handler interface for batch
   void addBatchDownloaderHandlerInterface() {
     final urls = models.map((e) => e.url).toList();
-    ALDownloaderBatcher.addDownloaderHandlerInterface(
+    final id = ALDownloaderBatcher.addDownloaderHandlerInterface(
         ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint('ALDownloader | batch | download progress = $progress\n');
         }, succeededHandler: () {
@@ -271,80 +251,22 @@ class _MyHomePageState extends State<MyHomePage> {
           debugPrint('ALDownloader | batch | download paused\n');
         }),
         urls);
-  }
 
-  /// Download
-  void download() {
-    final urls = models.map((e) => e.url).toList();
-    final url = urls.first;
-
-    ALDownloader.download(url,
-        downloaderHandlerInterface:
-            ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint(
-              'ALDownloader | download progress = $progress, url = $url\n');
-        }, succeededHandler: () {
-          debugPrint('ALDownloader | download succeeded, url = $url\n');
-        }, failedHandler: () {
-          debugPrint('ALDownloader | download failed, url = $url\n');
-        }, pausedHandler: () {
-          debugPrint('ALDownloader | download paused, url = $url\n');
-        }));
-  }
-
-  /// Download all
-  void downloadAll() {
-    final urls = models.map((e) => e.url).toList();
-    ALDownloaderBatcher.download(urls,
-        downloaderHandlerInterface:
-            ALDownloaderHandlerInterface(progressHandler: (progress) {
-          debugPrint('ALDownloader | batch | download progress = $progress\n');
-        }, succeededHandler: () {
-          debugPrint('ALDownloader | batch | download succeeded\n');
-        }, failedHandler: () {
-          debugPrint('ALDownloader | batch | download failed\n');
-        }, pausedHandler: () {
-          debugPrint('ALDownloader | batch | download paused\n');
-        }));
-  }
-
-  /// Path
-  Future<void> path() async {
-    final urls = models.map((e) => e.url).toList();
-    final url = urls.first;
-
-    final virtualFilePath =
-        await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
-    debugPrint(
-        "ALDownloader | get 'virtual file path' for [url], url = $url, path = $virtualFilePath\n");
-
-    final physicalFilePath =
-        await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
-    debugPrint(
-        "ALDownloader | get 'physical file path' for [url], url = $url, path = $physicalFilePath\n");
+    _batchDownloaderHandlerInterfaceIds.add(id);
   }
 
   /// Remove downloader handler interface
-  void removeDownloaderHandlerInterface(String url) {
-    final urls = models.map((e) => e.url).toList();
-    final url = urls.first;
-    ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
+  void removeDownloaderHandlerInterface() {
+    for (final element in _batchDownloaderHandlerInterfaceIds) {
+      ALDownloaderBatcher.removeDownloaderHandlerInterfaceForId(element);
+    }
+
+    _batchDownloaderHandlerInterfaceIds.clear();
   }
 
-  /// Remove all downloader handler interfaces
-  void removeDownloaderHandlerInterfaceForAll() {
-    ALDownloader.removeDownloaderHandlerInterfaceForAll();
-  }
-
-  /// Status
-  void status() {
-    final urls = models.map((e) => e.url).toList();
-    final url = urls.first;
-
-    final status = ALDownloader.getStatusForUrl(url);
-    debugPrint(
-        'ALDownloader | get download status for [url], url = $url, status= $status\n');
-  }
+  /// Manage the [ALDownloaderHandlerInterface] by [ALDownloaderHandlerInterfaceId]
+  final _batchDownloaderHandlerInterfaceIds =
+      <ALDownloaderHandlerInterfaceId>[];
 }
 
 /* ----------------------------------------------Model class for test---------------------------------------------- */
@@ -354,8 +276,6 @@ class DownloadModel {
 
   double progress = 0;
 
-  bool get isSuccess => status == ALDownloaderStatus.succeeded;
-
   String get progressForPercent {
     int aProgress = (progress * 100).toInt();
     return '$aProgress%';
@@ -363,33 +283,17 @@ class DownloadModel {
 
   ALDownloaderStatus status = ALDownloaderStatus.unstarted;
 
-  String get statusDescription {
-    switch (status) {
-      case ALDownloaderStatus.downloading:
-        return 'downloading';
-      case ALDownloaderStatus.paused:
-        return 'paused';
-      case ALDownloaderStatus.failed:
-        return 'failed';
-      case ALDownloaderStatus.succeeded:
-        return 'succeeded';
-      default:
-        return 'unstarted';
-    }
-  }
-
   DownloadModel(this.url);
+}
+
+extension _ALDownloaderStatusExtension on ALDownloaderStatus {
+  String get alDescription =>
+      ['unstarted', 'downloading', 'paused', 'failed', 'succeeded'][index];
 }
 
 /* ----------------------------------------------Data for test---------------------------------------------- */
 
 final models = kTestVideos.map((e) => DownloadModel(e)).toList();
-
-final kTestPNGs = [
-  'https://upload-images.jianshu.io/upload_images/9955565-51a4b4f35bd7973f.png',
-  'https://upload-images.jianshu.io/upload_images/9955565-e99b6bd33b388feb.png',
-  'https://upload-images.jianshu.io/upload_images/9955565-3aafbc20dd329e58.png'
-];
 
 final kTestVideos = [
   'http://vfx.mtime.cn/Video/2019/03/19/mp4/190319222227698228.mp4',
@@ -405,5 +309,3 @@ final kTestVideos = [
   'http://vfx.mtime.cn/Video/2019/03/14/mp4/190314223540373995.mp4',
   'http://vfx.mtime.cn/Video/2019/03/19/mp4/190319125415785691.mp4'
 ];
-
-final kTestOthers = ['https://www.orimi.com/pdf-test.pdf'];

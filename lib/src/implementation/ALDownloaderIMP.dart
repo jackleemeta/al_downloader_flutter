@@ -7,6 +7,7 @@ import 'package:queue/queue.dart';
 import 'ALDownloaderFileManagerIMP.dart';
 import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
+import '../ALDownloaderTypeDefine.dart';
 import '../internal/ALDownloaderConstant.dart';
 import '../internal/ALDownloaderHeader.dart';
 import '../internal/ALDownloaderIsolateLauncher.dart';
@@ -18,7 +19,7 @@ abstract class ALDownloaderIMP {
   static void initialize() {
     if (!_isInitialized) {
       _isInitialized = true;
-      _configForIsolatesChores();
+      _launchALIsolate();
     }
   }
 
@@ -38,7 +39,7 @@ abstract class ALDownloaderIMP {
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
-  static void download(String url,
+  static ALDownloaderHandlerInterfaceId? download(String url,
       {ALDownloaderHandlerInterface? downloaderHandlerInterface,
       Map<String, String> headers = const {}}) {
     final message = ALDownloaderMessage();
@@ -49,16 +50,19 @@ abstract class ALDownloaderIMP {
       ALDownloaderConstant.kHeaders: headers
     };
 
+    ALDownloaderHandlerInterfaceId? id;
     if (downloaderHandlerInterface != null) {
-      final id = ALDownloaderHeader.uuid.v1();
-      _interfaceKVs[id] = downloaderHandlerInterface;
+      id = ALDownloaderHeader.uuid.v1();
+      _idInterfaceKVs[id] = downloaderHandlerInterface;
       message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
     }
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return id;
   }
 
-  static void addDownloaderHandlerInterface(
+  static ALDownloaderHandlerInterfaceId addDownloaderHandlerInterface(
       ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
@@ -66,13 +70,15 @@ abstract class ALDownloaderIMP {
     message.content = <String, dynamic>{ALDownloaderConstant.kUrl: url};
 
     final id = ALDownloaderHeader.uuid.v1();
-    _interfaceKVs[id] = downloaderHandlerInterface;
+    _idInterfaceKVs[id] = downloaderHandlerInterface;
     message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return id;
   }
 
-  static void addForeverDownloaderHandlerInterface(
+  static ALDownloaderHandlerInterfaceId addForeverDownloaderHandlerInterface(
       ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
@@ -80,10 +86,12 @@ abstract class ALDownloaderIMP {
     message.content = <String, dynamic>{ALDownloaderConstant.kUrl: url};
 
     final id = ALDownloaderHeader.uuid.v1();
-    _interfaceKVs[id] = downloaderHandlerInterface;
+    _idInterfaceKVs[id] = downloaderHandlerInterface;
     message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return id;
   }
 
   static void removeDownloaderHandlerInterfaceForUrl(String url) {
@@ -96,8 +104,18 @@ abstract class ALDownloaderIMP {
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
+  static void removeDownloaderHandlerInterfaceForId(
+      ALDownloaderHandlerInterfaceId id) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderIMP;
+    message.action =
+        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForId;
+    message.content = {ALDownloaderConstant.kDownloaderHandlerInterfaceId: id};
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+  }
+
   static void removeDownloaderHandlerInterfaceForAll() {
-    _qRemoveDownloaderHandlerInterfaceForAll();
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
     message.action =
@@ -111,26 +129,32 @@ abstract class ALDownloaderIMP {
 
     try {
       final task = _getTaskFromUrl(url);
-      final innerStatus = task?.innerStatus;
 
-      if (innerStatus == null ||
-          innerStatus == _ALDownloaderInnerStatus.prepared ||
-          innerStatus == _ALDownloaderInnerStatus.undefined ||
-          innerStatus == _ALDownloaderInnerStatus.deprecated ||
-          innerStatus == _ALDownloaderInnerStatus.ignored)
+      if (task == null) {
         status = ALDownloaderStatus.unstarted;
-      else if (innerStatus == _ALDownloaderInnerStatus.enqueued ||
-          innerStatus == _ALDownloaderInnerStatus.running)
-        status = ALDownloaderStatus.downloading;
-      else if (innerStatus == _ALDownloaderInnerStatus.canceled ||
-          innerStatus == _ALDownloaderInnerStatus.failed)
-        status = ALDownloaderStatus.failed;
-      else if (innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
-          innerStatus == _ALDownloaderInnerStatus.paused ||
-          innerStatus == _ALDownloaderInnerStatus.preparedPretendedPaused)
-        status = ALDownloaderStatus.paused;
-      else
-        status = ALDownloaderStatus.succeeded;
+      } else {
+        final innerStatus = task.innerStatus;
+        if (task.waitingPhase == _ALDownloaderTaskWaitingPhase.transiting ||
+            task.waitingPhase == _ALDownloaderTaskWaitingPhase.waiting) {
+          // _ALDownloaderTaskWaitingPhase.transiting and ALDownloaderTaskWaitingPhase.waiting as downloading
+          status = ALDownloaderStatus.downloading;
+        } else if (innerStatus == _ALDownloaderInnerStatus.prepared ||
+            innerStatus == _ALDownloaderInnerStatus.undefined ||
+            innerStatus == _ALDownloaderInnerStatus.deprecated) {
+          status = ALDownloaderStatus.unstarted;
+        } else if (innerStatus == _ALDownloaderInnerStatus.enqueued ||
+            innerStatus == _ALDownloaderInnerStatus.running) {
+          status = ALDownloaderStatus.downloading;
+        } else if (innerStatus == _ALDownloaderInnerStatus.canceled ||
+            innerStatus == _ALDownloaderInnerStatus.failed) {
+          status = ALDownloaderStatus.failed;
+        } else if (innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
+            innerStatus == _ALDownloaderInnerStatus.paused) {
+          status = ALDownloaderStatus.paused;
+        } else {
+          status = ALDownloaderStatus.succeeded;
+        }
+      }
     } catch (error) {
       status = ALDownloaderStatus.unstarted;
       aldDebugPrint('ALDownloader | getStatusForUrl = $url, error = $error');
@@ -216,44 +240,56 @@ abstract class ALDownloaderIMP {
     String? id;
     if (downloaderHandlerInterface != null) {
       id = ALDownloaderHeader.uuid.v1();
-      _interfaceKVs[id] = downloaderHandlerInterface;
+      _idInterfaceKVs[id] = downloaderHandlerInterface;
     }
 
     _qDownload(url, downloaderHandlerInterfaceId: id, headers: headers);
   }
 
-  static void cAddDownloaderHandlerInterface(
+  static ALDownloaderHandlerInterfaceId cAddDownloaderHandlerInterface(
       ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
     final id = ALDownloaderHeader.uuid.v1();
-    _interfaceKVs[id] = downloaderHandlerInterface;
+    _idInterfaceKVs[id] = downloaderHandlerInterface;
 
-    _qAddDownloaderHandlerInterface(id, url);
+    _qAddDownloaderHandlerInterface(id, url, isInner: false);
+
+    return id;
   }
 
   static void cAddForeverDownloaderHandlerInterface(
       ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
     final id = ALDownloaderHeader.uuid.v1();
-    _interfaceKVs[id] = downloaderHandlerInterface;
+    _idInterfaceKVs[id] = downloaderHandlerInterface;
     _qAddForeverDownloaderHandlerInterface(id, url);
   }
 
   static void cRemoveDownloaderHandlerInterfaceForUrl(String url) =>
       _qRemoveDownloaderHandlerInterfaceForUrl(url);
 
+  static void cRemoveDownloaderHandlerInterfaceForId(
+          ALDownloaderHandlerInterfaceId id) =>
+      _qRemoveDownloaderHandlerInterfaceForId(id);
+
   static void cPause(String url) => _qPause(url);
 
   static void cPauseAll() => _qPauseAll();
 
+  static void cPauseUrls(List<String> urls) => _qPauseUrls(urls);
+
   static void cCancel(String url) => _qCancel(url);
+
+  static void cCancelUrls(List<String> urls) => _qCancelUrls(urls);
 
   static void cCancelAll() => _qCancelAll();
 
   static void cRemove(String url) => _qRemove(url);
 
+  static void cRemoveUrls(List<String> urls) => _qRemoveUrls(urls);
+
   static void cRemoveAll() => _qRemoveAll();
 
-  static void _configForIsolatesChores() =>
-      ALDownloaderIsolateLauncher.configForIsolatesChores();
+  static void _launchALIsolate() =>
+      ALDownloaderIsolateLauncher.launchALIsolate();
 
   static void _qInitialize() {
     _queue.add(() async {
@@ -268,50 +304,34 @@ abstract class ALDownloaderIMP {
   static void _qDownload(String url,
       {String? downloaderHandlerInterfaceId,
       Map<String, String> headers = const {}}) {
-    _ALDownloadTask? task = _getTaskFromUrl(url);
-
-    if (task == null) {
-      task = _addOrUpdateTaskForUrl(
-          url, '', _ALDownloaderInnerStatus.prepared, 0, '', '');
-    } else if (task.innerStatus == _ALDownloaderInnerStatus.deprecated ||
-        task.innerStatus == _ALDownloaderInnerStatus.ignored) {
-      _addOrUpdateTaskForUrl(
-          url, '', _ALDownloaderInnerStatus.prepared, 0, '', '');
-    } else if (task.innerStatus ==
-        _ALDownloaderInnerStatus.preparedPretendedPaused) {
-      _addOrUpdateTaskForUrl(
-          url, '', _ALDownloaderInnerStatus.pretendedPaused, 0, '', '');
-    }
-
-    task.headers = headers;
-
-    if (_isLimitedForGoingTasks) {
-      if (!_waitingTasks.contains(task)) _waitingTasks.add(task);
-      aldDebugPrint(
-          'ALDownloader | in phase 1 | try to download url, but the going urls are limited, the url will download later, url = $url, taskId = ${task.taskId}');
-      return;
-    }
-
-    final inputTask = task;
-
     _queue
-        .add(() => _download(inputTask,
-            downloaderHandlerInterfaceId: downloaderHandlerInterfaceId))
+        .add(() => _download(url,
+            downloaderHandlerInterfaceId: downloaderHandlerInterfaceId,
+            headers: headers))
         .catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qDownload, error = $error');
     });
   }
 
   static void _qAddDownloaderHandlerInterface(
-      String downloaderHandlerInterfaceId, String url) {
+      String downloaderHandlerInterfaceId, String url,
+      {bool isInner = true}) {
     _queue.add(() async {
       final aBinder =
           _ALDownloaderBinder(url, downloaderHandlerInterfaceId, false);
-      _binders.add(aBinder);
-    }).catchError((error) {
-      aldDebugPrint(
-          'ALDownloader | queue error | _qAddDownloaderHandlerInterface, error = $error');
+      aBinder.isInner = isInner;
+
+      _addBinder(url, aBinder);
     });
+  }
+
+  static void _addBinder(String url, _ALDownloaderBinder binder) {
+    List<_ALDownloaderBinder>? binders = _urlBinderKVs[url];
+    if (binders == null) {
+      binders = <_ALDownloaderBinder>[];
+      _urlBinderKVs[url] = binders;
+    }
+    binders.add(binder);
   }
 
   static void _qAddForeverDownloaderHandlerInterface(
@@ -319,25 +339,84 @@ abstract class ALDownloaderIMP {
     _queue.add(() async {
       final aBinder =
           _ALDownloaderBinder(url, downloaderHandlerInterfaceId, true);
-      _binders.add(aBinder);
-    }).catchError((error) {
-      aldDebugPrint(
-          'ALDownloader | queue error | _qAddForeverDownloaderHandlerInterface, error = $error');
+
+      _addBinder(url, aBinder);
     });
   }
 
   static void _qRemoveDownloaderHandlerInterfaceForUrl(String url) {
     _queue.add(() async {
-      _binders.removeWhere((element) => url == element.url);
+      final binders = _urlBinderKVs[url];
+      if (binders == null) return;
+
+      final aList = <_ALDownloaderBinder>[];
+      aList.addAll(binders);
+      for (final element in aList) {
+        if (element.isInner && element.url == url) {
+          _callInterface(element.downloaderHandlerInterfaceId, false, false,
+              false, false, 0,
+              isNeedRemoveInterface: true);
+          binders.remove(element);
+        }
+      }
+
+      if (binders.length == 0) _urlBinderKVs.remove(url);
     }).catchError((error) {
       aldDebugPrint(
           'ALDownloader | queue error | _qRemoveDownloaderHandlerInterfaceForUrl, error = $error');
     });
   }
 
+  static void _qRemoveDownloaderHandlerInterfaceForId(
+      ALDownloaderHandlerInterfaceId id) {
+    _queue.add(() async {
+      final aMap = <String, List<_ALDownloaderBinder>>{};
+      aMap.addAll(_urlBinderKVs);
+      for (final entry in aMap.entries) {
+        final key = entry.key;
+        final element = entry.value;
+
+        final aList = <_ALDownloaderBinder>[];
+        aList.addAll(element);
+
+        for (final element1 in aList) {
+          if (element1.downloaderHandlerInterfaceId == id) {
+            _callInterface(element1.downloaderHandlerInterfaceId, false, false,
+                false, false, 0,
+                isNeedRemoveInterface: true);
+            element.remove(element1);
+            if (element.length == 0) _urlBinderKVs.remove(key);
+            return;
+          }
+        }
+      }
+    }).catchError((error) {
+      aldDebugPrint(
+          'ALDownloader | queue error | _qRemoveDownloaderHandlerInterfaceForId, error = $error');
+    });
+  }
+
   static void _qRemoveDownloaderHandlerInterfaceForAll() {
     _queue.add(() async {
-      _binders.clear();
+      final aMap = <String, List<_ALDownloaderBinder>>{};
+      aMap.addAll(_urlBinderKVs);
+      for (final entry in aMap.entries) {
+        final key = entry.key;
+        final element = entry.value;
+
+        final aList = <_ALDownloaderBinder>[];
+        aList.addAll(element);
+
+        for (final element1 in aList) {
+          if (element1.isInner) {
+            _callInterface(element1.downloaderHandlerInterfaceId, false, false,
+                false, false, 0,
+                isNeedRemoveInterface: true);
+            element.remove(element1);
+            if (element.length == 0) _urlBinderKVs.remove(key);
+          }
+        }
+      }
     }).catchError((error) {
       aldDebugPrint(
           'ALDownloader | queue error | _qRemoveDownloaderHandlerInterfaceForAll, error = $error');
@@ -345,48 +424,56 @@ abstract class ALDownloaderIMP {
   }
 
   static void _qPause(String url) {
-    _preprocessSomeActionForUrl(url);
-
     _queue.add(() => _pause1(url)).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qPause, error = $error');
     });
   }
 
-  static void _qPauseAll() {
-    _preprocessSomeActionForAll();
+  static void _qPauseUrls(List<String> urls) {
+    _queue.add(() => _pauseUrls1(urls)).catchError((error) {
+      aldDebugPrint('ALDownloader | queue error | _qPauseUrls, error = $error');
+    });
+  }
 
+  static void _qPauseAll() {
     _queue.add(() => _pauseAll1()).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qPauseAll, error = $error');
     });
   }
 
   static void _qCancel(String url) {
-    _preprocessSomeActionForUrl(url);
-
     _queue.add(() => _cancel1(url)).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qCancel, error = $error');
     });
   }
 
-  static void _qCancelAll() {
-    _preprocessSomeActionForAll();
+  static void _qCancelUrls(List<String> urls) {
+    _queue.add(() => _cancelUrls1(urls)).catchError((error) {
+      aldDebugPrint(
+          'ALDownloader | queue error | _qCancelUrls, error = $error');
+    });
+  }
 
+  static void _qCancelAll() {
     _queue.add(() => _cancelAll1()).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qCancelAll, error = $error');
     });
   }
 
   static void _qRemove(String url) {
-    _preprocessSomeActionForUrl(url);
-
     _queue.add(() => _remove1(url)).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qRemove, error = $error');
     });
   }
 
-  static void _qRemoveAll() {
-    _preprocessSomeActionForAll();
+  static void _qRemoveUrls(List<String> urls) {
+    _queue.add(() => _removeUrls1(urls)).catchError((error) {
+      aldDebugPrint(
+          'ALDownloader | queue error | _qRemoveUrls, error = $error');
+    });
+  }
 
+  static void _qRemoveAll() {
     _queue.add(() => _removeAll1()).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qRemoveAll, error = $error');
     });
@@ -407,21 +494,40 @@ abstract class ALDownloaderIMP {
     await _loadTasks();
   }
 
-  static Future<void> _download(_ALDownloadTask task,
-      {String? downloaderHandlerInterfaceId}) async {
-    final url = task.url;
+  static Future<void> _download(String url,
+      {String? downloaderHandlerInterfaceId,
+      Map<String, String> headers = const {}}) async {
+    _ALDownloadTask? task = _getTaskFromUrl(url);
 
     if (downloaderHandlerInterfaceId != null) {
       final aBinder =
           _ALDownloaderBinder(url, downloaderHandlerInterfaceId, false);
-      _binders.add(aBinder);
+      _addBinder(url, aBinder);
     }
 
+    if (task == null)
+      task = _addOrUpdateTaskForUrl(url, '', _ALDownloaderInnerStatus.prepared,
+          0, '', '', _ALDownloaderTaskWaitingPhase.nonWaiting);
+
+    task.headers = headers;
+
     if (_isLimitedForGoingTasks) {
-      if (!_waitingTasks.contains(task)) _waitingTasks.add(task);
-      aldDebugPrint(
-          'ALDownloader | in phase 2 | try to download url, going tasks are limited, those will download later, url = $url, taskId = ${task.taskId}');
-      return;
+      if (task.innerStatus == _ALDownloaderInnerStatus.prepared ||
+          task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
+          task.innerStatus == _ALDownloaderInnerStatus.deprecated ||
+          task.innerStatus == _ALDownloaderInnerStatus.canceled ||
+          task.innerStatus == _ALDownloaderInnerStatus.failed ||
+          task.innerStatus == _ALDownloaderInnerStatus.paused) {
+        final aBool = _isWaitingTask(task);
+        if (!aBool) {
+          _waitTask(task);
+          _processProgressEventForTask(task);
+        }
+
+        aldDebugPrint(
+            'ALDownloader | try to download url, going tasks are limited, those will download later, url = $url, taskId = ${task.taskId}, status= ${task.innerStatus}');
+        return;
+      }
     }
 
     if (await _isShouldRemoveData(
@@ -431,8 +537,6 @@ abstract class ALDownloaderIMP {
     if (task.innerStatus == _ALDownloaderInnerStatus.prepared ||
         task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
         task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
-      final url = task.url;
-
       aldDebugPrint(
           'ALDownloader | try to download url, the url is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}');
 
@@ -457,7 +561,7 @@ abstract class ALDownloaderIMP {
             'ALDownloader | try to download url, a download task of the url generates succeeded, url = $url, taskId = $taskId, innerStatus = enqueued');
 
         _addOrUpdateTaskForUrl(url, taskId, _ALDownloaderInnerStatus.enqueued,
-            0, directoryPath, fileName);
+            0, directoryPath, fileName, task.waitingPhase);
 
         _callProgressHandler(url, 0);
       } else {
@@ -468,13 +572,7 @@ abstract class ALDownloaderIMP {
       aldDebugPrint(
           'ALDownloader | try to download url, but the url is succeeded, url = $url, taskId = ${task.taskId}');
 
-      // ignore: non_constant_identifier_names
-      final int_progress = task.progress;
-      // ignore: non_constant_identifier_names
-      final double_progress =
-          double.tryParse(((int_progress / 100).toStringAsFixed(2))) ?? 0;
-
-      _callSucceededHandler(url, double_progress);
+      _callSucceededHandler(task.url, task.double_progress);
     } else if (task.innerStatus == _ALDownloaderInnerStatus.canceled ||
         task.innerStatus == _ALDownloaderInnerStatus.failed) {
       final previousTaskId = task.taskId;
@@ -491,13 +589,10 @@ abstract class ALDownloaderIMP {
             _ALDownloaderInnerStatus.enqueued,
             progress,
             task.savedDir,
-            task.fileName);
+            task.fileName,
+            task.waitingPhase);
 
-        // ignore: non_constant_identifier_names
-        final double_progress =
-            double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
-
-        _callProgressHandler(url, double_progress);
+        _processProgressEventForTask(task);
 
         aldDebugPrint(
             'ALDownloader | try to download url, the url is $previousStatusDescription previously and retries succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForRetry, innerStatus = enqueued');
@@ -517,10 +612,13 @@ abstract class ALDownloaderIMP {
         _addOrUpdateTaskForUrl(
             url,
             taskIdForResumption,
-            _ALDownloaderInnerStatus.running,
+            Platform.isIOS
+                ? _ALDownloaderInnerStatus.running
+                : _ALDownloaderInnerStatus.paused,
             task.progress,
             task.savedDir,
-            task.fileName);
+            task.fileName,
+            task.waitingPhase);
       } else {
         aldDebugPrint(
             'ALDownloader | try to download url, the url is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, taskId = null');
@@ -538,11 +636,20 @@ abstract class ALDownloaderIMP {
 
   static Future<void> _pause1(String url) async {
     try {
-      final task = _getTaskFromUrl(url);
+      _ALDownloadTask? task = _getTaskFromUrl(url);
+
+      aldDebugPrint(
+          'ALDownloader | _pause1, url = $url, but url is ${task?.innerStatus.alDescription}');
 
       if (task == null) {
-        aldDebugPrint(
-            'ALDownloader | _pause1, url = $url, but url task is null');
+        task = _addOrUpdateTaskForUrl(
+            url,
+            '',
+            _ALDownloaderInnerStatus.prepared,
+            0,
+            '',
+            '',
+            _ALDownloaderTaskWaitingPhase.nonWaiting);
       } else {
         final taskId = task.taskId;
 
@@ -561,9 +668,18 @@ abstract class ALDownloaderIMP {
             await FlutterDownloader.pause(taskId: taskId);
             task.isMayRedownloadAboutPause = false;
           }
-        } else {
-          aldDebugPrint(
-              'ALDownloader | _pause1, url = $url, but url is ${task.innerStatus.alDescription}');
+        } else if (task.waitingPhase ==
+                _ALDownloaderTaskWaitingPhase.transiting ||
+            task.waitingPhase == _ALDownloaderTaskWaitingPhase.waiting) {
+          if (task.innerStatus == _ALDownloaderInnerStatus.paused ||
+              task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused) {
+            _processPausedEventForTask(task);
+          } else {
+            await _pauseTaskPretendedlyWithCallHandler(task);
+          }
+        } else if (task.innerStatus == _ALDownloaderInnerStatus.paused ||
+            task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused) {
+          _callPausedHandler(task.url, task.double_progress);
         }
       }
     } catch (error) {
@@ -571,12 +687,21 @@ abstract class ALDownloaderIMP {
     }
   }
 
-  static Future<void> _pauseAll1() async {
-    final aTemp = <_ALDownloadTask>[];
-    aTemp.addAll(_tasks);
-    for (final task in aTemp) {
-      final url = task.url;
+  static Future<void> _pauseUrls1(List<String> urls) async {
+    for (final url in urls) _transitUrl(url);
+    for (final url in urls) {
       await _pause1(url);
+      _unwaitUrl(url);
+    }
+  }
+
+  static double ttt = 0;
+
+  static Future<void> _pauseAll1() async {
+    for (final task in _tasks) _transitTask(task);
+    for (final task in _tasks) {
+      await _pause1(task.url);
+      _unwaitTask(task);
     }
   }
 
@@ -584,98 +709,60 @@ abstract class ALDownloaderIMP {
     try {
       final task = _getTaskFromUrl(url);
 
+      aldDebugPrint(
+          'ALDownloader | _cancel1, url = $url, but url is ${task?.innerStatus.alDescription}');
+
       if (task == null) {
-        aldDebugPrint(
-            'ALDownloader | _cancel1, url = $url, but url task is null');
-
-        _addOrUpdateTaskForUrl(
-            url, '', _ALDownloaderInnerStatus.deprecated, 0, '', '');
-        _callFailedHandler(url, 0);
-      } else {
-        if (task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
-          aldDebugPrint(
-              'ALDownloader | _cancel1, url = $url, but url is deprecated');
-
-          _addOrUpdateTaskForUrl(
-              url, '', _ALDownloaderInnerStatus.deprecated, 0, '', '');
-          _callFailedHandler(url, 0);
-        } else if (task.innerStatus == _ALDownloaderInnerStatus.enqueued ||
-            task.innerStatus == _ALDownloaderInnerStatus.running) {
-          await _removeTaskWithCallHandler(task);
-        }
+        _addOrUpdateTaskForUrl(url, '', _ALDownloaderInnerStatus.prepared, 0,
+            '', '', _ALDownloaderTaskWaitingPhase.nonWaiting);
+      } else if (task.waitingPhase ==
+              _ALDownloaderTaskWaitingPhase.transiting ||
+          task.waitingPhase == _ALDownloaderTaskWaitingPhase.waiting ||
+          task.innerStatus == _ALDownloaderInnerStatus.enqueued ||
+          task.innerStatus == _ALDownloaderInnerStatus.running) {
+        await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
       aldDebugPrint('ALDownloader | _cancel1, url = $url, error = $error');
     }
   }
 
+  static Future<void> _cancelUrls1(List<String> urls) async {
+    for (final url in urls) _transitUrl(url);
+    for (final url in urls) await _cancel1(url);
+  }
+
   static Future<void> _cancelAll1() async {
-    final aTemp = <_ALDownloadTask>[];
-    aTemp.addAll(_tasks);
-    for (final task in aTemp) {
-      final url = task.url;
-      await _cancel1(url);
-    }
+    for (final task in _tasks) _transitTask(task);
+    for (final task in _tasks) await _cancel1(task.url);
   }
 
   static Future<void> _remove1(String url) async {
     try {
       final task = _getTaskFromUrl(url);
 
+      aldDebugPrint(
+          'ALDownloader | _remove1, url = $url, but url is ${task?.innerStatus.alDescription}');
+
       if (task == null) {
-        aldDebugPrint(
-            'ALDownloader | _remove1, url = $url, but url task is null');
-
-        _addOrUpdateTaskForUrl(
-            url, '', _ALDownloaderInnerStatus.deprecated, 0, '', '');
-
-        _callFailedHandler(url, 0);
+        _addOrUpdateTaskForUrl(url, '', _ALDownloaderInnerStatus.prepared, 0,
+            '', '', _ALDownloaderTaskWaitingPhase.nonWaiting);
       } else {
-        if (task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
-          aldDebugPrint(
-              'ALDownloader | _remove1, url = $url, but url is deprecated');
-
-          _addOrUpdateTaskForUrl(
-              url, '', _ALDownloaderInnerStatus.deprecated, 0, '', '');
-          _callFailedHandler(url, 0);
-        } else {
-          await _removeTaskWithCallHandler(task);
-        }
+        await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
       aldDebugPrint('ALDownloader | _remove1, url = $url, error = $error');
     }
   }
 
+  static Future<void> _removeUrls1(List<String> urls) async {
+    for (final url in urls) _transitUrl(url);
+    for (final url in urls) await _remove1(url);
+  }
+
   static Future<void> _removeAll1() async {
-    final aTemp = <_ALDownloadTask>[];
-    aTemp.addAll(_tasks);
-    for (final task in aTemp) {
-      final url = task.url;
-      await _remove1(url);
-    }
-  }
-
-  static void _preprocessSomeActionForUrl(String url) {
-    final task = _getTaskFromUrl(url);
-    if (task != null) _preprocessSomeActionForTask(task);
-  }
-
-  static void _preprocessSomeActionForAll() {
-    for (final task in _tasks) _preprocessSomeActionForTask(task);
-  }
-
-  static void _preprocessSomeActionForTask(_ALDownloadTask task) {
-    if (_waitingTasks.contains(task)) _waitingTasks.remove(task);
-
-    final url = task.url;
-    if (task.innerStatus == _ALDownloaderInnerStatus.prepared) {
-      _addOrUpdateTaskForUrl(
-          url, '', _ALDownloaderInnerStatus.ignored, 0, '', '');
-    } else if (task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused) {
-      _addOrUpdateTaskForUrl(
-          url, '', _ALDownloaderInnerStatus.preparedPretendedPaused, 0, '', '');
-    }
+    for (final task in _tasks) _transitTask(task);
+    for (final task in _tasks) await _remove1(task.url);
   }
 
   /// Manager custom download tasks
@@ -687,15 +774,14 @@ abstract class ALDownloaderIMP {
   /// **discussion**
   ///
   /// Add or update the task for [url].
-  ///
-  /// Specially, [savedDir] does not update while be `null`, also [fileName]. It's reason that avoid real value replacing by `null` from [_processDataFromPort].
   static _ALDownloadTask _addOrUpdateTaskForUrl(
       String? url,
       String taskId,
       _ALDownloaderInnerStatus innerStatus,
       int progress,
-      String? savedDir,
-      String? fileName) {
+      String savedDir,
+      String fileName,
+      _ALDownloaderTaskWaitingPhase waitingPhase) {
     if (url == null)
       throw 'ALDownloader | _addOrUpdateTaskForUrl, error = url is null';
 
@@ -703,22 +789,25 @@ abstract class ALDownloaderIMP {
 
     try {
       task = _tasks.firstWhere((element) => element.url == url);
-      if (savedDir != null) task.savedDir = savedDir;
-      if (fileName != null) task.fileName = fileName;
+      task.savedDir = savedDir;
+      task.fileName = fileName;
       task.taskId = taskId;
       task.innerStatus = innerStatus;
       task.progress = progress;
+      task.waitingPhase = waitingPhase;
     } catch (error) {
       aldDebugPrint('ALDownloader | _addOrUpdateTaskForUrl, error = $error');
     }
 
     if (task == null) {
       task = _ALDownloadTask(url);
-      if (savedDir != null) task.savedDir = savedDir;
-      if (fileName != null) task.fileName = fileName;
+      task.savedDir = savedDir;
+      task.fileName = fileName;
       task.taskId = taskId;
       task.innerStatus = innerStatus;
       task.progress = progress;
+      task.waitingPhase = waitingPhase;
+      task.pIndex = _tasks.length;
 
       _tasks.add(task);
     }
@@ -747,7 +836,7 @@ abstract class ALDownloaderIMP {
     if (action == ALDownloaderConstant.kSyncTaskToRoot) {
       final task = content[ALDownloaderConstant.kTask];
       _addOrUpdateTaskForUrl(task.url, task.taskId, task.innerStatus,
-          task.progress, task.savedDir, task.fileName);
+          task.progress, task.savedDir, task.fileName, task.waitingPhase);
     } else if (action == ALDownloaderConstant.kCallInterface) {
       final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
       final isNeedCallProgressHandler =
@@ -759,10 +848,10 @@ abstract class ALDownloaderIMP {
       final isNeedCallPausedHandler =
           content[ALDownloaderConstant.kIsNeedCallPausedHandler];
       final progress = content[ALDownloaderConstant.kProgress];
-      final isNeedRemoveInterfaceAfterCallForRoot =
-          content[ALDownloaderConstant.kIsNeedRemoveInterfaceAfterCallForRoot];
-      final inteface = _interfaceKVs[id];
-      ALDownloaderHeader.callInterfaceById(
+      final isNeedRemoveInterface =
+          content[ALDownloaderConstant.kIsNeedRemoveInterface];
+      final inteface = _idInterfaceKVs[id];
+      ALDownloaderHeader.callDownloaderHandlerInterface(
           inteface,
           isNeedCallProgressHandler,
           isNeedCallSucceededHandler,
@@ -770,7 +859,7 @@ abstract class ALDownloaderIMP {
           isNeedCallPausedHandler,
           progress);
 
-      if (isNeedRemoveInterfaceAfterCallForRoot) _interfaceKVs.remove(id);
+      if (isNeedRemoveInterface) _idInterfaceKVs.remove(id);
     }
   }
 
@@ -801,6 +890,10 @@ abstract class ALDownloaderIMP {
         ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForUrl) {
       final url = content[ALDownloaderConstant.kUrl];
       _qRemoveDownloaderHandlerInterfaceForUrl(url);
+    } else if (action ==
+        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForId) {
+      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
+      _qRemoveDownloaderHandlerInterfaceForId(id);
     } else if (action ==
         ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForAll) {
       _qRemoveDownloaderHandlerInterfaceForAll();
@@ -859,7 +952,7 @@ abstract class ALDownloaderIMP {
 
       final progress = data[2];
 
-      _processDataFromPort(taskId, originalStatus, progress);
+      _processDataFromFPort(taskId, originalStatus, progress);
     });
   }
 
@@ -874,10 +967,10 @@ abstract class ALDownloaderIMP {
   }
 
   /// Process the [FlutterDownloader]'s callback
-  static void _processDataFromPort(
+  static void _processDataFromFPort(
       String taskId, DownloadTaskStatus originalStatus, int progress) {
     aldDebugPrint(
-        'ALDownloader | _processDataFromPort | original, taskId = $taskId, original status = $originalStatus, original progress = $progress',
+        'ALDownloader | _processDataFromFPort | original, taskId = $taskId, original status = $originalStatus, original progress = $progress',
         isFrequentPrint: true);
 
     _ALDownloaderInnerStatus innerStatus = _transferStatus(originalStatus);
@@ -886,29 +979,24 @@ abstract class ALDownloaderIMP {
 
     if (task == null) {
       aldDebugPrint(
-          'ALDownloader | _processDataFromPort, the func return, because task is not found, taskId = $taskId');
+          'ALDownloader | _processDataFromFPort, the function return, because task is not found, taskId = $taskId');
       return;
     }
 
     if (task.innerStatus == _ALDownloaderInnerStatus.prepared ||
         task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
-        task.innerStatus == _ALDownloaderInnerStatus.deprecated ||
-        task.innerStatus == _ALDownloaderInnerStatus.ignored ||
-        task.innerStatus == _ALDownloaderInnerStatus.preparedPretendedPaused) {
+        task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
       aldDebugPrint(
-          'ALDownloader | _processDataFromPort, the func return, because task is ${task.innerStatus.alDescription}, taskId = $taskId');
+          'ALDownloader | _processDataFromFPort, the function return, because task is ${task.innerStatus.alDescription}, taskId = $taskId');
       return;
     }
 
     final url = task.url;
 
-    _addOrUpdateTaskForUrl(url, taskId, innerStatus, progress, null, null);
+    _addOrUpdateTaskForUrl(url, taskId, innerStatus, progress, task.savedDir,
+        task.fileName, task.waitingPhase);
 
-    // ignore: non_constant_identifier_names
-    final double_progress =
-        double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
-
-    _callHandlerForBusiness1(taskId, url, innerStatus, double_progress);
+    _callHandlerForBusiness1(task);
 
     if (task.isMayRedownloadAboutPause &&
         task.innerStatus == _ALDownloaderInnerStatus.paused) {
@@ -917,7 +1005,7 @@ abstract class ALDownloaderIMP {
     }
 
     aldDebugPrint(
-        'ALDownloader | _processDataFromPort | processed, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = $double_progress',
+        'ALDownloader | _processDataFromFPort | processed, taskId = $taskId, url = $url, innerStatus = $innerStatus, progress = $progress, double_progress = ${task.double_progress}',
         isFrequentPrint: true);
   }
 
@@ -966,37 +1054,29 @@ abstract class ALDownloaderIMP {
           'ALDownloader | _loadTasks, tasks length = ${_tasks.length}');
 
       for (final task in _tasks) {
-        // ignore: non_constant_identifier_names
-        final double_progress =
-            double.tryParse(((task.progress / 100).toStringAsFixed(2))) ?? 0;
         if (task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
-          _callFailedHandler(task.url, 0);
+          _processFailedEventForUrlProgress(task.url, 0);
         } else {
           // If the task is normal, call handler directly.
-          _callHandlerForBusiness1(
-              task.taskId, task.url, task.innerStatus, double_progress);
+          _callHandlerForBusiness1(task);
         }
       }
     }
   }
 
   /// Call handler for business 1
-  static void _callHandlerForBusiness1(
-      String taskId,
-      String url,
-      _ALDownloaderInnerStatus innerStatus,
-      // ignore: non_constant_identifier_names
-      double double_progress) {
+  static void _callHandlerForBusiness1(_ALDownloadTask task) {
+    final innerStatus = task.innerStatus;
     if (innerStatus == _ALDownloaderInnerStatus.enqueued ||
         innerStatus == _ALDownloaderInnerStatus.running) {
-      _callProgressHandler(url, double_progress);
+      _processProgressEventForTask(task);
     } else if (innerStatus == _ALDownloaderInnerStatus.complete) {
-      _callSucceededHandler(url, double_progress);
+      _processSucceededEventForTask(task);
     } else if (innerStatus == _ALDownloaderInnerStatus.canceled ||
         innerStatus == _ALDownloaderInnerStatus.failed) {
-      _callFailedHandler(url, -0.01);
+      _processFailedEventForUrlProgress(task.url, -0.01);
     } else if (innerStatus == _ALDownloaderInnerStatus.paused) {
-      _callPausedHandler(url, double_progress);
+      _processPausedEventForTask(task);
     }
   }
 
@@ -1008,10 +1088,7 @@ abstract class ALDownloaderIMP {
       _ALDownloaderInnerStatus innerStatus,
       String savedDir,
       String filePath) async {
-    if (innerStatus == _ALDownloaderInnerStatus.prepared ||
-        innerStatus == _ALDownloaderInnerStatus.ignored ||
-        innerStatus == _ALDownloaderInnerStatus.preparedPretendedPaused)
-      return false;
+    if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
     if (!(await _isInRootPathForPath(savedDir))) return true;
 
     bool aBool = innerStatus == _ALDownloaderInnerStatus.enqueued ||
@@ -1043,10 +1120,7 @@ abstract class ALDownloaderIMP {
       _ALDownloaderInnerStatus innerStatus,
       String savedDir,
       String filePath) async {
-    if (innerStatus == _ALDownloaderInnerStatus.prepared ||
-        innerStatus == _ALDownloaderInnerStatus.ignored ||
-        innerStatus == _ALDownloaderInnerStatus.preparedPretendedPaused)
-      return false;
+    if (innerStatus == _ALDownloaderInnerStatus.prepared) return false;
     if (!(await _isInRootPathForPath(savedDir))) return true;
 
     bool aBool;
@@ -1132,38 +1206,11 @@ abstract class ALDownloaderIMP {
     return isLimited;
   }
 
-  static Future<void> _removeTaskWithCallHandler(_ALDownloadTask task) async {
-    final url = task.url;
-
-    await _removeTask(task);
-
-    _callFailedHandler(url, 0);
-  }
-
-  static Future<void> _removeTask(_ALDownloadTask task) async {
-    final taskId = task.taskId;
-
-    _addOrUpdateTaskForUrl(
-        task.url,
-        taskId,
-        _ALDownloaderInnerStatus.deprecated,
-        task.progress,
-        task.savedDir,
-        task.fileName);
-
-    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
-  }
-
   static Future<void> _pauseTaskPretendedlyWithCallHandler(
       _ALDownloadTask task) async {
-    final url = task.url;
-
     await _pauseTaskPretendedly(task);
 
-    // ignore: non_constant_identifier_names
-    final double_progress =
-        double.tryParse(((task.progress / 100).toStringAsFixed(2))) ?? 0;
-    _callPausedHandler(url, double_progress);
+    _processPausedEventForTask(task);
   }
 
   static Future<void> _pauseTaskPretendedly(_ALDownloadTask task) async {
@@ -1175,72 +1222,124 @@ abstract class ALDownloaderIMP {
         _ALDownloaderInnerStatus.pretendedPaused,
         task.progress,
         task.savedDir,
-        task.fileName);
+        task.fileName,
+        task.waitingPhase);
 
-    await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
+    if (taskId.length > 0)
+      await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
+  }
+
+  static Future<void> _removeTaskWithCallHandler(_ALDownloadTask task) async {
+    final url = task.url;
+
+    await _removeTask(task);
+
+    _processFailedEventForUrlProgress(url, 0);
+  }
+
+  static Future<void> _removeTask(_ALDownloadTask task) async {
+    final taskId = task.taskId;
+
+    _addOrUpdateTaskForUrl(
+        task.url,
+        taskId,
+        _ALDownloaderInnerStatus.deprecated,
+        task.progress,
+        task.savedDir,
+        task.fileName,
+        task.waitingPhase);
+
+    if (taskId.length > 0)
+      await FlutterDownloader.remove(taskId: taskId, shouldDeleteContent: true);
+  }
+
+  static void _processProgressEventForTask(_ALDownloadTask task) {
+    _callProgressHandler(task.url, task.double_progress);
+  }
+
+  static void _processSucceededEventForTask(_ALDownloadTask task) {
+    _unwaitTask(task);
+    _callSucceededHandler(task.url, task.double_progress);
+    _downloadWaitingTasks();
+  }
+
+  // ignore: unused_element
+  static void _processFailedEventForTask(_ALDownloadTask task) {
+    _unwaitTask(task);
+    _callFailedHandler(task.url, task.double_progress);
+    _downloadWaitingTasks();
+  }
+
+  static void _processPausedEventForTask(_ALDownloadTask task) {
+    _unwaitTask(task);
+    _callPausedHandler(task.url, task.double_progress);
+    _downloadWaitingTasks();
+  }
+
+  static void _processFailedEventForUrlProgress(String url, double progress) {
+    _unwaitUrl(url);
+    _callFailedHandler(url, progress);
+    _downloadWaitingTasks();
   }
 
   static void _callProgressHandler(String url, double progress) {
-    _binders.forEach((element) {
-      if (element.url == url) {
-        final downloaderHandlerInterfaceId =
-            element.downloaderHandlerInterfaceId;
-        _callInterface(
-            downloaderHandlerInterfaceId, true, false, false, false, progress);
-      }
-    });
+    final binders = _urlBinderKVs[url];
+    if (binders == null) return;
+
+    for (final element in binders) {
+      final downloaderHandlerInterfaceId = element.downloaderHandlerInterfaceId;
+      _callInterface(
+          downloaderHandlerInterfaceId, true, false, false, false, progress);
+    }
   }
 
   static void _callSucceededHandler(String url, double progress) {
-    _binders.forEach((element) {
-      if (element.url == url) {
-        final downloaderHandlerInterfaceId =
-            element.downloaderHandlerInterfaceId;
-        _callInterface(
-            downloaderHandlerInterfaceId, true, true, false, false, progress,
-            isNeedRemoveInterfaceAfterCallForRoot: !element.isForever);
-      }
-    });
+    final binders = _urlBinderKVs[url];
+    if (binders == null) return;
 
-    _binders.removeWhere((element) => element.url == url && !element.isForever);
+    final aList = <_ALDownloaderBinder>[];
+    aList.addAll(binders);
 
-    _unwait(url);
-    _downloadWaitingTasks();
+    for (final element in aList) {
+      final downloaderHandlerInterfaceId = element.downloaderHandlerInterfaceId;
+      _callInterface(
+          downloaderHandlerInterfaceId, true, true, false, false, progress,
+          isNeedRemoveInterface: !element.isForever);
+      if (!element.isForever) binders.remove(element);
+    }
+
+    if (binders.length == 0) _urlBinderKVs.remove(url);
   }
 
   static void _callFailedHandler(String url, double progress) {
-    _binders.forEach((element) {
-      if (element.url == url) {
-        final downloaderHandlerInterfaceId =
-            element.downloaderHandlerInterfaceId;
-        _callInterface(
-            downloaderHandlerInterfaceId, true, false, true, false, progress,
-            isNeedRemoveInterfaceAfterCallForRoot: !element.isForever);
-      }
-    });
+    final binders = _urlBinderKVs[url];
+    if (binders == null) return;
 
-    _binders.removeWhere((element) => element.url == url && !element.isForever);
+    final aList = <_ALDownloaderBinder>[];
+    aList.addAll(binders);
 
-    _unwait(url);
-    _downloadWaitingTasks();
+    for (final element in aList) {
+      final downloaderHandlerInterfaceId = element.downloaderHandlerInterfaceId;
+      _callInterface(
+          downloaderHandlerInterfaceId, true, false, true, false, progress,
+          isNeedRemoveInterface: !element.isForever);
+      if (!element.isForever) binders.remove(element);
+    }
+
+    if (binders.length == 0) _urlBinderKVs.remove(url);
   }
 
   static void _callPausedHandler(String url, double progress) {
-    _binders.forEach((element) {
-      if (element.url == url) {
-        final downloaderHandlerInterfaceId =
-            element.downloaderHandlerInterfaceId;
-        if (progress > -0.01)
-          _callInterface(downloaderHandlerInterfaceId, true, false, false,
-              false, progress);
+    final binders = _urlBinderKVs[url];
+    if (binders == null) return;
 
-        _callInterface(
-            downloaderHandlerInterfaceId, false, false, false, true, progress);
-      }
-    });
+    for (final element in binders) {
+      final downloaderHandlerInterfaceId = element.downloaderHandlerInterfaceId;
+      bool isNeedCallProgressHandler = progress > -0.01;
 
-    _unwait(url);
-    _downloadWaitingTasks();
+      _callInterface(downloaderHandlerInterfaceId, isNeedCallProgressHandler,
+          false, false, true, progress);
+    }
   }
 
   /// call interface for all isolates
@@ -1251,9 +1350,9 @@ abstract class ALDownloaderIMP {
       bool isNeedCallFailedHandler,
       bool isNeedCallPausedHandler,
       double progress,
-      {bool isNeedRemoveInterfaceAfterCallForRoot = false}) {
+      {bool isNeedRemoveInterface = false}) {
     // Call interface for root isolate
-    ALDownloaderHeader.callInterfaceFromALToRoot(
+    ALDownloaderHeader.processDownloaderHandlerInterfaceOnComingRootIsolate(
         ALDownloaderConstant.kALDownloaderIMP,
         downloaderHandlerInterfaceId,
         isNeedCallProgressHandler,
@@ -1261,11 +1360,10 @@ abstract class ALDownloaderIMP {
         isNeedCallFailedHandler,
         isNeedCallPausedHandler,
         progress,
-        isNeedRemoveInterfaceAfterCallForRoot:
-            isNeedRemoveInterfaceAfterCallForRoot);
+        isNeedRemoveInterface: isNeedRemoveInterface);
 
     // Call interface for current isolate
-    _callInterfaceForCurrentIsolate(
+    _processDownloaderHandlerInterfaceOnCurrentIsolate(
         downloaderHandlerInterfaceId,
         isNeedCallProgressHandler,
         isNeedCallSucceededHandler,
@@ -1274,16 +1372,17 @@ abstract class ALDownloaderIMP {
         progress);
   }
 
-  static void _callInterfaceForCurrentIsolate(
+  static void _processDownloaderHandlerInterfaceOnCurrentIsolate(
       String downloaderHandlerInterfaceId,
       bool isNeedCallProgressHandler,
       bool isNeedCallSucceededHandler,
       bool isNeedCallFailedHandler,
       bool isNeedCallPausedHandler,
       double progress) {
-    final inteface = _interfaceKVs[downloaderHandlerInterfaceId];
-    ALDownloaderHeader.callInterfaceById(
-        inteface,
+    final downloaderHandlerInterface =
+        _idInterfaceKVs[downloaderHandlerInterfaceId];
+    ALDownloaderHeader.callDownloaderHandlerInterface(
+        downloaderHandlerInterface,
         isNeedCallProgressHandler,
         isNeedCallSucceededHandler,
         isNeedCallFailedHandler,
@@ -1291,14 +1390,83 @@ abstract class ALDownloaderIMP {
         progress);
   }
 
-  static void _unwait(String url) {
+  // ignore: unused_element
+  static bool _isWaitingUrl(String url) {
     final task = _getTaskFromUrl(url);
-    if (_waitingTasks.contains(task)) _waitingTasks.remove(task);
+    return _isWaitingTask(task);
+  }
+
+  static bool _isWaitingTask(_ALDownloadTask? task) {
+    return task?.waitingPhase == _ALDownloaderTaskWaitingPhase.waiting;
+  }
+
+  // ignore: unused_element
+  static void _waitUrl(String url) {
+    final task = _getTaskFromUrl(url);
+    _waitTask(task);
+  }
+
+  static void _waitTask(_ALDownloadTask? task) {
+    _assignTaskWaitingPhase(task, _ALDownloaderTaskWaitingPhase.waiting);
+  }
+
+  static void _transitUrl(String url) {
+    final task = _getTaskFromUrl(url);
+    _transitTask(task);
+  }
+
+  static void _transitTask(_ALDownloadTask? task) {
+    if (!_isWaitingTask(task)) return;
+
+    _assignTaskWaitingPhase(task, _ALDownloaderTaskWaitingPhase.transiting);
+  }
+
+  static void _unwaitUrl(String url) {
+    final task = _getTaskFromUrl(url);
+    _unwaitTask(task);
+  }
+
+  static void _unwaitTask(_ALDownloadTask? task) {
+    _assignTaskWaitingPhase(task, _ALDownloaderTaskWaitingPhase.nonWaiting);
+  }
+
+  static void _assignTaskWaitingPhase(
+      _ALDownloadTask? task, _ALDownloaderTaskWaitingPhase waitingPhase) {
+    if (task == null) return;
+
+    _addOrUpdateTaskForUrl(task.url, task.taskId, task.innerStatus,
+        task.progress, task.savedDir, task.fileName, waitingPhase);
+
+    switch (waitingPhase) {
+      case _ALDownloaderTaskWaitingPhase.nonWaiting:
+      case _ALDownloaderTaskWaitingPhase.transiting:
+        {
+          _waitingTasks.remove(task);
+        }
+        break;
+
+      case _ALDownloaderTaskWaitingPhase.waiting:
+        {
+          if (!_waitingTasks.contains(task)) {
+            _waitingTasks.add(task);
+            _waitingTasks.sort((a, b) => a.pIndex.compareTo(b.pIndex));
+          }
+        }
+        break;
+      default:
+    }
   }
 
   static void _downloadWaitingTasks() {
-    for (final element in _waitingTasks)
-      _qDownload(element.url, headers: element.headers);
+    final expectedExecuteTasksCount =
+        _kMaxConcurrentTaskCount - _goingTasks.length;
+
+    for (int i = 0; i < expectedExecuteTasksCount; i++) {
+      if (_waitingTasks.length > i) {
+        final task = _waitingTasks[i];
+        _qDownload(task.url, headers: task.headers);
+      }
+    }
   }
 
   static _ALDownloaderInnerStatus _transferStatus(DownloadTaskStatus status) {
@@ -1322,10 +1490,10 @@ abstract class ALDownloaderIMP {
   /// A dirty flag that [initialize] executed
   static bool _isInitialized = false;
 
-  /// A map for storaging interfaces
+  /// A map that key is id and value is [ALDownloaderHandlerInterface].
   ///
   /// Key is generated by [ALDownloaderHeader.uuid].
-  static final _interfaceKVs = <String, ALDownloaderHandlerInterface>{};
+  static final _idInterfaceKVs = <String, ALDownloaderHandlerInterface>{};
 
   /// Send port for communication from [FlutterDownloader] isolate to ALDownloader isolate
   static final _kPortForFToAL = '_kPortForFToAL';
@@ -1342,11 +1510,11 @@ abstract class ALDownloaderIMP {
   /// Waiting download tasks
   static final _waitingTasks = <_ALDownloadTask>[];
 
-  /// A binder list for binding element such as url, downloader interface, forever flag and so on
-  static final _binders = <_ALDownloaderBinder>[];
+  /// A map that key is url and value is binder list.
+  static final _urlBinderKVs = <String, List<_ALDownloaderBinder>>{};
 
   /// Max concurrent task count
-  static final _kMaxConcurrentTaskCount = 10;
+  static final _kMaxConcurrentTaskCount = 7;
 
   /// Privatize constructor
   ALDownloaderIMP._();
@@ -1362,28 +1530,49 @@ class _ALDownloadTask {
 
   String taskId = '';
 
-  int progress = 0;
+  int get progress => _progress;
 
-  Map<String, String> headers = const {};
+  set progress(int value) {
+    _progress = value;
+
+    double_progress =
+        double.tryParse(((progress / 100).toStringAsFixed(2))) ?? 0;
+  }
+
+  int _progress = 0;
 
   _ALDownloaderInnerStatus innerStatus = _ALDownloaderInnerStatus.undefined;
 
+  _ALDownloaderTaskWaitingPhase waitingPhase =
+      _ALDownloaderTaskWaitingPhase.nonWaiting;
+
+  // ignore: non_constant_identifier_names
+  double double_progress = 0;
+
+  Map<String, String> headers = const {};
+
   bool isMayRedownloadAboutPause = false;
+
+  int pIndex = 0;
 
   String get filePath => savedDir + fileName;
 
   _ALDownloadTask(this.url);
 }
 
-/// A binder for binding element of url and downloader interface
-///
-/// It may bind more elements in the future.
+/// A binder for binding some elements such as [url], [downloaderHandlerInterfaceId] and more
 class _ALDownloaderBinder {
+  final String url;
+
+  final ALDownloaderHandlerInterfaceId downloaderHandlerInterfaceId;
+
+  final bool isForever;
+
+  /// Whether [_ALDownloaderBinder] generates by ALDownloader inner
+  bool isInner = true;
+
   _ALDownloaderBinder(
       this.url, this.downloaderHandlerInterfaceId, this.isForever);
-  final String url;
-  final String downloaderHandlerInterfaceId;
-  final bool isForever;
 }
 
 /// An enumeration of inner status
@@ -1394,7 +1583,7 @@ class _ALDownloaderBinder {
 ///
 /// It has supplemented the fllowing statuses at present.
 ///
-/// [prepared], [deprecated], [pretendedPaused], [ignored], [preparedPretendedPaused]
+/// [prepared], [deprecated], [pretendedPaused]
 ///
 /// It may supplement more statuses in the future.
 enum _ALDownloaderInnerStatus {
@@ -1407,10 +1596,15 @@ enum _ALDownloaderInnerStatus {
   canceled,
   paused,
   pretendedPaused,
-  deprecated,
-  ignored,
-  preparedPretendedPaused
+  deprecated
 }
+
+/// An enumeration of task waiting phase
+///
+/// [transiting]
+///
+/// It is a transitional status that used for some scenes while transiting to [nonWaiting] and duration is very short.
+enum _ALDownloaderTaskWaitingPhase { nonWaiting, transiting, waiting }
 
 /// An enumeration extension of inner status
 extension _ALDownloaderInnerStatusExtension on _ALDownloaderInnerStatus {
@@ -1424,8 +1618,6 @@ extension _ALDownloaderInnerStatusExtension on _ALDownloaderInnerStatus {
         'canceled',
         'paused',
         'pretendedPaused',
-        'deprecated',
-        'ignored',
-        'preparedPretendedPaused'
+        'deprecated'
       ][index];
 }
