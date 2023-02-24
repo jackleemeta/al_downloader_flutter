@@ -424,57 +424,57 @@ abstract class ALDownloaderIMP {
   }
 
   static void _qPause(String url) {
-    _queue.add(() => _pause1(url)).catchError((error) {
+    _queue.add(() => _pause(url)).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qPause, error = $error');
     });
   }
 
   static void _qPauseUrls(List<String> urls) {
-    _queue.add(() => _pauseUrls1(urls)).catchError((error) {
+    _queue.add(() => _pauseUrls(urls)).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qPauseUrls, error = $error');
     });
   }
 
   static void _qPauseAll() {
-    _queue.add(() => _pauseAll1()).catchError((error) {
+    _queue.add(() => _pauseAll()).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qPauseAll, error = $error');
     });
   }
 
   static void _qCancel(String url) {
-    _queue.add(() => _cancel1(url)).catchError((error) {
+    _queue.add(() => _cancel(url)).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qCancel, error = $error');
     });
   }
 
   static void _qCancelUrls(List<String> urls) {
-    _queue.add(() => _cancelUrls1(urls)).catchError((error) {
+    _queue.add(() => _cancelUrls(urls)).catchError((error) {
       aldDebugPrint(
           'ALDownloader | queue error | _qCancelUrls, error = $error');
     });
   }
 
   static void _qCancelAll() {
-    _queue.add(() => _cancelAll1()).catchError((error) {
+    _queue.add(() => _cancelAll()).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qCancelAll, error = $error');
     });
   }
 
   static void _qRemove(String url) {
-    _queue.add(() => _remove1(url)).catchError((error) {
+    _queue.add(() => _remove(url)).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qRemove, error = $error');
     });
   }
 
   static void _qRemoveUrls(List<String> urls) {
-    _queue.add(() => _removeUrls1(urls)).catchError((error) {
+    _queue.add(() => _removeUrls(urls)).catchError((error) {
       aldDebugPrint(
           'ALDownloader | queue error | _qRemoveUrls, error = $error');
     });
   }
 
   static void _qRemoveAll() {
-    _queue.add(() => _removeAll1()).catchError((error) {
+    _queue.add(() => _removeAll()).catchError((error) {
       aldDebugPrint('ALDownloader | queue error | _qRemoveAll, error = $error');
     });
   }
@@ -634,12 +634,12 @@ abstract class ALDownloaderIMP {
     }
   }
 
-  static Future<void> _pause1(String url) async {
+  static Future<void> _pause(String url) async {
     try {
       _ALDownloadTask? task = _getTaskFromUrl(url);
 
       aldDebugPrint(
-          'ALDownloader | _pause1, url = $url, but url is ${task?.innerStatus.alDescription}');
+          'ALDownloader | _pause, url = $url, but url is ${task?.innerStatus.alDescription}');
 
       if (task == null) {
         task = _addOrUpdateTaskForUrl(
@@ -683,34 +683,34 @@ abstract class ALDownloaderIMP {
         }
       }
     } catch (error) {
-      aldDebugPrint('ALDownloader | _pause1, url = $url, error = $error');
+      aldDebugPrint('ALDownloader | _pause, url = $url, error = $error');
     }
   }
 
-  static Future<void> _pauseUrls1(List<String> urls) async {
+  static Future<void> _pauseUrls(List<String> urls) async {
     for (final url in urls) _transitUrl(url);
     for (final url in urls) {
-      await _pause1(url);
+      await _pause(url);
       _unwaitUrl(url);
     }
   }
 
   static double ttt = 0;
 
-  static Future<void> _pauseAll1() async {
+  static Future<void> _pauseAll() async {
     for (final task in _tasks) _transitTask(task);
     for (final task in _tasks) {
-      await _pause1(task.url);
+      await _pause(task.url);
       _unwaitTask(task);
     }
   }
 
-  static Future<void> _cancel1(String url) async {
+  static Future<void> _cancel(String url) async {
     try {
       final task = _getTaskFromUrl(url);
 
       aldDebugPrint(
-          'ALDownloader | _cancel1, url = $url, but url is ${task?.innerStatus.alDescription}');
+          'ALDownloader | _cancel, url = $url, but url is ${task?.innerStatus.alDescription}');
 
       if (task == null) {
         _addOrUpdateTaskForUrl(url, '', _ALDownloaderInnerStatus.prepared, 0,
@@ -723,26 +723,26 @@ abstract class ALDownloaderIMP {
         await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
-      aldDebugPrint('ALDownloader | _cancel1, url = $url, error = $error');
+      aldDebugPrint('ALDownloader | _cancel, url = $url, error = $error');
     }
   }
 
-  static Future<void> _cancelUrls1(List<String> urls) async {
+  static Future<void> _cancelUrls(List<String> urls) async {
     for (final url in urls) _transitUrl(url);
-    for (final url in urls) await _cancel1(url);
+    for (final url in urls) await _cancel(url);
   }
 
-  static Future<void> _cancelAll1() async {
+  static Future<void> _cancelAll() async {
     for (final task in _tasks) _transitTask(task);
-    for (final task in _tasks) await _cancel1(task.url);
+    for (final task in _tasks) await _cancel(task.url);
   }
 
-  static Future<void> _remove1(String url) async {
+  static Future<void> _remove(String url) async {
     try {
       final task = _getTaskFromUrl(url);
 
       aldDebugPrint(
-          'ALDownloader | _remove1, url = $url, but url is ${task?.innerStatus.alDescription}');
+          'ALDownloader | _remove, url = $url, but url is ${task?.innerStatus.alDescription}');
 
       if (task == null) {
         _addOrUpdateTaskForUrl(url, '', _ALDownloaderInnerStatus.prepared, 0,
@@ -751,18 +751,18 @@ abstract class ALDownloaderIMP {
         await _removeTaskWithCallHandler(task);
       }
     } catch (error) {
-      aldDebugPrint('ALDownloader | _remove1, url = $url, error = $error');
+      aldDebugPrint('ALDownloader | _remove, url = $url, error = $error');
     }
   }
 
-  static Future<void> _removeUrls1(List<String> urls) async {
+  static Future<void> _removeUrls(List<String> urls) async {
     for (final url in urls) _transitUrl(url);
-    for (final url in urls) await _remove1(url);
+    for (final url in urls) await _remove(url);
   }
 
-  static Future<void> _removeAll1() async {
+  static Future<void> _removeAll() async {
     for (final task in _tasks) _transitTask(task);
-    for (final task in _tasks) await _remove1(task.url);
+    for (final task in _tasks) await _remove(task.url);
   }
 
   /// Manager custom download tasks

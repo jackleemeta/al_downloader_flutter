@@ -25,4 +25,4 @@ class ALDownloaderPathModel {
 }
 
 /// ALDownloader persistence status
-enum ALDownloaderPersistenceStatus { unknown, virtural, physical }
+enum ALDownloaderPersistenceStatus { unknown, virtual, physical }

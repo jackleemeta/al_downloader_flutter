@@ -77,7 +77,9 @@ abstract class ALDownloader {
   ///
   /// [downloaderHandlerInterface] downloader handler interface
   ///
-  /// It is a forever interface which never is destroyed unless [removeDownloaderHandlerInterfaceForUrl] or [removeDownloaderHandlerInterfaceForAll] is called.
+  /// It is a forever interface which never is destroyed unless the fllowing function is called.
+  ///
+  /// [removeDownloaderHandlerInterfaceForUrl], [removeDownloaderHandlerInterfaceForId], [removeDownloaderHandlerInterfaceForAll]
   ///
   /// [url] url
   ///

@@ -34,7 +34,7 @@ abstract class ALDownloaderFileManagerIMP {
 
     if (directory == null) {
       pathModel.directoryPersistenceStatus =
-          ALDownloaderPersistenceStatus.virtural;
+          ALDownloaderPersistenceStatus.virtual;
     } else {
       pathModel.directoryPersistenceStatus =
           ALDownloaderPersistenceStatus.physical;
