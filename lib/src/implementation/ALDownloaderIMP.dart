@@ -923,14 +923,20 @@ abstract class ALDownloaderIMP {
     IsolateNameServer.registerPortWithName(
         receivePort.sendPort, _kPortForFToAL);
     receivePort.listen((dynamic data) {
-      final taskId = data[0];
+      try {
+        final taskId = data[0];
 
-      final originalStatusValue = data[1];
-      final originalStatus = DownloadTaskStatus(originalStatusValue);
+        final originalStatusValue = data[1];
+        final originalStatus = DownloadTaskStatus(originalStatusValue);
 
-      final progress = data[2];
+        final progress = data[2];
 
-      _processDataFromFPort(taskId, originalStatus, progress);
+        _processDataFromFPort(taskId, originalStatus, progress);
+      } catch (error) {
+        aldDebugPrint(
+            'ALDownloader | _registerServiceForCommunicationBetweenFAndAL | listen | error = $error',
+            isFrequentPrint: true);
+      }
     });
   }
 
