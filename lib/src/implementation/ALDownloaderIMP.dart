@@ -612,9 +612,9 @@ abstract class ALDownloaderIMP {
         _addOrUpdateTaskForUrl(
             url,
             taskIdForResumption,
-            Platform.isIOS
-                ? _ALDownloaderInnerStatus.running
-                : _ALDownloaderInnerStatus.paused,
+            Platform.isAndroid
+                ? _ALDownloaderInnerStatus.paused
+                : _ALDownloaderInnerStatus.running,
             task.progress,
             task.savedDir,
             task.fileName,
