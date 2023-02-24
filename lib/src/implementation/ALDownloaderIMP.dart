@@ -689,20 +689,12 @@ abstract class ALDownloaderIMP {
 
   static Future<void> _pauseUrls(List<String> urls) async {
     for (final url in urls) _transitUrl(url);
-    for (final url in urls) {
-      await _pause(url);
-      _unwaitUrl(url);
-    }
+    for (final url in urls) await _pause(url);
   }
-
-  static double ttt = 0;
 
   static Future<void> _pauseAll() async {
     for (final task in _tasks) _transitTask(task);
-    for (final task in _tasks) {
-      await _pause(task.url);
-      _unwaitTask(task);
-    }
+    for (final task in _tasks) await _pause(task.url);
   }
 
   static Future<void> _cancel(String url) async {

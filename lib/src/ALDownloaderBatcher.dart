@@ -71,7 +71,7 @@ abstract class ALDownloaderBatcher {
       ALDownloaderBatcherIMP.addDownloaderHandlerInterface(
           downloaderHandlerInterface, urls);
 
-  /// Remove downloader handler interfaces
+  /// Remove downloader handler interface
   ///
   /// **parameters**
   ///

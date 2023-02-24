@@ -255,8 +255,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _batchDownloaderHandlerInterfaceIds.add(id);
   }
 
-  /// Remove downloader handler interface
-  void removeDownloaderHandlerInterface() {
+  /// Remove batch downloader handler interface
+  void removeBatchDownloaderHandlerInterface() {
     for (final element in _batchDownloaderHandlerInterfaceIds) {
       ALDownloaderBatcher.removeDownloaderHandlerInterfaceForId(element);
     }
