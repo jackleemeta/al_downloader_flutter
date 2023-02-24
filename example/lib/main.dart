@@ -5,7 +5,7 @@ void main() {
   runApp(const MyApp());
 }
 
-/* ----------------------------------------------UI for test---------------------------------------------- */
+/* ----------------------------------------------UI---------------------------------------------- */
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -148,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ['remove', _removeAllAction]
   ];
 
-  /* ----------------------------------------------Action for test---------------------------------------------- */
+  /* ----------------------------------------------Action---------------------------------------------- */
 
   void _batchDownloadAction() {
     batchDownload();
@@ -166,7 +166,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ALDownloader.removeAll();
   }
 
-  /* ----------------------------------------------Method for test---------------------------------------------- */
+  /* ----------------------------------------------ALDownloader---------------------------------------------- */
 
   /// Initialize
   void initialize() {
@@ -205,7 +205,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void addForeverDownloaderHandlerInterface() {
     for (final model in models) {
       final url = model.url;
-      ALDownloader.addForeverDownloaderHandlerInterface(
+      final id = ALDownloader.addForeverDownloaderHandlerInterface(
           ALDownloaderHandlerInterface(progressHandler: (progress) {
             debugPrint(
                 'ALDownloader | download progress = $progress, url = $url\n');
@@ -234,6 +234,8 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {});
           }),
           url);
+
+      _downloaderHandlerInterfaceIds.add(id);
     }
   }
 
@@ -255,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _batchDownloaderHandlerInterfaceIds.add(id);
   }
 
-  /// Remove batch downloader handler interface
+  /// Remove downloader handler interface for batch
   void removeBatchDownloaderHandlerInterface() {
     for (final element in _batchDownloaderHandlerInterfaceIds) {
       ALDownloaderBatcher.removeDownloaderHandlerInterfaceForId(element);
@@ -264,12 +266,15 @@ class _MyHomePageState extends State<MyHomePage> {
     _batchDownloaderHandlerInterfaceIds.clear();
   }
 
-  /// Manage the [ALDownloaderHandlerInterface] by [ALDownloaderHandlerInterfaceId]
+  /// Manage [ALDownloaderHandlerInterface] by [ALDownloaderHandlerInterfaceId]
+  final _downloaderHandlerInterfaceIds = <ALDownloaderHandlerInterfaceId>[];
+
+  /// Manage batch [ALDownloaderHandlerInterface] by [ALDownloaderHandlerInterfaceId]
   final _batchDownloaderHandlerInterfaceIds =
       <ALDownloaderHandlerInterfaceId>[];
 }
 
-/* ----------------------------------------------Model class for test---------------------------------------------- */
+/* ----------------------------------------------Model class---------------------------------------------- */
 
 class DownloadModel {
   final String url;
@@ -291,7 +296,7 @@ extension _ALDownloaderStatusExtension on ALDownloaderStatus {
       ['unstarted', 'downloading', 'paused', 'failed', 'succeeded'][index];
 }
 
-/* ----------------------------------------------Data for test---------------------------------------------- */
+/* ----------------------------------------------Data---------------------------------------------- */
 
 final models = kTestVideos.map((e) => DownloadModel(e)).toList();
 
