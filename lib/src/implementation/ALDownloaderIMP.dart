@@ -507,7 +507,7 @@ abstract class ALDownloaderIMP {
 
     if (task == null)
       task = _addOrUpdateTaskForUrl(url, '', _ALDownloaderInnerStatus.prepared,
-          0, '', '', _ALDownloaderTaskWaitingPhase.nonWaiting);
+          0, '', '', _ALDownloaderTaskWaitingPhase.unwaiting);
 
     task.headers = headers;
 
@@ -1405,7 +1405,7 @@ abstract class ALDownloaderIMP {
   }
 
   static void _unwaitTask(_ALDownloadTask? task) {
-    _assignTaskWaitingPhase(task, _ALDownloaderTaskWaitingPhase.nonWaiting);
+    _assignTaskWaitingPhase(task, _ALDownloaderTaskWaitingPhase.unwaiting);
   }
 
   static void _assignTaskWaitingPhase(
@@ -1520,7 +1520,7 @@ class _ALDownloadTask {
   _ALDownloaderInnerStatus innerStatus = _ALDownloaderInnerStatus.undefined;
 
   _ALDownloaderTaskWaitingPhase waitingPhase =
-      _ALDownloaderTaskWaitingPhase.nonWaiting;
+      _ALDownloaderTaskWaitingPhase.unwaiting;
 
   // ignore: non_constant_identifier_names
   double double_progress = 0;
@@ -1579,8 +1579,8 @@ enum _ALDownloaderInnerStatus {
 ///
 /// [transiting]
 ///
-/// It is a transitional status that used for some scenes while transiting to [nonWaiting] and duration is very short.
-enum _ALDownloaderTaskWaitingPhase { nonWaiting, transiting, waiting }
+/// It is a transitional status that used for some scenes while transiting to [unwaiting] and duration is very short.
+enum _ALDownloaderTaskWaitingPhase { unwaiting, transiting, waiting }
 
 /// An enumeration extension of inner status
 extension _ALDownloaderInnerStatusExtension on _ALDownloaderInnerStatus {
