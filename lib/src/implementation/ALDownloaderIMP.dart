@@ -1438,13 +1438,6 @@ abstract class ALDownloaderIMP {
         task.progress, task.savedDir, task.fileName, waitingPhase);
 
     switch (waitingPhase) {
-      case _ALDownloaderTaskWaitingPhase.nonWaiting:
-      case _ALDownloaderTaskWaitingPhase.transiting:
-        {
-          _waitingTasks.remove(task);
-        }
-        break;
-
       case _ALDownloaderTaskWaitingPhase.waiting:
         {
           if (!_waitingTasks.contains(task)) {
@@ -1453,7 +1446,12 @@ abstract class ALDownloaderIMP {
           }
         }
         break;
+
       default:
+        {
+          _waitingTasks.remove(task);
+        }
+        break;
     }
   }
 
