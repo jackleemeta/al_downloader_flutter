@@ -317,7 +317,7 @@ abstract class ALDownloaderBatcherIMP {
         if (binder._isCompletedHandlerCalled) {
           if (binder._isSucceeded) {
             aldDebugPrint(
-                'ALDownloaderBatcher | in succeededHandler | download succeeded, urls = $urls');
+                'ALDownloaderBatcher | in succeededHandler | download succeeded, urls = ${binder._targetUrls}');
 
             ALDownloaderHeader
                 .processDownloaderHandlerInterfaceOnComingRootIsolate(
