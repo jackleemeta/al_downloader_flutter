@@ -1198,7 +1198,7 @@ abstract class ALDownloaderIMP {
         task.url,
         taskId,
         _ALDownloaderInnerStatus.pretendedPaused,
-        task.progress,
+        0,
         task.savedDir,
         task.fileName,
         task.waitingPhase);
@@ -1222,7 +1222,7 @@ abstract class ALDownloaderIMP {
         task.url,
         taskId,
         _ALDownloaderInnerStatus.deprecated,
-        task.progress,
+        0,
         task.savedDir,
         task.fileName,
         task.waitingPhase);
