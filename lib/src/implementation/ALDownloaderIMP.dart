@@ -538,7 +538,7 @@ abstract class ALDownloaderIMP {
         task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused ||
         task.innerStatus == _ALDownloaderInnerStatus.deprecated) {
       aldDebugPrint(
-          'ALDownloader | try to download url, url is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}');
+          'ALDownloader | try to download url, url status is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}');
 
       // Get 'physical directory path' and 'file name' of the file by url.
       final model =
@@ -570,7 +570,7 @@ abstract class ALDownloaderIMP {
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.complete) {
       aldDebugPrint(
-          'ALDownloader | try to download url, but url is succeeded, url = $url, taskId = ${task.taskId}');
+          'ALDownloader | try to download url, but url status is succeeded, url = $url, taskId = ${task.taskId}');
 
       _callSucceededHandler(task.url, task.double_progress);
     } else if (task.innerStatus == _ALDownloaderInnerStatus.canceled ||
@@ -595,10 +595,10 @@ abstract class ALDownloaderIMP {
         _processProgressEventForTask(task);
 
         aldDebugPrint(
-            'ALDownloader | try to download url, url is $previousStatusDescription previously and retries succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForRetry, innerStatus = enqueued');
+            'ALDownloader | try to download url, url status is $previousStatusDescription previously and retries succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForRetry, innerStatus = enqueued');
       } else {
         aldDebugPrint(
-            'ALDownloader | try to download url, url is $previousStatusDescription previously but retries failed, url = $url, previous taskId = $previousTaskId, taskId = null');
+            'ALDownloader | try to download url, url status is $previousStatusDescription previously but retries failed, url = $url, previous taskId = $previousTaskId, taskId = null');
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.paused) {
       final previousTaskId = task.taskId;
@@ -607,7 +607,7 @@ abstract class ALDownloaderIMP {
           await FlutterDownloader.resume(taskId: task.taskId);
       if (taskIdForResumption != null) {
         aldDebugPrint(
-            'ALDownloader | try to download url, url is paused previously and resumes succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForResumption');
+            'ALDownloader | try to download url, url status is paused previously and resumes succeeded, url = $url, previous taskId = $previousTaskId, taskId = $taskIdForResumption');
 
         _addOrUpdateTaskForUrl(
             url,
@@ -621,16 +621,16 @@ abstract class ALDownloaderIMP {
             task.waitingPhase);
       } else {
         aldDebugPrint(
-            'ALDownloader | try to download url, url is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, taskId = null');
+            'ALDownloader | try to download url, url status is paused previously but resumes failed, url = $url, previous taskId = $previousTaskId, taskId = null');
       }
     } else if (task.innerStatus == _ALDownloaderInnerStatus.running) {
       aldDebugPrint(
-          'ALDownloader | try to download url, but url is running, url may re-download after being paused, url = $url, taskId = ${task.taskId}');
+          'ALDownloader | try to download url, but url status is running, url may re-download after being paused, url = $url, taskId = ${task.taskId}');
 
       task.isMayRedownloadAboutPause = true;
     } else {
       aldDebugPrint(
-          'ALDownloader | try to download url, but url is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}');
+          'ALDownloader | try to download url, but url status is ${task.innerStatus.alDescription}, url = $url, taskId = ${task.taskId}');
     }
   }
 
@@ -639,48 +639,39 @@ abstract class ALDownloaderIMP {
       _ALDownloadTask? task = _getTaskFromUrl(url);
 
       aldDebugPrint(
-          'ALDownloader | _pause, url = $url, url is ${task?.innerStatus.alDescription}');
+          'ALDownloader | _pause, url = $url, url status is ${task?.innerStatus.alDescription}');
 
-      if (task == null) {
-        task = _addOrUpdateTaskForUrl(
-            url,
-            '',
-            _ALDownloaderInnerStatus.prepared,
-            0,
-            '',
-            '',
-            _ALDownloaderTaskWaitingPhase.nonWaiting);
-      } else {
-        final taskId = task.taskId;
+      if (task == null) return;
 
-        if (task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
-          await _pauseTaskPretendedlyWithCallHandler(task);
-        } else if (task.innerStatus == _ALDownloaderInnerStatus.running) {
-          if (Platform.isAndroid) {
-            if (await ALDownloaderFileManagerIMP.isExistPhysicalFilePathForUrl(
-                url)) {
-              await FlutterDownloader.pause(taskId: taskId);
-              task.isMayRedownloadAboutPause = false;
-            } else {
-              await _pauseTaskPretendedlyWithCallHandler(task);
-            }
-          } else {
+      final taskId = task.taskId;
+
+      if (task.innerStatus == _ALDownloaderInnerStatus.enqueued) {
+        await _pauseTaskPretendedlyWithCallHandler(task);
+      } else if (task.innerStatus == _ALDownloaderInnerStatus.running) {
+        if (Platform.isAndroid) {
+          if (await ALDownloaderFileManagerIMP.isExistPhysicalFilePathForUrl(
+              url)) {
             await FlutterDownloader.pause(taskId: taskId);
             task.isMayRedownloadAboutPause = false;
-          }
-        } else if (task.waitingPhase ==
-                _ALDownloaderTaskWaitingPhase.transiting ||
-            task.waitingPhase == _ALDownloaderTaskWaitingPhase.waiting) {
-          if (task.innerStatus == _ALDownloaderInnerStatus.paused ||
-              task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused) {
-            _processPausedEventForTask(task);
           } else {
             await _pauseTaskPretendedlyWithCallHandler(task);
           }
-        } else if (task.innerStatus == _ALDownloaderInnerStatus.paused ||
-            task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused) {
-          _callPausedHandler(task.url, task.double_progress);
+        } else {
+          await FlutterDownloader.pause(taskId: taskId);
+          task.isMayRedownloadAboutPause = false;
         }
+      } else if (task.waitingPhase ==
+              _ALDownloaderTaskWaitingPhase.transiting ||
+          task.waitingPhase == _ALDownloaderTaskWaitingPhase.waiting) {
+        if (task.innerStatus == _ALDownloaderInnerStatus.paused ||
+            task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused) {
+          _processPausedEventForTask(task);
+        } else {
+          await _pauseTaskPretendedlyWithCallHandler(task);
+        }
+      } else if (task.innerStatus == _ALDownloaderInnerStatus.paused ||
+          task.innerStatus == _ALDownloaderInnerStatus.pretendedPaused) {
+        _callPausedHandler(task.url, task.double_progress);
       }
     } catch (error) {
       aldDebugPrint('ALDownloader | _pause, url = $url, error = $error');
@@ -702,13 +693,11 @@ abstract class ALDownloaderIMP {
       final task = _getTaskFromUrl(url);
 
       aldDebugPrint(
-          'ALDownloader | _cancel, url = $url, url is ${task?.innerStatus.alDescription}');
+          'ALDownloader | _cancel, url = $url, url status is ${task?.innerStatus.alDescription}');
 
-      if (task == null) {
-        _addOrUpdateTaskForUrl(url, '', _ALDownloaderInnerStatus.prepared, 0,
-            '', '', _ALDownloaderTaskWaitingPhase.nonWaiting);
-      } else if (task.waitingPhase ==
-              _ALDownloaderTaskWaitingPhase.transiting ||
+      if (task == null) return;
+
+      if (task.waitingPhase == _ALDownloaderTaskWaitingPhase.transiting ||
           task.waitingPhase == _ALDownloaderTaskWaitingPhase.waiting ||
           task.innerStatus == _ALDownloaderInnerStatus.enqueued ||
           task.innerStatus == _ALDownloaderInnerStatus.running) {
@@ -734,14 +723,11 @@ abstract class ALDownloaderIMP {
       final task = _getTaskFromUrl(url);
 
       aldDebugPrint(
-          'ALDownloader | _remove, url = $url, url is ${task?.innerStatus.alDescription}');
+          'ALDownloader | _remove, url = $url, url status is ${task?.innerStatus.alDescription}');
 
-      if (task == null) {
-        _addOrUpdateTaskForUrl(url, '', _ALDownloaderInnerStatus.prepared, 0,
-            '', '', _ALDownloaderTaskWaitingPhase.nonWaiting);
-      } else {
-        await _removeTaskWithCallHandler(task);
-      }
+      if (task == null) return;
+
+      await _removeTaskWithCallHandler(task);
     } catch (error) {
       aldDebugPrint('ALDownloader | _remove, url = $url, error = $error');
     }

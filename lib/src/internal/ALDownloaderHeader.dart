@@ -26,8 +26,9 @@ abstract class ALDownloaderHeader {
 
   /// A reliable way that sends message from root isolate to ALDownloader isolate
   ///
-  /// This ensures that messages send and arrive in order.
-  /// Specially, this could ensures that some messages which are sent before ALDownloader initilized arrive reliably after ALDownloader initilized.
+  /// This ensures that messages sends and arrives in order. Specially, this could
+  /// ensures that messages which sent before ALDownloader initilized arrive reliably
+  /// after ALDownloader initilized.
   static void sendMessageFromRootToALReliably(ALDownloaderMessage message) {
     if (completerForGotPortRootToAL.isCompleted) {
       portRootToAL?.send(message);
