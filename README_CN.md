@@ -21,7 +21,7 @@
 添加下面这行代码到pubspec.yaml中
 ```
 dependencies:
-  al_downloader: ^1.7.0
+  al_downloader: ^1.7.1
 ```
 
 使用命令行运行下面这行代码

@@ -1,3 +1,8 @@
+## 1.7.1
+
+- handle management by id
+- fix bug
+
 ## 1.7.0
 
 - update document
