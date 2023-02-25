@@ -105,12 +105,16 @@ ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 
 #### Get download status
 ```
-final status = ALDownloader.getStatusForUrl(url);
+ALDownloader.getStatusForUrl(url, (status) {
+  debugPrint('ALDownloader | download progress = $status\n');
+});
 ```
 
 #### Get download progress
 ```
-final progress = ALDownloader.getProgressForUrl(url);
+ALDownloader.getProgressForUrl(url, (progress) {
+  debugPrint('ALDownloader | download progress = $progress\n');
+});
 ```
 
 #### Pause download
@@ -165,7 +169,9 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 
 #### Get download status for a set of urls
 ```
-final status = ALDownloaderBatcher.getStatusForUrls(urls);
+ALDownloaderBatcher.getStatusForUrls(urls, (status) {
+  debugPrint('ALDownloader | batch | download status = $status\n');
+});
 ```
 
 ### ALDownloaderFileManager - A manager that manages file by url

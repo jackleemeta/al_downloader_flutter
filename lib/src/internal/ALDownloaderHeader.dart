@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'ALDownloaderConstant.dart';
 import 'ALDownloaderMessage.dart';
 import '../ALDownloaderHandlerInterface.dart';
+import '../ALDownloaderStatus.dart';
 
 /// ALDownloaderHeader
 abstract class ALDownloaderHeader {
@@ -69,6 +70,34 @@ abstract class ALDownloaderHeader {
       ALDownloaderConstant.kIsNeedCallPausedHandler: isNeedCallPausedHandler,
       ALDownloaderConstant.kProgress: progress,
       ALDownloaderConstant.kIsNeedRemoveInterface: isNeedRemoveInterface
+    };
+
+    portALToRoot?.send(message);
+  }
+
+  /// A convenient function that supports to process the status handler on coming root isolate
+  static void processStatusHandlerOnComingRootIsolate(
+      String scope, String statusHandlerId, ALDownloaderStatus status) {
+    final message = ALDownloaderMessage();
+    message.scope = scope;
+    message.action = ALDownloaderConstant.kCallStatusHandler;
+    message.content = {
+      ALDownloaderConstant.kStatusHandlerId: statusHandlerId,
+      ALDownloaderConstant.kStatus: status
+    };
+
+    portALToRoot?.send(message);
+  }
+
+  /// A convenient function that supports to process the progress handler on coming root isolate
+  static void processProgressHandlerOnComingRootIsolate(
+      String scope, String progressHandlerId, double progress) {
+    final message = ALDownloaderMessage();
+    message.scope = scope;
+    message.action = ALDownloaderConstant.kCallProgressHandler;
+    message.content = {
+      ALDownloaderConstant.kProgressHandlerId: progressHandlerId,
+      ALDownloaderConstant.kProgress: progress
     };
 
     portALToRoot?.send(message);

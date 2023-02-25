@@ -19,7 +19,7 @@ abstract class ALDownloaderBatcherIMP {
     ALDownloaderHandlerInterfaceId? id;
     if (downloaderHandlerInterface != null) {
       id = ALDownloaderHeader.uuid.v1();
-      _idInterfaceKVs[id] = downloaderHandlerInterface;
+      _idDynamicKVs[id] = downloaderHandlerInterface;
       message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
     }
 
@@ -41,7 +41,7 @@ abstract class ALDownloaderBatcherIMP {
     ALDownloaderHandlerInterfaceId? id;
     if (downloaderHandlerInterface != null) {
       id = ALDownloaderHeader.uuid.v1();
-      _idInterfaceKVs[id] = downloaderHandlerInterface;
+      _idDynamicKVs[id] = downloaderHandlerInterface;
       message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
     }
 
@@ -59,7 +59,7 @@ abstract class ALDownloaderBatcherIMP {
     message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
 
     final id = ALDownloaderHeader.uuid.v1();
-    _idInterfaceKVs[id] = downloaderHandlerInterface;
+    _idDynamicKVs[id] = downloaderHandlerInterface;
     message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
@@ -89,56 +89,6 @@ abstract class ALDownloaderBatcherIMP {
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
-  static ALDownloaderStatus getStatusForUrls(List<String> urls) {
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
-
-    final aMap = <String, ALDownloaderStatus>{};
-
-    for (final url in aNonDuplicatedUrls) {
-      final aStatus = ALDownloaderIMP.getStatusForUrl(url);
-      if (aStatus == ALDownloaderStatus.unstarted)
-        return ALDownloaderStatus.unstarted;
-
-      aMap[url] = aStatus;
-    }
-
-    final allStatus = aMap.values.toSet();
-
-    if (allStatus.contains(ALDownloaderStatus.paused)) {
-      return ALDownloaderStatus.paused;
-    } else if (allStatus.contains(ALDownloaderStatus.failed)) {
-      return ALDownloaderStatus.failed;
-    }
-
-    return ALDownloaderStatus.succeeded;
-  }
-
-  static double getProgressForUrls(List<String> urls) {
-    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
-    int succeededCount = 0;
-    for (final url in aNonDuplicatedUrls) {
-      final aStatus = ALDownloaderIMP.getStatusForUrl(url);
-      if (aStatus == ALDownloaderStatus.succeeded) succeededCount++;
-    }
-
-    double aDouble;
-
-    try {
-      if (aNonDuplicatedUrls.length == 0) {
-        aDouble = 0;
-      } else {
-        dynamic result = succeededCount / aNonDuplicatedUrls.length;
-        result = result.toStringAsFixed(2);
-        aDouble = double.tryParse(result) ?? 0;
-      }
-    } catch (error) {
-      aDouble = 0;
-      aldDebugPrint('ALDownloaderBatcher | get progress for urls, $error');
-    }
-
-    return aDouble;
-  }
-
   static void pause(List<String> urls) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
@@ -166,6 +116,34 @@ abstract class ALDownloaderBatcherIMP {
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
+  static void getStatusForUrls(
+      List<String> urls, ALDownloaderStatusHandler handler) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kGetStatusForUrls;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
+
+    final id = ALDownloaderHeader.uuid.v1();
+    _idDynamicKVs[id] = handler;
+    message.content[ALDownloaderConstant.kStatusHandlerId] = id;
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+  }
+
+  static void getProgressForUrls(
+      List<String> urls, ALDownloaderProgressHandler handler) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kGetProgressForUrls;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
+
+    final id = ALDownloaderHeader.uuid.v1();
+    _idDynamicKVs[id] = handler;
+    message.content[ALDownloaderConstant.kProgressHandlerId] = id;
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+  }
+
   /// Do work on root isolate
   static void doWorkOnRootIsolate(ALDownloaderMessage message) {
     final action = message.action;
@@ -184,7 +162,7 @@ abstract class ALDownloaderBatcherIMP {
       final isNeedRemoveInterface =
           content[ALDownloaderConstant.kIsNeedRemoveInterface];
 
-      final downloaderHandlerInterface = _idInterfaceKVs[id];
+      final downloaderHandlerInterface = _idDynamicKVs[id];
 
       ALDownloaderHeader.callDownloaderHandlerInterface(
           downloaderHandlerInterface,
@@ -194,7 +172,23 @@ abstract class ALDownloaderBatcherIMP {
           isNeedCallPausedHandler,
           progress);
 
-      if (isNeedRemoveInterface) _idInterfaceKVs.remove(id);
+      if (isNeedRemoveInterface) _idDynamicKVs.remove(id);
+    } else if (action == ALDownloaderConstant.kCallStatusHandler) {
+      final id = content[ALDownloaderConstant.kStatusHandlerId];
+      final status = content[ALDownloaderConstant.kStatus];
+      final handler = _idDynamicKVs[id];
+
+      if (handler != null) handler(status);
+
+      _idDynamicKVs.remove(id);
+    } else if (action == ALDownloaderConstant.kCallProgressHandler) {
+      final id = content[ALDownloaderConstant.kProgressHandlerId];
+      final progress = content[ALDownloaderConstant.kProgress];
+      final handler = _idDynamicKVs[id];
+
+      if (handler != null) handler(progress);
+
+      _idDynamicKVs.remove(id);
     }
   }
 
@@ -246,6 +240,14 @@ abstract class ALDownloaderBatcherIMP {
     } else if (action == ALDownloaderConstant.kRemove) {
       final urls = content[ALDownloaderConstant.kUrls];
       _remove(urls);
+    } else if (action == ALDownloaderConstant.kGetStatusForUrls) {
+      final id = content[ALDownloaderConstant.kStatusHandlerId];
+      final urls = content[ALDownloaderConstant.kUrls];
+      _getStatusForUrls(id, urls);
+    } else if (action == ALDownloaderConstant.kGetProgressForUrls) {
+      final id = content[ALDownloaderConstant.kProgressHandlerId];
+      final urls = content[ALDownloaderConstant.kUrls];
+      _getProgressForUrls(id, urls);
     }
   }
 
@@ -439,6 +441,72 @@ abstract class ALDownloaderBatcherIMP {
     ALDownloaderIMP.cRemoveUrls(aNonDuplicatedUrls);
   }
 
+  static void _getStatusForUrls(String statusHandlerId, List<String> urls) {
+    final status = _fGetStatusForUrls(urls);
+
+    ALDownloaderHeader.processStatusHandlerOnComingRootIsolate(
+        ALDownloaderConstant.kALDownloaderBatcherIMP, statusHandlerId, status);
+  }
+
+  static void _getProgressForUrls(String progressHandlerId, List<String> urls) {
+    final progress = _fGetProgressForUrls(urls);
+
+    ALDownloaderHeader.processProgressHandlerOnComingRootIsolate(
+        ALDownloaderConstant.kALDownloaderBatcherIMP,
+        progressHandlerId,
+        progress);
+  }
+
+  static ALDownloaderStatus _fGetStatusForUrls(List<String> urls) {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+
+    final aMap = <String, ALDownloaderStatus>{};
+
+    for (final url in aNonDuplicatedUrls) {
+      final aStatus = ALDownloaderIMP.cGetStatusForUrl(url);
+      if (aStatus == ALDownloaderStatus.unstarted)
+        return ALDownloaderStatus.unstarted;
+
+      aMap[url] = aStatus;
+    }
+
+    final allStatus = aMap.values.toSet();
+
+    if (allStatus.contains(ALDownloaderStatus.paused)) {
+      return ALDownloaderStatus.paused;
+    } else if (allStatus.contains(ALDownloaderStatus.failed)) {
+      return ALDownloaderStatus.failed;
+    }
+
+    return ALDownloaderStatus.succeeded;
+  }
+
+  static double _fGetProgressForUrls(List<String> urls) {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+    int succeededCount = 0;
+    for (final url in aNonDuplicatedUrls) {
+      final aStatus = ALDownloaderIMP.cGetStatusForUrl(url);
+      if (aStatus == ALDownloaderStatus.succeeded) succeededCount++;
+    }
+
+    double aDouble;
+
+    try {
+      if (aNonDuplicatedUrls.length == 0) {
+        aDouble = 0;
+      } else {
+        dynamic result = succeededCount / aNonDuplicatedUrls.length;
+        result = result.toStringAsFixed(2);
+        aDouble = double.tryParse(result) ?? 0;
+      }
+    } catch (error) {
+      aDouble = 0;
+      aldDebugPrint('ALDownloaderBatcher | get progress for urls, $error');
+    }
+
+    return aDouble;
+  }
+
   /// Remove duplicated vos
   ///
   /// If the following url is the same as the previous one, the following url will not be added.
@@ -471,10 +539,12 @@ abstract class ALDownloaderBatcherIMP {
     return aNonDuplicatedUrls;
   }
 
-  /// A map that key is id and value is [ALDownloaderHandlerInterface]
+  /// A map that key is id and value may be the fllowing type.
+  ///
+  /// [ALDownloaderHandlerInterface], [ALDownloaderStatusHandler], [ALDownloaderProgressHandler]
   ///
   /// Key is generated by [ALDownloaderHeader.uuid].
-  static final _idInterfaceKVs = <String, ALDownloaderHandlerInterface>{};
+  static final _idDynamicKVs = <String, dynamic>{};
 
   /// A map that key is url and value is [_ALDownloaderBatcherBinder].
   static final _idBinderKVs = <String, _ALDownloaderBatcherBinder>{};

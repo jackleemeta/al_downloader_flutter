@@ -103,12 +103,16 @@ ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 
 #### 获取下载状态
 ```
-final status = ALDownloader.getStatusForUrl(url);
+ALDownloader.getStatusForUrl(url, (status) {
+  debugPrint('ALDownloader | 下载状态 = $status\n');
+});
 ```
 
 #### 获取下载进度
 ```
-final progress = ALDownloader.getProgressForUrl(url);
+ALDownloader.getProgressForUrl(url, (progress) {
+  debugPrint('ALDownloader | 下载进度 = $progress\n');
+});
 ```
 
 #### 暂停下载
@@ -123,9 +127,8 @@ ALDownloader.pause(url);
 ALDownloader.cancel(url);
 ```
 
-```
 #### 移除下载
-///
+```
 /// 删除下载，删除所有数据
 ALDownloader.remove(url);
 ```
@@ -164,7 +167,9 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 
 #### 获取一组url的下载状态
 ```
-final status = ALDownloaderBatcher.getStatusForUrls(urls);
+ALDownloaderBatcher.getStatusForUrls(urls, (status) {
+  debugPrint('ALDownloader | 批量 | 下载状态 = $status\n');
+});
 ```
 
 ### ALDownloaderFileManager - 基于url的文件管理器

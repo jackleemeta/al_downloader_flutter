@@ -23,13 +23,13 @@ abstract class ALDownloaderConstant {
   static final kPortALToRoot = 'portALToRoot';
   static final kPrintEnabled = 'printEnabled';
   static final kFrequentPrintEnabled = 'frequentPrintEnabled';
-  static final kSyncTaskToRoot = 'syncTaskToRoot';
   static final kTask = 'kTask';
   static final kCallInterface = 'callInterface';
   static final kIsNeedCallProgressHandler = 'isNeedCallProgressHandler';
   static final kIsNeedCallSucceededHandler = 'isNeedCallSucceededHandler';
   static final kIsNeedCallFailedHandler = 'isNeedCallFailedHandler';
   static final kIsNeedCallPausedHandler = 'isNeedCallPausedHandler';
+  static final kStatus = 'status';
   static final kProgress = 'progress';
   static final kIsNeedRemoveInterface = 'isNeedRemoveInterface';
   static final kConfigurePrint = 'configurePrint';
@@ -42,4 +42,12 @@ abstract class ALDownloaderConstant {
   static final kRemoveDownloaderHandlerInterfaceForId =
       'removeDownloaderHandlerInterfaceForId';
   static final kGlobalScope = 'globalScope';
+  static final kGetStatusForUrl = 'getStatusForUrl';
+  static final kGetStatusForUrls = 'getStatusForUrls';
+  static final kStatusHandlerId = 'statusHandlerId';
+  static final kCallStatusHandler = 'callStatusHandler';
+  static final kGetProgressForUrl = 'getProgressForUrl';
+  static final kGetProgressForUrls = 'getProgressForUrls';
+  static final kProgressHandlerId = 'progressHandlerId';
+  static final kCallProgressHandler = 'callProgressHandler';
 }
