@@ -90,36 +90,27 @@ abstract class ALDownloaderBatcherIMP {
   }
 
   static ALDownloaderStatus getStatusForUrls(List<String> urls) {
-    final aMap = <String, ALDownloaderStatus>{};
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+
+    final aMap = <String, ALDownloaderStatus>{};
 
     for (final url in aNonDuplicatedUrls) {
       final aStatus = ALDownloaderIMP.getStatusForUrl(url);
-
-      if (aStatus == ALDownloaderStatus.downloading) {
-        // Contain downloading task.
-        return ALDownloaderStatus.downloading;
-      } else if (aStatus == ALDownloaderStatus.paused) {
-        // Contain paused task.
-        return ALDownloaderStatus.paused;
-      }
+      if (aStatus == ALDownloaderStatus.unstarted)
+        return ALDownloaderStatus.unstarted;
 
       aMap[url] = aStatus;
     }
 
     final allStatus = aMap.values.toSet();
 
-    if (allStatus.contains(ALDownloaderStatus.failed)) {
-      // Do not contain downloaded task && Do not contain paused task && Contain failed task.
+    if (allStatus.contains(ALDownloaderStatus.paused)) {
+      return ALDownloaderStatus.paused;
+    } else if (allStatus.contains(ALDownloaderStatus.failed)) {
       return ALDownloaderStatus.failed;
-    } else if (allStatus.difference({ALDownloaderStatus.succeeded}).length ==
-        0) {
-      // Do not contain downloading task && Do not contain paused task && Do not contain failed task && Tasks are all succeeded.
-      return ALDownloaderStatus.succeeded;
     }
 
-    // Do not contain downloading task && Do not contain failed task && Do not contain paused task && Contain task which is not succeeded.
-    return ALDownloaderStatus.unstarted;
+    return ALDownloaderStatus.succeeded;
   }
 
   static double getProgressForUrls(List<String> urls) {
@@ -293,122 +284,21 @@ abstract class ALDownloaderBatcherIMP {
     for (final url in aNonDuplicatedUrls) {
       final aDownloaderHandlerInterface =
           ALDownloaderHandlerInterface(progressHandler: (progress) {
-        binder._downloadingKVs[url] = true;
+        binder.urlStatusKVs[url] = ALDownloaderStatus.downloading;
       }, succeededHandler: () {
-        binder._completedKVs[url] = true;
+        binder.urlStatusKVs[url] = ALDownloaderStatus.succeeded;
 
-        binder._downloadingKVs[url] = false;
-
-        final progress = binder._progress;
-
-        aldDebugPrint(
-            'ALDownloaderBatcher | in succeededHandler | download progress = $progress, url = $url',
-            isFrequentPrint: true);
-
-        ALDownloaderHeader.processDownloaderHandlerInterfaceOnComingRootIsolate(
-            ALDownloaderConstant.kALDownloaderBatcherIMP,
-            downloaderHandlerInterfaceId,
-            true,
-            false,
-            false,
-            false,
-            progress);
-
-        if (binder._isCompletedHandlerCalled) {
-          if (binder._isSucceeded) {
-            aldDebugPrint(
-                'ALDownloaderBatcher | in succeededHandler | download succeeded, urls = ${binder._targetUrls}');
-
-            ALDownloaderHeader
-                .processDownloaderHandlerInterfaceOnComingRootIsolate(
-                    ALDownloaderConstant.kALDownloaderBatcherIMP,
-                    downloaderHandlerInterfaceId,
-                    false,
-                    true,
-                    false,
-                    false,
-                    progress,
-                    isNeedRemoveInterface: true);
-
-            _idBinderKVs.remove(downloaderHandlerInterfaceId);
-          } else {
-            aldDebugPrint(
-                'ALDownloaderBatcher | in succeededHandler | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}');
-
-            ALDownloaderHeader
-                .processDownloaderHandlerInterfaceOnComingRootIsolate(
-                    ALDownloaderConstant.kALDownloaderBatcherIMP,
-                    downloaderHandlerInterfaceId,
-                    false,
-                    false,
-                    true,
-                    false,
-                    progress,
-                    isNeedRemoveInterface: true);
-
-            _idBinderKVs.remove(downloaderHandlerInterfaceId);
-          }
-        }
+        _processDownloaderHandlerInterface(binder, true);
       }, failedHandler: () {
-        binder._completedKVs[url] = false;
+        binder.urlStatusKVs[url] = ALDownloaderStatus.failed;
 
-        binder._downloadingKVs[url] = false;
-
-        final progress = binder._progress;
-
-        aldDebugPrint(
-            'ALDownloaderBatcher | in failedHandler | download progress = $progress, url = $url',
-            isFrequentPrint: true);
-
-        ALDownloaderHeader.processDownloaderHandlerInterfaceOnComingRootIsolate(
-            ALDownloaderConstant.kALDownloaderBatcherIMP,
-            downloaderHandlerInterfaceId,
-            true,
-            false,
-            false,
-            false,
-            progress);
-
-        if (binder._isCompletedHandlerCalled) {
-          aldDebugPrint(
-              'ALDownloaderBatcher | in failedHandler | download failed, succeeded urls = ${binder._succeededUrls}, failed urls = ${binder._failedUrls}');
-
-          ALDownloaderHeader
-              .processDownloaderHandlerInterfaceOnComingRootIsolate(
-                  ALDownloaderConstant.kALDownloaderBatcherIMP,
-                  downloaderHandlerInterfaceId,
-                  false,
-                  false,
-                  true,
-                  false,
-                  progress,
-                  isNeedRemoveInterface: true);
-
-          _idBinderKVs.remove(downloaderHandlerInterfaceId);
-        }
+        _processDownloaderHandlerInterface(binder, true);
       }, pausedHandler: () {
-        binder._downloadingKVs[url] = false;
+        binder.urlStatusKVs[url] = ALDownloaderStatus.paused;
 
-        if (!binder._isDownloading) {
-          if (!binder._isIgnoreUnnecessaryPausedHandlerCalled) {
-            aldDebugPrint(
-                'ALDownloaderBatcher | download paused, all the targetUrls are not downloading, the targetUrls = ${binder._targetUrls}, the last paused url = $url');
+        binder.pausedCalledCounter.add(url);
 
-            binder._isIgnoreUnnecessaryPausedHandlerCalled = true;
-
-            ALDownloaderHeader
-                .processDownloaderHandlerInterfaceOnComingRootIsolate(
-                    ALDownloaderConstant.kALDownloaderBatcherIMP,
-                    downloaderHandlerInterfaceId,
-                    false,
-                    false,
-                    false,
-                    true,
-                    0);
-          }
-        } else {
-          binder._isIgnoreUnnecessaryPausedHandlerCalled = false;
-        }
+        _processDownloaderHandlerInterface(binder, false);
       });
 
       final id = ALDownloaderIMP.cAddDownloaderHandlerInterface(
@@ -416,6 +306,85 @@ abstract class ALDownloaderBatcherIMP {
 
       binder._childDownloadHandlerInterfaceIds.add(id);
     }
+  }
+
+  static void _processDownloaderHandlerInterface(
+      _ALDownloaderBatcherBinder binder, bool isNeedCallProgressHandler) {
+    final downloaderHandlerInterfaceId = binder.downloadHandlerInterfaceId;
+
+    final result = binder.extract();
+
+    final downloadingUrlsLength = result[0];
+    final succeededUrlsLength = result[1];
+    final failedUrlsLength = result[2];
+    final pausedUrlsLength = result[3];
+
+    double progress = 0;
+    if (isNeedCallProgressHandler)
+      progress = binder.calculateProgress(succeededUrlsLength);
+
+    final targetUrls = binder.targetUrls;
+    final targetUrlsLength = targetUrls.length;
+
+    bool isNeedCallSucceededHandler = false;
+    bool isNeedCallFailedHandler = false;
+    bool isNeedCallPausedHandler = false;
+    bool isNeedRemoveInterface = false;
+    bool isNeedClearPausedCalledCounter = false;
+
+    if (downloadingUrlsLength +
+            succeededUrlsLength +
+            failedUrlsLength +
+            pausedUrlsLength ==
+        targetUrlsLength) {
+      if (downloadingUrlsLength == 0) {
+        if (pausedUrlsLength > 0) {
+          if (binder.pausedCalledCounter.length == pausedUrlsLength) {
+            aldDebugPrint(
+                'ALDownloaderBatcher | download paused, target urls = $targetUrls');
+
+            isNeedCallSucceededHandler = false;
+            isNeedCallFailedHandler = false;
+            isNeedCallPausedHandler = true;
+            isNeedRemoveInterface = false;
+            isNeedClearPausedCalledCounter = true;
+          }
+        } else if (succeededUrlsLength == targetUrlsLength) {
+          aldDebugPrint(
+              'ALDownloaderBatcher | download succeeded, target urls = $targetUrls');
+
+          isNeedCallSucceededHandler = true;
+          isNeedCallFailedHandler = false;
+          isNeedCallPausedHandler = false;
+          isNeedRemoveInterface = true;
+          isNeedClearPausedCalledCounter = false;
+        } else if (succeededUrlsLength + failedUrlsLength == targetUrlsLength) {
+          aldDebugPrint(
+              'ALDownloaderBatcher | download failed, target urls = $targetUrls');
+
+          isNeedCallSucceededHandler = false;
+          isNeedCallFailedHandler = true;
+          isNeedCallPausedHandler = false;
+          isNeedRemoveInterface = true;
+          isNeedClearPausedCalledCounter = false;
+        }
+      }
+    }
+
+    ALDownloaderHeader.processDownloaderHandlerInterfaceOnComingRootIsolate(
+        ALDownloaderConstant.kALDownloaderBatcherIMP,
+        downloaderHandlerInterfaceId,
+        isNeedCallProgressHandler,
+        isNeedCallSucceededHandler,
+        isNeedCallFailedHandler,
+        isNeedCallPausedHandler,
+        progress,
+        isNeedRemoveInterface: isNeedRemoveInterface);
+
+    if (isNeedClearPausedCalledCounter) binder.pausedCalledCounter.clear();
+
+    if (isNeedRemoveInterface)
+      _idBinderKVs.remove(downloaderHandlerInterfaceId);
   }
 
   static void _removeDownloaderHandlerInterfaceForId(
@@ -441,7 +410,7 @@ abstract class ALDownloaderBatcherIMP {
 
     ALDownloaderHeader.processDownloaderHandlerInterfaceOnComingRootIsolate(
         ALDownloaderConstant.kALDownloaderBatcherIMP,
-        binder._downloadHandlerInterfaceId,
+        binder.downloadHandlerInterfaceId,
         false,
         false,
         false,
@@ -514,69 +483,55 @@ abstract class ALDownloaderBatcherIMP {
   ALDownloaderBatcherIMP._();
 }
 
-/// A batch binder for binding some elements such as [_targetUrls], [_downloadHandlerInterfaceId], [_childDownloadHandlerInterfaceIds] and more
+/// A batch binder for binding some elements such as [targetUrls], [downloadHandlerInterfaceId], [_childDownloadHandlerInterfaceIds] and more
 ///
 /// It may bind more elements in the future.
 class _ALDownloaderBatcherBinder {
-  /// Get result whether [_targetUrls] are all succeeded
-  bool get _isSucceeded => _succeededUrls.length == _targetUrls.length;
+  /// Extract urls length as a set by [ALDownloaderStatus]
+  List<int> extract() {
+    int downloadingUrlsLength = 0;
+    int succeededUrlsLength = 0;
+    int failedUrlsLength = 0;
+    int pausedUrlsLength = 0;
 
-  /// Get succeeded urls
-  List<String> get _succeededUrls {
-    List<String> aList;
-
-    try {
-      aList = _completedKVs.entries
-          .where((element) => element.value)
-          .map((e) => e.key)
-          .toList();
-
-      aldDebugPrint(
-          '_ALDownloaderBatcherBinder | get _succeededUrls, result = $aList',
-          isFrequentPrint: true);
-    } catch (error) {
-      aList = <String>[];
-      aldDebugPrint(
-          '_ALDownloaderBatcherBinder | get _succeededUrls, error = $error');
+    for (final element in urlStatusKVs.entries) {
+      switch (element.value) {
+        case ALDownloaderStatus.downloading:
+          downloadingUrlsLength++;
+          break;
+        case ALDownloaderStatus.succeeded:
+          succeededUrlsLength++;
+          break;
+        case ALDownloaderStatus.failed:
+          failedUrlsLength++;
+          break;
+        case ALDownloaderStatus.paused:
+          pausedUrlsLength++;
+          break;
+        default:
+          break;
+      }
     }
 
-    return aList;
-  }
-
-  /// Get failed urls
-  // ignore: unused_element
-  List<String> get _failedUrls {
-    List<String> aList;
-
-    try {
-      aList = _completedKVs.entries
-          .where((element) => !element.value)
-          .map((e) => e.key)
-          .toList();
-
-      aldDebugPrint(
-          '_ALDownloaderBatcherBinder | get _failedUrls, result = $aList',
-          isFrequentPrint: true);
-    } catch (error) {
-      aList = <String>[];
-      aldDebugPrint(
-          '_ALDownloaderBatcherBinder | get _failedUrls, error = $error');
-    }
-
-    return aList;
+    return [
+      downloadingUrlsLength,
+      succeededUrlsLength,
+      failedUrlsLength,
+      pausedUrlsLength
+    ];
   }
 
   /// Get progress
   ///
   /// progress = number of succeeded urls / number of all urls
-  double get _progress {
+  double calculateProgress(int succeededCount) {
     double aDouble = 0;
 
     try {
-      if (_targetUrls.length == 0) {
+      if (targetUrls.length == 0) {
         aDouble = 0;
       } else {
-        dynamic result = _succeededUrls.length / _targetUrls.length;
+        dynamic result = succeededCount / targetUrls.length;
         result = result.toStringAsFixed(2);
         aDouble = double.tryParse(result) ?? 0;
       }
@@ -588,44 +543,22 @@ class _ALDownloaderBatcherBinder {
     return aDouble;
   }
 
-  /// Whether exist downloading url
-  bool get _isDownloading => _downloadingKVs.values.contains(true);
+  /// The purpose is to return a reasonable paused status.
+  final pausedCalledCounter = Set<String>();
 
-  /// The paused urls among [_targetUrls]
-  // ignore: unused_element
-  List<String> get _pausedUrls {
-    final aList = <String>[];
-    for (final element in _targetUrls) {
-      final status = ALDownloaderIMP.getStatusForUrl(element);
-      if (status == ALDownloaderStatus.paused) aList.add(element);
-    }
-
-    return aList;
-  }
-
-  /// Whether ignore unnecessary paused handler called
-  bool _isIgnoreUnnecessaryPausedHandlerCalled = false;
-
-  /// Purpose is that check whether all the completed handler called
-  bool get _isCompletedHandlerCalled =>
-      _completedKVs.length == _targetUrls.length;
-
-  /// A map that key is url and value is whether url is completed
-  final _completedKVs = <String, bool>{};
-
-  /// A map that key is url and value is whether url is downloading
-  final _downloadingKVs = <String, bool>{};
+  /// A map that key is url and value [ALDownloaderStatus]
+  final urlStatusKVs = <String, ALDownloaderStatus>{};
 
   /// Batch download handler interface id
-  final ALDownloaderHandlerInterfaceId _downloadHandlerInterfaceId;
+  final ALDownloaderHandlerInterfaceId downloadHandlerInterfaceId;
 
   /// A list that contains child download handler interface ids
   final _childDownloadHandlerInterfaceIds = <String>[];
 
   /// A list that contains urls needed to download
-  final List<String> _targetUrls;
+  final List<String> targetUrls;
 
   /// Privatize constructor
   _ALDownloaderBatcherBinder._(
-      this._downloadHandlerInterfaceId, this._targetUrls);
+      this.downloadHandlerInterfaceId, this.targetUrls);
 }

@@ -49,6 +49,12 @@ abstract class ALDownloaderHeader {
       bool isNeedCallPausedHandler,
       double progress,
       {bool isNeedRemoveInterface = false}) {
+    if (!isNeedCallProgressHandler &&
+        !isNeedCallSucceededHandler &&
+        !isNeedCallFailedHandler &&
+        !isNeedCallPausedHandler &&
+        !isNeedRemoveInterface) return;
+
     final message = ALDownloaderMessage();
     message.scope = scope;
     message.action = ALDownloaderConstant.kCallInterface;
