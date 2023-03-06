@@ -18,7 +18,7 @@ abstract class ALDownloaderFilePropertyDecider {
   ///
   /// [ALDownloaderFileTypeModel] file type model
   static ALDownloaderFileTypeModel getFileTypeModelForUrl(String url) {
-    final File file = File(url);
+    final file = File(url);
     final anExtension = extension(file.path);
 
     for (final type in ALDownloaderFileType.values) {
@@ -29,7 +29,7 @@ abstract class ALDownloaderFilePropertyDecider {
           return ALDownloaderFileTypeModel(type, anExtension);
       } catch (error) {
         aldDebugPrint(
-            'ALDownloader | getFileTypeModelForUrl, url = $url, type = $type, error = $error');
+            'ALDownloaderFilePropertyDecider | getFileTypeModelForUrl, url = $url, type = $type, error: $error');
       }
     }
 
@@ -203,5 +203,5 @@ abstract class _ALDownloaderFilePropertyDeciderConstant {
       kComponentParentDirectoryPath + 'al_other' + '/';
 
   /// Component parent directory path
-  static final kComponentParentDirectoryPath = '/' + 'al_flutter' + '/';
+  static final kComponentParentDirectoryPath = '/al_flutter/';
 }

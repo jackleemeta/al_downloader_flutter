@@ -1,5 +1,6 @@
 import 'ALDownloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
+import 'ALDownloaderStatus.dart';
 import 'ALDownloaderTypeDefine.dart';
 import 'chore/ALDownloaderBatcherInputVO.dart';
 import 'implementation/ALDownloaderBatcherIMP.dart';
@@ -93,10 +94,11 @@ abstract class ALDownloaderBatcher {
   ///
   /// [urls] urls
   ///
-  /// [handler] handler
-  static void getStatusForUrls(
-          List<String> urls, ALDownloaderStatusHandler handler) =>
-      ALDownloaderBatcherIMP.getStatusForUrls(urls, handler);
+  /// **return**
+  ///
+  /// [ALDownloaderStatus] status
+  static Future<ALDownloaderStatus> getStatusForUrls(List<String> urls) =>
+      ALDownloaderBatcherIMP.getStatusForUrls(urls);
 
   /// Get download progress
   ///
@@ -106,10 +108,11 @@ abstract class ALDownloaderBatcher {
   ///
   /// [urls] urls
   ///
-  /// [handler] handler
-  static void getProgressForUrls(
-          List<String> urls, ALDownloaderProgressHandler handler) =>
-      ALDownloaderBatcherIMP.getProgressForUrls(urls, handler);
+  /// **return**
+  ///
+  /// [double] progress
+  static Future<double> getProgressForUrls(List<String> urls) =>
+      ALDownloaderBatcherIMP.getProgressForUrls(urls);
 
   /// Pause downloads
   ///

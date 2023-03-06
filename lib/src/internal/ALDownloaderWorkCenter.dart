@@ -1,5 +1,6 @@
 import 'ALDownloaderMessage.dart';
 import '../implementation/ALDownloaderBatcherIMP.dart';
+import '../implementation/ALDownloaderFileManagerIMP.dart';
 import '../implementation/ALDownloaderIMP.dart';
 
 /// ALDownloader work center
@@ -13,6 +14,11 @@ abstract class ALDownloaderWorkCenter {
           ALDownloaderMessage message) =>
       ALDownloaderBatcherIMP.doWorkOnRootIsolate(message);
 
+  /// Do work on root isolate for ALDownloaderFileManagerIMP
+  static void doWorkOnRootIsolateForALDownloaderFileManagerIMP(
+          ALDownloaderMessage message) =>
+      ALDownloaderFileManagerIMP.doWorkOnRootIsolate(message);
+
   /// Do work on ALDownloader isolate for ALDownloader
   static void doWorkOnALIsolateForALDownloader(ALDownloaderMessage message) =>
       ALDownloaderIMP.doWorkOnALIsolate(message);
@@ -21,4 +27,9 @@ abstract class ALDownloaderWorkCenter {
   static void doWorkOnALIsolateForALDownloaderBatcher(
           ALDownloaderMessage message) =>
       ALDownloaderBatcherIMP.doWorkOnALIsolate(message);
+
+  /// Do work on ALDownloader isolate for ALDownloaderFileManagerIMP
+  static void doWorkOnALIsolateForALDownloaderFileManagerIMP(
+          ALDownloaderMessage message) =>
+      ALDownloaderFileManagerIMP.doWorkOnALIsolate(message);
 }

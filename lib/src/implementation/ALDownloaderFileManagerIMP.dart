@@ -1,230 +1,255 @@
-import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
-import 'package:convert/convert.dart';
-import 'package:crypto/crypto.dart';
-import 'package:path_provider/path_provider.dart';
 import '../chore/ALDownloaderPathModel.dart';
-import '../internal/ALDownloaderFilePropertyDecider.dart';
+import '../internal/ALDownloaderConstant.dart';
+import '../internal/ALDownloaderDirectoryManager.dart';
+import '../internal/ALDownloaderHeader.dart';
+import '../internal/ALDownloaderMessage.dart';
 import '../internal/ALDownloaderPrint.dart';
+import '../internal/ALDownloaderTask.dart';
 
+/// ALDownloaderFileManagerIMP
 abstract class ALDownloaderFileManagerIMP {
-  static Future<ALDownloaderPathModel> lazyGetPathModelForUrl(
+  static Future<ALDownloaderPathModel?> getPhysicalFilePathModelForUrl(
       String url) async {
-    // Generate path model by url.
-    final model = ALDownloaderFilePropertyDecider.getFileTypeModelForUrl(url);
+    final id = ALDownloaderHeader.uuid.v1();
 
-    // component directory path
-    final componentDirectoryPath =
-        model.type.componentDirectoryPathWithUnknownAsPlaceholder;
+    final aCompleter = Completer<ALDownloaderPathModel?>();
+    _idDynamicKVs[id] =
+        (ALDownloaderPathModel? model) => aCompleter.complete(model);
 
-    // file name
-    final fileName = _assembleFileName(url, model);
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderFileManagerIMP;
+    message.action = ALDownloaderConstant.kGetPhysicalFilePathModelForUrl;
+    message.content = {
+      ALDownloaderConstant.kHandlerId: id,
+      ALDownloaderConstant.kUrl: url
+    };
 
-    final theRootDir = await _theRootDir;
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
 
-    // directory path
-    final directoryPath = theRootDir + componentDirectoryPath;
-
-    final directory =
-        await _ALDownloaderFilePathManager.tryToCreateCustomDirectory(
-            directoryPath,
-            recursive: true);
-
-    final pathModel = ALDownloaderPathModel(directoryPath, fileName);
-
-    if (directory == null) {
-      pathModel.directoryPersistenceStatus =
-          ALDownloaderPersistenceStatus.virtual;
-    } else {
-      pathModel.directoryPersistenceStatus =
-          ALDownloaderPersistenceStatus.physical;
-    }
-
-    return pathModel;
-  }
-
-  static Future<String> lazyGetPhysicalDirectoryPathForUrl(String url) async {
-    final model = await lazyGetPathModelForUrl(url);
-    final directoryPath = model.directoryPath;
-
-    return directoryPath;
-  }
-
-  static Future<String> getVirtualFilePathForUrl(String url) async {
-    // Generate data model of file types for url.
-    final model = ALDownloaderFilePropertyDecider.getFileTypeModelForUrl(url);
-
-    // level 1 folder - component
-    final aDirString =
-        model.type.componentDirectoryPathWithUnknownAsPlaceholder;
-    final theRootDir = await _theRootDir;
-    final dirForRootToFirstLevel = theRootDir + aDirString;
-    final fileName = _assembleFileName(url, model);
-
-    final filePath = dirForRootToFirstLevel + fileName;
-
-    return filePath;
+    return aCompleter.future;
   }
 
   static Future<String?> getPhysicalFilePathForUrl(String url) async {
-    String virtualfilePath =
-        await getVirtualFilePathForUrl(url); // virtual file path
-    String? filePath;
-    try {
-      File aFile = File(virtualfilePath); // physical file
-      if (aFile.existsSync()) filePath = virtualfilePath;
-    } catch (error) {
-      aldDebugPrint(
-          'ALDownloaderFileManager | getPhysicalFilePathForUrl, error = $error');
+    final id = ALDownloaderHeader.uuid.v1();
+
+    final aCompleter = Completer<String?>();
+    _idDynamicKVs[id] =
+        (String? directoryPath) => aCompleter.complete(directoryPath);
+
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderFileManagerIMP;
+    message.action = ALDownloaderConstant.kGetPhysicalFilePathForUrl;
+    message.content = {
+      ALDownloaderConstant.kHandlerId: id,
+      ALDownloaderConstant.kUrl: url
+    };
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return aCompleter.future;
+  }
+
+  static Future<bool> isExistPhysicalFilePathForUrl(String url) async {
+    final id = ALDownloaderHeader.uuid.v1();
+
+    final aCompleter = Completer<bool>();
+    _idDynamicKVs[id] = (bool isExist) => aCompleter.complete(isExist);
+
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderFileManagerIMP;
+    message.action = ALDownloaderConstant.kIsExistPhysicalFilePathForUrl;
+    message.content = {
+      ALDownloaderConstant.kHandlerId: id,
+      ALDownloaderConstant.kUrl: url
+    };
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return aCompleter.future;
+  }
+
+  static Future<ALDownloaderPathModel> cLazyGetPathModel(
+      String directoryPath, String fileName) async {
+    if (Platform.isIOS) {
+      final localDocumentDirectory =
+          await ALDownloaderDirectoryManager.localDocumentDirectory;
+      if (!directoryPath.startsWith(localDocumentDirectory)) {
+        final errorMsg =
+            'ALDownloaderFileManager | cLazyGetPathModel | error: At present, on iOS, only `Documents` directory is available, because `FlutterDownloader` does not support any other directory.';
+        aldDebugPrint(errorMsg);
+        throw errorMsg;
+      }
     }
 
-    return filePath;
+    await ALDownloaderDirectoryManager.tryToCreateCustomDirectory(directoryPath,
+        recursive: true);
+
+    final model = ALDownloaderPathModel(directoryPath, fileName);
+
+    aldDebugPrint(
+        'ALDownloaderFileManager | cLazyGetPathModel | file path = ${model.filePath}');
+
+    return model;
   }
 
-  static Future<bool> isExistPhysicalFilePathForUrl(String url) async =>
-      await getPhysicalFilePathForUrl(url) != null;
-
-  static String getFileNameForUrl(String url) {
-    final model = ALDownloaderFilePropertyDecider.getFileTypeModelForUrl(url);
-
-    final fileName = _assembleFileName(url, model);
-    return fileName;
-  }
-
-  static Future<bool> isInRootPathForPath(String path) async {
-    final theRootDir = await _theRootDir;
+  static Future<bool> cIsInRootPathForPath(String path, String rootPath) async {
+    final theRootDir = rootPath;
     final aBool = path.startsWith(theRootDir);
     return aBool;
   }
 
-  static Future<List<String>?> get dirs async {
-    try {
-      final theRootDir = await _theRootDir;
-      final aDirs = <String>[];
-      for (final element in ALDownloaderFileType.values) {
-        final componentDirectoryPath = element.componentDirectoryPath;
-        if (componentDirectoryPath != null)
-          aDirs.add(theRootDir + componentDirectoryPath);
-      }
+  static bool cIsExistPhysicalFilePath(String? filePath) {
+    bool aBool = false;
 
-      return aDirs;
-    } catch (error) {
-      aldDebugPrint('ALDownloaderFileManager | get dirs, error = $error');
+    if (filePath != null) {
+      try {
+        final aFile = File(filePath);
+        if (aFile.existsSync()) aBool = true;
+      } catch (error) {
+        aldDebugPrint(
+            'ALDownloaderFileManager | getPhysicalFilePathForUrl, error: $error');
+      }
     }
 
-    return null;
+    return aBool;
   }
 
-  /// Get root path
-  static Future<String> get _theRootDir async {
-    String? aDir;
-    if (Platform.isIOS) {
-      aDir = await _ALDownloaderFilePathManager.localDocumentDirectory;
-    } else if (Platform.isAndroid) {
-      aDir = await _ALDownloaderFilePathManager.localExternalStorageDirectory;
-      if (aDir == null)
-        aDir = await _ALDownloaderFilePathManager.localDocumentDirectory;
+  /// Do work on root isolate
+  static void doWorkOnRootIsolate(ALDownloaderMessage message) {
+    final action = message.action;
+    final content = message.content;
+    if (action == ALDownloaderConstant.kCallFileManagerHandler) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final data = content[ALDownloaderConstant.kData];
+
+      final handler = _idDynamicKVs[id];
+
+      if (handler != null) handler(data);
+
+      _idDynamicKVs.remove(id);
+    }
+  }
+
+  /// Do work on ALDownloader isolate
+  static void doWorkOnALIsolate(ALDownloaderMessage message) {
+    if (ALDownloaderHeader.initializedCompleter.isCompleted) {
+      _doWorkWhichMustBeAfterInitializedOnALIsolate(message);
     } else {
-      throw 'ALDownloaderFileManager | get _theRootDir, error = ALDownloader can not operate on current platform ${Platform.operatingSystem}';
+      ALDownloaderHeader.initializedCompleter.future
+          .then((_) => _doWorkWhichMustBeAfterInitializedOnALIsolate(message));
     }
-
-    return aDir;
   }
 
-  /// Get result that assemble file name for [url] and [model]
-  static String _assembleFileName(String url, ALDownloaderFileTypeModel model) {
-    final StringBuffer sb = StringBuffer();
+  static void _doWorkWhichMustBeAfterInitializedOnALIsolate(
+      ALDownloaderMessage message) {
+    final action = message.action;
+    final content = message.content;
 
-    final md5String = _getMd5StringForString(url);
-    sb.write(md5String);
+    if (action == ALDownloaderConstant.kGetPhysicalFilePathModelForUrl) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final url = content[ALDownloaderConstant.kUrl];
 
-    final description = model.description;
-    if (description != null && description.length > 0) sb.write(description);
-    return sb.toString();
-  }
+      _getPhysicalFilePathModelForUrl(id, url);
+    } else if (action == ALDownloaderConstant.kGetPhysicalFilePathForUrl) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final url = content[ALDownloaderConstant.kUrl];
 
-  static String _getMd5StringForString(String aString) {
-    final content = Utf8Encoder().convert(aString);
-    final digest = md5.convert(content);
-    return hex.encode(digest.bytes);
-  }
+      _getPhysicalFilePathForUrl(id, url);
+    } else if (action == ALDownloaderConstant.kIsExistPhysicalFilePathForUrl) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final url = content[ALDownloaderConstant.kUrl];
 
-  /// Privatize constructor
-  ALDownloaderFileManagerIMP._();
-}
-
-class _ALDownloaderFilePathManager {
-  /// Try to create a directory
-  static Future<Directory?> tryToCreateCustomDirectory(String path,
-      {bool recursive = false}) async {
-    final dir = Directory(path);
-    try {
-      bool exists = await dir.exists();
-      if (!exists) return await dir.create(recursive: recursive);
-    } catch (error) {
-      aldDebugPrint(
-          '_ALDownloaderFilePathManager | tryToCreateCustomDirectory, error = $error');
+      _isExistPhysicalFilePathForUrl(id, url);
     }
-    return null;
   }
 
-  /// Get `document directory`
-  // ignore: unused_element
-  static Future<String> get localDocumentDirectory async {
-    String? aPath;
-    try {
-      final aDir = await getApplicationDocumentsDirectory();
-      aPath = aDir.path;
+  static Future<void> _getPhysicalFilePathModelForUrl(
+      String id, String url) async {
+    final task = _getTaskFromUrl(url);
 
-      aldDebugPrint(
-          '_ALDownloaderFilePathManager | get localDocumentDirectory, directoryPath = $aPath');
-    } catch (error) {
-      aldDebugPrint(
-          '_ALDownloaderFilePathManager | get localDocumentDirectory, error = $error');
-    }
-    return aPath!;
-  }
-
-  /// Get `temporary directory`
-  // ignore: unused_element
-  static Future<String> get localTemporaryDirectory async {
-    String? aPath;
-    try {
-      final aDir = await getTemporaryDirectory();
-      aPath = aDir.path;
-
-      aldDebugPrint(
-          '_ALDownloaderFilePathManager | get localTemporaryDirectory, directoryPath = $aPath');
-    } catch (error) {
-      aldDebugPrint(
-          '_ALDownloaderFilePathManager | get localTemporaryDirectory, error = $error');
-    }
-    return aPath!;
-  }
-
-  /// Get `external storage directory`
-  ///
-  /// **note**
-  ///
-  /// No iOS
-  // ignore: unused_element
-  static Future<String?> get localExternalStorageDirectory async {
-    String? aPath;
-    try {
-      final aDir = await getExternalStorageDirectory();
-      if (aDir != null) {
-        aPath = aDir.path;
-
-        aldDebugPrint(
-            '_ALDownloaderFilePathManager | get localExternalStorageDirectory, directoryPath = $aPath');
-      } else {
-        aldDebugPrint(
-            '_ALDownloaderFilePathManager | get localExternalStorageDirectory, directoryPath = none');
+    ALDownloaderPathModel? model;
+    if (task != null) {
+      final directoryPath = task.savedDir;
+      final fileName = task.fileName;
+      if (directoryPath != null && fileName != null) {
+        try {
+          final filePath = directoryPath + fileName;
+          final aFile = File(filePath);
+          if (aFile.existsSync()) {
+            model = ALDownloaderPathModel(directoryPath, fileName);
+          } else {
+            final aDirectory = Directory(directoryPath);
+            if (aDirectory.existsSync())
+              model = ALDownloaderPathModel(directoryPath, '');
+          }
+        } catch (error) {
+          aldDebugPrint(
+              'ALDownloaderFileManager | getPhysicalFilePathForUrl, error: $error');
+        }
       }
-    } catch (error) {
-      aldDebugPrint(
-          '_ALDownloaderFilePathManager | get localExternalStorageDirectory, error = $error');
     }
-    return aPath;
+
+    ALDownloaderHeader.processFileManagerHandlerOnComingRootIsolate(id, model);
   }
+
+  static void _getPhysicalFilePathForUrl(String id, String url) {
+    final task = _getTaskFromUrl(url);
+
+    String? aFilePath;
+
+    if (task != null) {
+      final filePath = task.filePath;
+
+      if (filePath != null) {
+        try {
+          final aFile = File(filePath);
+          if (aFile.existsSync()) aFilePath = filePath;
+        } catch (error) {
+          aldDebugPrint(
+              'ALDownloaderFileManager | getPhysicalFilePathForUrl, error: $error');
+        }
+      }
+    }
+
+    ALDownloaderHeader.processFileManagerHandlerOnComingRootIsolate(
+        id, aFilePath);
+  }
+
+  static void _isExistPhysicalFilePathForUrl(String id, String url) {
+    final task = _getTaskFromUrl(url);
+
+    bool aBool = false;
+
+    if (task != null && task.savedDir != null && task.fileName != null) {
+      final filePath = task.filePath;
+
+      if (filePath != null) {
+        try {
+          final aFile = File(filePath);
+          if (aFile.existsSync()) aBool = true;
+        } catch (error) {
+          aldDebugPrint(
+              'ALDownloaderFileManager | getPhysicalFilePathForUrl, error: $error');
+        }
+      }
+    }
+
+    ALDownloaderHeader.processFileManagerHandlerOnComingRootIsolate(id, aBool);
+  }
+
+  static ALDownloaderTask? _getTaskFromUrl(String url) {
+    ALDownloaderTask? task;
+    try {
+      task =
+          ALDownloaderHeader.tasks.firstWhere((element) => url == element.url);
+    } catch (error) {
+      aldDebugPrint('ALDownloaderFileManager | _getTaskFromUrl, error: $error');
+    }
+
+    return task;
+  }
+
+  static final _idDynamicKVs = <String, dynamic>{};
 }

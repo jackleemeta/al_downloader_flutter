@@ -27,6 +27,9 @@ abstract class ALDownloaderIsolate {
         } else if (scope == ALDownloaderConstant.kALDownloaderBatcherIMP) {
           ALDownloaderWorkCenter.doWorkOnALIsolateForALDownloaderBatcher(
               message);
+        } else if (scope == ALDownloaderConstant.kALDownloaderFileManagerIMP) {
+          ALDownloaderWorkCenter.doWorkOnALIsolateForALDownloaderFileManagerIMP(
+              message);
         }
       }
     });

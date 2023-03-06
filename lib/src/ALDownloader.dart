@@ -1,4 +1,5 @@
 import 'ALDownloaderHandlerInterface.dart';
+import 'ALDownloaderStatus.dart';
 import 'ALDownloaderTypeDefine.dart';
 import 'implementation/ALDownloaderIMP.dart';
 
@@ -35,7 +36,17 @@ abstract class ALDownloader {
   ///
   /// It is an one-off interface which will be destroyed when the download succeeded/failed.
   ///
-  /// [headers] download headers
+  /// [directoryPath], [fileName]
+  ///
+  /// If any one of them is `null`, both of them are invalid. At this time, [ALDownloader] will
+  /// generate default.
+  ///
+  /// [headers] download http header
+  ///
+  /// [redownloadIfNeeded]
+  ///
+  /// If [redownloadIfNeeded] is `true` and any one of [directoryPath], [fileName], [headers] content
+  /// is changed than before, [url] will re-download.
   ///
   /// **return**
   ///
@@ -43,11 +54,17 @@ abstract class ALDownloader {
   ///
   /// It is used for managing downloader handler interface.
   static ALDownloaderHandlerInterfaceId? download(String url,
-          {ALDownloaderHandlerInterface? downloaderHandlerInterface,
-          Map<String, String> headers = const {}}) =>
+          {String? directoryPath,
+          String? fileName,
+          Map<String, String>? headers,
+          bool redownloadIfNeeded = true,
+          ALDownloaderHandlerInterface? downloaderHandlerInterface}) =>
       ALDownloaderIMP.download(url,
-          downloaderHandlerInterface: downloaderHandlerInterface,
-          headers: headers);
+          directoryPath: directoryPath,
+          fileName: fileName,
+          headers: headers,
+          redownloadIfNeeded: redownloadIfNeeded,
+          downloaderHandlerInterface: downloaderHandlerInterface);
 
   /// Add a downloader handler interface
   ///
@@ -122,9 +139,11 @@ abstract class ALDownloader {
   ///
   /// [url] url
   ///
-  /// [handler] handler
-  static void getStatusForUrl(String url, ALDownloaderStatusHandler handler) =>
-      ALDownloaderIMP.getStatusForUrl(url, handler);
+  /// **return**
+  ///
+  /// [ALDownloaderStatus] status
+  static Future<ALDownloaderStatus> getStatusForUrl(String url) =>
+      ALDownloaderIMP.getStatusForUrl(url);
 
   /// Get download progress
   ///
@@ -132,10 +151,11 @@ abstract class ALDownloader {
   ///
   /// [url] url
   ///
-  /// [handler] handler
-  static void getProgressForUrl(
-          String url, ALDownloaderProgressHandler handler) =>
-      ALDownloaderIMP.getProgressForUrl(url, handler);
+  /// **return**
+  ///
+  /// [double] progress
+  static Future<double> getProgressForUrl(String url) =>
+      ALDownloaderIMP.getProgressForUrl(url);
 
   /// Pause download
   ///

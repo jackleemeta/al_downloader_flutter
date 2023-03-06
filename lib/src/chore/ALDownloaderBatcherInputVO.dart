@@ -2,7 +2,14 @@
 class ALDownloaderBatcherInputVO {
   final String url;
 
-  final Map<String, String> headers;
+  String? directoryPath;
 
-  ALDownloaderBatcherInputVO(this.url, this.headers);
+  String? fileName;
+
+  Map<String, String>? headers;
+
+  /// See [redownloadIfNeeded] in [ALDownloader.download]
+  bool redownloadIfNeeded = false;
+
+  ALDownloaderBatcherInputVO(this.url);
 }
