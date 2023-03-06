@@ -1,3 +1,7 @@
+## 1.7.2
+
+- support to input file path
+
 ## 1.7.1
 
 - handle management by id
