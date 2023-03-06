@@ -16,7 +16,7 @@ abstract class ALDownloaderFileManager {
           String url) =>
       ALDownloaderFileManagerIMP.getPhysicalFilePathModelForUrl(url);
 
-  /// Get 'physical directory path' for [url]
+  /// Get physical directory path for [url]
   ///
   /// **parameters**
   ///
