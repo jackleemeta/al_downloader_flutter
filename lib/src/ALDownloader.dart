@@ -46,7 +46,7 @@ abstract class ALDownloader {
   /// [redownloadIfNeeded]
   ///
   /// If [redownloadIfNeeded] is `true` and any one of [directoryPath], [fileName], [headers] content
-  /// is changed than before, [url] will re-download.
+  /// is changed than before, [url] will re-download. Otherwise, [url] will not re-download.
   ///
   /// **return**
   ///
@@ -57,7 +57,7 @@ abstract class ALDownloader {
           {String? directoryPath,
           String? fileName,
           Map<String, String>? headers,
-          bool redownloadIfNeeded = true,
+          bool redownloadIfNeeded = false,
           ALDownloaderHandlerInterface? downloaderHandlerInterface}) =>
       ALDownloaderIMP.download(url,
           directoryPath: directoryPath,
