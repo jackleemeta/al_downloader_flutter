@@ -84,7 +84,7 @@ abstract class ALDownloaderFileManagerDefault {
       if (aFile.existsSync()) filePath = virtualfilePath;
     } catch (error) {
       aldDebugPrint(
-          'ALDownloaderFileManager | getPhysicalFilePathForUrl, error: $error');
+          'ALDownloaderFileManagerDefault | getPhysicalFilePathForUrl, error: $error');
     }
 
     return filePath;
@@ -117,7 +117,7 @@ abstract class ALDownloaderFileManagerDefault {
       if (aDir == null)
         aDir = await ALDownloaderDirectoryManager.localDocumentDirectory;
     } else {
-      throw 'ALDownloaderFileManager | get _theRootDir, error: ALDownloader can not operate on current platform ${Platform.operatingSystem}';
+      throw 'ALDownloaderFileManagerDefault | get _theRootDir, error: ALDownloader can not operate on current platform ${Platform.operatingSystem}';
     }
 
     return aDir;
