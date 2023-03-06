@@ -220,13 +220,13 @@ class _MyHomePageState extends State<MyHomePage> {
             model.status = ALDownloaderStatus.succeeded;
 
             setState(() {});
-          }, failedHandler: () {
+          }, failedHandler: () async {
             debugPrint('ALDownloader | download failed, url = $url\n');
 
-            ALDownloader.getStatusForUrl(url, (status) {
-              model.status = status;
-              setState(() {});
-            });
+            final status = await ALDownloader.getStatusForUrl(url);
+            model.status = status;
+
+            setState(() {});
           }, pausedHandler: () {
             debugPrint('ALDownloader | download paused, url = $url\n');
 

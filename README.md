@@ -23,7 +23,7 @@ If you need Chinese Document, click [here](README_CN.md).
 add the following line to your pubspec.yaml
 ```
 dependencies:
-  al_downloader: ^1.7.1
+  al_downloader: ^1.7.2
 ```
 
 run the following line with your command line
@@ -103,20 +103,6 @@ ALDownloader.addForeverDownloaderHandlerInterface(
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 ```
 
-#### Get download status
-```
-ALDownloader.getStatusForUrl(url, (status) {
-  debugPrint('ALDownloader | download progress = $status\n');
-});
-```
-
-#### Get download progress
-```
-ALDownloader.getProgressForUrl(url, (progress) {
-  debugPrint('ALDownloader | download progress = $progress\n');
-});
-```
-
 #### Pause download
 ```
 /// Stop download, but the incomplete data will not be deleted.
@@ -133,6 +119,16 @@ ALDownloader.cancel(url);
 ```
 /// Remove download, and all the data will be deleted.
 ALDownloader.remove(url);
+```
+
+#### Get download status
+```
+final status = await ALDownloader.getStatusForUrl(url);
+```
+
+#### Get download progress
+```
+final progress = await ALDownloader.getProgressForUrl(url);
 ```
 
 ### ALDownloaderBatcher
@@ -169,23 +165,16 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 
 #### Get download status for a set of urls
 ```
-ALDownloaderBatcher.getStatusForUrls(urls, (status) {
-  debugPrint('ALDownloader | batch | download status = $status\n');
-});
+final status = await ALDownloaderBatcher.getStatusForUrls(urls);
 ```
 
 ### ALDownloaderFileManager - A manager that manages file by url
 
 ```
-final virtualFilePath =
-    await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
-debugPrint(
-    "ALDownloader | get 'virtual file path' for [url], url = $url, path = $virtualFilePath\n");
-
 final physicalFilePath =
     await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
 debugPrint(
-    "ALDownloader | get 'physical file path' for [url], url = $url, path = $physicalFilePath\n");
+    'ALDownloader | get physical file path for [url], url = $url, path = $physicalFilePath\n');
 ```
 
 ## *Note*:

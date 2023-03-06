@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:isolate';
 import 'package:uuid/uuid.dart';
-import 'ALDownloaderConstant.dart';
-import 'ALDownloaderMessage.dart';
 import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
+import 'ALDownloaderConstant.dart';
+import 'ALDownloaderMessage.dart';
+import 'ALDownloaderTask.dart';
 
 /// ALDownloaderHeader
 abstract class ALDownloaderHeader {
@@ -24,6 +25,9 @@ abstract class ALDownloaderHeader {
   ///
   /// AlDownloader creates [uuid] by [Uuid.v1].
   static final uuid = Uuid();
+
+  /// Custom download tasks
+  static final tasks = <ALDownloaderTask>[];
 
   /// A reliable way that sends message from root isolate to ALDownloader isolate
   ///
@@ -98,6 +102,20 @@ abstract class ALDownloaderHeader {
     message.content = {
       ALDownloaderConstant.kProgressHandlerId: progressHandlerId,
       ALDownloaderConstant.kProgress: progress
+    };
+
+    portALToRoot?.send(message);
+  }
+
+  /// A convenient function that supports to process the progress handler on coming root isolate
+  static void processFileManagerHandlerOnComingRootIsolate(
+      String handlerId, dynamic data) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderFileManagerIMP;
+    message.action = ALDownloaderConstant.kCallFileManagerHandler;
+    message.content = {
+      ALDownloaderConstant.kHandlerId: handlerId,
+      ALDownloaderConstant.kData: data
     };
 
     portALToRoot?.send(message);

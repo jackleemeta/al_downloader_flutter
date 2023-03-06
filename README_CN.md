@@ -21,7 +21,7 @@
 添加下面这行代码到pubspec.yaml中
 ```
 dependencies:
-  al_downloader: ^1.7.1
+  al_downloader: ^1.7.2
 ```
 
 使用命令行运行下面这行代码
@@ -101,20 +101,6 @@ ALDownloader.addForeverDownloaderHandlerInterface(
 ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
 ```
 
-#### 获取下载状态
-```
-ALDownloader.getStatusForUrl(url, (status) {
-  debugPrint('ALDownloader | 下载状态 = $status\n');
-});
-```
-
-#### 获取下载进度
-```
-ALDownloader.getProgressForUrl(url, (progress) {
-  debugPrint('ALDownloader | 下载进度 = $progress\n');
-});
-```
-
 #### 暂停下载
 ```
 /// 停止下载，不删除未下载完成的数据
@@ -131,6 +117,16 @@ ALDownloader.cancel(url);
 ```
 /// 删除下载，删除所有数据
 ALDownloader.remove(url);
+```
+
+#### 获取下载状态
+```
+final status = await ALDownloader.getStatusForUrl(url);
+```
+
+#### 获取下载进度
+```
+final progress = await ALDownloader.getProgressForUrl(url);
 ```
 
 ### ALDownloaderBatcher
@@ -167,23 +163,16 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 
 #### 获取一组url的下载状态
 ```
-ALDownloaderBatcher.getStatusForUrls(urls, (status) {
-  debugPrint('ALDownloader | 批量 | 下载状态 = $status\n');
-});
+final status = ALDownloaderBatcher.getStatusForUrls(urls);
 ```
 
 ### ALDownloaderFileManager - 基于url的文件管理器
 
 ```
-final virtualFilePath =
-    await ALDownloaderFileManager.getVirtualFilePathForUrl(url);
-debugPrint(
-    "ALDownloader | 获取[url]的'虚拟文件路径', url = $url, path = $virtualFilePath\n");
-
 final physicalFilePath =
     await ALDownloaderFileManager.getPhysicalFilePathForUrl(url);
 debugPrint(
-    "ALDownloader | 获取[url]的'物理文件路径', url = $url, path = $virtualFilePath\n");
+    'ALDownloader | 获取[url]的物理文件路径, url = $url, path = $physicalFilePath\n');
 ```
 
 ## *提示*:

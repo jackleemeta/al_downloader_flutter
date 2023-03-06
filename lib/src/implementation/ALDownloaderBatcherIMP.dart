@@ -1,4 +1,4 @@
-import 'ALDownloaderIMP.dart';
+import 'dart:async';
 import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
 import '../ALDownloaderTypeDefine.dart';
@@ -7,6 +7,7 @@ import '../internal/ALDownloaderConstant.dart';
 import '../internal/ALDownloaderHeader.dart';
 import '../internal/ALDownloaderMessage.dart';
 import '../internal/ALDownloaderPrint.dart';
+import 'ALDownloaderIMP.dart';
 
 abstract class ALDownloaderBatcherIMP {
   static ALDownloaderHandlerInterfaceId? download(List<String> urls,
@@ -116,32 +117,40 @@ abstract class ALDownloaderBatcherIMP {
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
-  static void getStatusForUrls(
-      List<String> urls, ALDownloaderStatusHandler handler) {
+  static Future<ALDownloaderStatus> getStatusForUrls(List<String> urls) async {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
     message.action = ALDownloaderConstant.kGetStatusForUrls;
     message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
 
     final id = ALDownloaderHeader.uuid.v1();
-    _idDynamicKVs[id] = handler;
+
+    final aCompleter = Completer<ALDownloaderStatus>();
+    _idDynamicKVs[id] =
+        (ALDownloaderStatus status) => aCompleter.complete(status);
+
     message.content[ALDownloaderConstant.kStatusHandlerId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return aCompleter.future;
   }
 
-  static void getProgressForUrls(
-      List<String> urls, ALDownloaderProgressHandler handler) {
+  static Future<double> getProgressForUrls(List<String> urls) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
     message.action = ALDownloaderConstant.kGetProgressForUrls;
     message.content = <String, dynamic>{ALDownloaderConstant.kUrls: urls};
 
     final id = ALDownloaderHeader.uuid.v1();
-    _idDynamicKVs[id] = handler;
+
+    final aCompleter = Completer<double>();
+    _idDynamicKVs[id] = (double progress) => aCompleter.complete(progress);
     message.content[ALDownloaderConstant.kProgressHandlerId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return aCompleter.future;
   }
 
   /// Do work on root isolate
@@ -271,7 +280,11 @@ abstract class ALDownloaderBatcherIMP {
     final aNonDuplicatedVOs = _getNonDuplicatedVOsFromVOs(vos);
 
     for (final element in aNonDuplicatedVOs)
-      ALDownloaderIMP.cDownload(element.url, headers: element.headers);
+      ALDownloaderIMP.cDownload(element.url,
+          headers: element.headers,
+          directoryPath: element.directoryPath,
+          fileName: element.fileName,
+          redownloadIfNeeded: element.redownloadIfNeeded);
   }
 
   static void _addDownloaderHandlerInterface(
@@ -557,15 +570,16 @@ abstract class ALDownloaderBatcherIMP {
 ///
 /// It may bind more elements in the future.
 class _ALDownloaderBatcherBinder {
-  /// Extract urls length as a set by [ALDownloaderStatus]
+  /// Extract urls length by [ALDownloaderStatus]
   List<int> extract() {
     int downloadingUrlsLength = 0;
     int succeededUrlsLength = 0;
     int failedUrlsLength = 0;
     int pausedUrlsLength = 0;
 
-    for (final element in urlStatusKVs.entries) {
-      switch (element.value) {
+    final values = urlStatusKVs.values;
+    for (final element in values) {
+      switch (element) {
         case ALDownloaderStatus.downloading:
           downloadingUrlsLength++;
           break;
