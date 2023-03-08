@@ -17,7 +17,7 @@ abstract class ALDownloaderIsolate {
     final aReceivePort = ReceivePort();
     final aSendPort = aReceivePort.sendPort;
 
-    aReceivePort.listen((message) async {
+    aReceivePort.listen((message) {
       // dispatch message on ALDownloader isolate
       if (message is ALDownloaderMessage) {
         final scope = message.scope;
