@@ -192,4 +192,10 @@ debugPrint(
 - [main.dart](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/lib/main.dart)
 - [AndroidManifest.xml](https://github.com/jackleemeta/al_downloader_flutter/blob/master/example/android/app/src/main/AndroidManifest.xml)
 
+## 贡献
+
+欢迎贡献！
+
+如果你有任何问题、建议或想法，欢迎随时提出issue或PR！
+
 > Maintainer: jackleemeta (jackleemeta@outlook.com)
