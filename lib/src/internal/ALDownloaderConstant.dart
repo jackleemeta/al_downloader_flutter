@@ -51,8 +51,7 @@ abstract class ALDownloaderConstant {
   static final kProgressHandlerId = 'progressHandlerId';
   static final kCallProgressHandler = 'callProgressHandler';
   static final kALDownloaderFileManagerIMP = 'ALDownloaderFileManagerIMP';
-  static final kGetPhysicalFilePathModelForUrl =
-      'getPhysicalFilePathModelForUrl';
+  static final kGetPhysicalFileForUrl = 'getPhysicalFileForUrl';
   static final kGetPhysicalFilePathForUrl = 'getPhysicalFilePathForUrl';
   static final kGetVirtualFilePathForUrl = 'getVirtualFilePathForUrl';
   static final kData = 'data';

@@ -7,4 +7,4 @@ export 'src/ALDownloaderHandlerInterface.dart';
 export 'src/ALDownloaderStatus.dart';
 export 'src/ALDownloaderTypeDefine.dart';
 export 'src/chore/ALDownloaderBatcherInputVO.dart';
-export 'src/chore/ALDownloaderPathModel.dart';
+export 'src/chore/ALDownloaderFile.dart';

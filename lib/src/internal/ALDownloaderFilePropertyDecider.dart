@@ -8,7 +8,7 @@ import 'ALDownloaderPrint.dart';
 ///
 /// Decide component directory path by type for file.
 abstract class ALDownloaderFilePropertyDecider {
-  /// Get file type model from url
+  /// Get file type model for url
   ///
   /// **parameters**
   ///

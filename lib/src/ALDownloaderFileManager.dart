@@ -1,4 +1,4 @@
-import 'chore/ALDownloaderPathModel.dart';
+import 'chore/ALDownloaderFile.dart';
 import 'implementation/ALDownloaderFileManagerIMP.dart';
 
 /// A manager that manages file by url
@@ -11,10 +11,9 @@ abstract class ALDownloaderFileManager {
   ///
   /// **return**
   ///
-  /// Whether it is null depends on whether [ALDownloaderPathModel.directoryPath] is null.
-  static Future<ALDownloaderPathModel?> getPhysicalFilePathModelForUrl(
-          String url) =>
-      ALDownloaderFileManagerIMP.getPhysicalFilePathModelForUrl(url);
+  /// [ALDownloaderFile]
+  static Future<ALDownloaderFile?> getPhysicalFileForUrl(String url) =>
+      ALDownloaderFileManagerIMP.getPhysicalFileForUrl(url);
 
   /// Get physical directory path for [url]
   ///

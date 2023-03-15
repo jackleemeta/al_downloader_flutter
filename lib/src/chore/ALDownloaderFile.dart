@@ -1,6 +1,6 @@
-/// ALDownloaderPathModel
-class ALDownloaderPathModel {
-  ALDownloaderPathModel(this.directoryPath, this.fileName);
+/// ALDownloaderFile
+class ALDownloaderFile {
+  ALDownloaderFile(this.directoryPath, this.fileName);
 
   String directoryPath; // file:/a/b/
 

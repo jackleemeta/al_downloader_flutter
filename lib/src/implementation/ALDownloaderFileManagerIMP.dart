@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import '../chore/ALDownloaderPathModel.dart';
+import '../chore/ALDownloaderFile.dart';
 import '../internal/ALDownloaderConstant.dart';
 import '../internal/ALDownloaderDirectoryManager.dart';
 import '../internal/ALDownloaderHeader.dart';
@@ -10,17 +10,15 @@ import '../internal/ALDownloaderTask.dart';
 
 /// ALDownloaderFileManagerIMP
 abstract class ALDownloaderFileManagerIMP {
-  static Future<ALDownloaderPathModel?> getPhysicalFilePathModelForUrl(
-      String url) async {
+  static Future<ALDownloaderFile?> getPhysicalFileForUrl(String url) async {
     final id = ALDownloaderHeader.uuid.v1();
 
-    final aCompleter = Completer<ALDownloaderPathModel?>();
-    _idDynamicKVs[id] =
-        (ALDownloaderPathModel? model) => aCompleter.complete(model);
+    final aCompleter = Completer<ALDownloaderFile?>();
+    _idDynamicKVs[id] = (ALDownloaderFile? file) => aCompleter.complete(file);
 
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderFileManagerIMP;
-    message.action = ALDownloaderConstant.kGetPhysicalFilePathModelForUrl;
+    message.action = ALDownloaderConstant.kGetPhysicalFileForUrl;
     message.content = {
       ALDownloaderConstant.kHandlerId: id,
       ALDownloaderConstant.kUrl: url
@@ -70,14 +68,14 @@ abstract class ALDownloaderFileManagerIMP {
     return aCompleter.future;
   }
 
-  static Future<ALDownloaderPathModel> cLazyGetPathModel(
+  static Future<ALDownloaderFile> cLazyGetFile(
       String directoryPath, String fileName) async {
     if (Platform.isIOS) {
       final localDocumentDirectory =
           await ALDownloaderDirectoryManager.localDocumentDirectory;
       if (!directoryPath.startsWith(localDocumentDirectory)) {
         final errorMsg =
-            'ALDownloaderFileManager | cLazyGetPathModel | error: At present, on iOS, only `Documents` directory is available, because `FlutterDownloader` does not support any other directory.';
+            'ALDownloaderFileManager | cLazyGetFile | error: At present, on iOS, only `Documents` directory is available, because `FlutterDownloader` does not support any other directory.';
         aldDebugPrint(errorMsg);
         throw errorMsg;
       }
@@ -86,12 +84,12 @@ abstract class ALDownloaderFileManagerIMP {
     await ALDownloaderDirectoryManager.tryToCreateCustomDirectory(directoryPath,
         recursive: true);
 
-    final model = ALDownloaderPathModel(directoryPath, fileName);
+    final file = ALDownloaderFile(directoryPath, fileName);
 
     aldDebugPrint(
-        'ALDownloaderFileManager | cLazyGetPathModel | file path = ${model.filePath}');
+        'ALDownloaderFileManager | cLazyGetFile | file path = ${file.filePath}');
 
-    return model;
+    return file;
   }
 
   static Future<bool> cIsInRootPathForPath(String path, String rootPath) async {
@@ -147,11 +145,11 @@ abstract class ALDownloaderFileManagerIMP {
     final action = message.action;
     final content = message.content;
 
-    if (action == ALDownloaderConstant.kGetPhysicalFilePathModelForUrl) {
+    if (action == ALDownloaderConstant.kGetPhysicalFileForUrl) {
       final id = content[ALDownloaderConstant.kHandlerId];
       final url = content[ALDownloaderConstant.kUrl];
 
-      _getPhysicalFilePathModelForUrl(id, url);
+      _getPhysicalFileForUrl(id, url);
     } else if (action == ALDownloaderConstant.kGetPhysicalFilePathForUrl) {
       final id = content[ALDownloaderConstant.kHandlerId];
       final url = content[ALDownloaderConstant.kUrl];
@@ -165,11 +163,10 @@ abstract class ALDownloaderFileManagerIMP {
     }
   }
 
-  static Future<void> _getPhysicalFilePathModelForUrl(
-      String id, String url) async {
+  static Future<void> _getPhysicalFileForUrl(String id, String url) async {
     final task = _getTaskFromUrl(url);
 
-    ALDownloaderPathModel? model;
+    ALDownloaderFile? file;
     if (task != null) {
       final directoryPath = task.savedDir;
       final fileName = task.fileName;
@@ -178,11 +175,11 @@ abstract class ALDownloaderFileManagerIMP {
           final filePath = directoryPath + fileName;
           final aFile = File(filePath);
           if (aFile.existsSync()) {
-            model = ALDownloaderPathModel(directoryPath, fileName);
+            file = ALDownloaderFile(directoryPath, fileName);
           } else {
             final aDirectory = Directory(directoryPath);
             if (aDirectory.existsSync())
-              model = ALDownloaderPathModel(directoryPath, '');
+              file = ALDownloaderFile(directoryPath, '');
           }
         } catch (error) {
           aldDebugPrint(
@@ -191,7 +188,7 @@ abstract class ALDownloaderFileManagerIMP {
       }
     }
 
-    ALDownloaderHeader.processFileManagerHandlerOnComingRootIsolate(id, model);
+    ALDownloaderHeader.processFileManagerHandlerOnComingRootIsolate(id, file);
   }
 
   static void _getPhysicalFilePathForUrl(String id, String url) {

@@ -800,11 +800,11 @@ abstract class ALDownloaderIMP {
       fFileName = cFileName;
       fHeaders = cHeaders;
     } else {
-      final model = await ALDownloaderFileManagerIMP.cLazyGetPathModel(
+      final file = await ALDownloaderFileManagerIMP.cLazyGetFile(
           willDirectoryPath, willFileName);
 
-      fSavedDir = model.directoryPath;
-      fFileName = model.fileName;
+      fSavedDir = file.directoryPath;
+      fFileName = file.fileName;
       fHeaders = willHeaders;
     }
 
