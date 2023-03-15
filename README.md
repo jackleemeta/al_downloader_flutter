@@ -23,7 +23,7 @@ If you need Chinese Document, click [here](README_CN.md).
 add the following line to your pubspec.yaml
 ```
 dependencies:
-  al_downloader: ^1.7.2
+  al_downloader: ^1.7.3
 ```
 
 run the following line with your command line
@@ -53,6 +53,8 @@ ALDownloader.configurePrint(enabled: true, frequentEnabled: false);
 #### Download
 ```
 ALDownloader.download(url,
+    directoryPath: directoryPath,
+    fileName: fileName,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(

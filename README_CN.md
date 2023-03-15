@@ -51,6 +51,8 @@ ALDownloader.configurePrint(enabled: true, frequentEnabled: false);
 #### 下载
 ```
 ALDownloader.download(url,
+    directoryPath: directoryPath,
+    fileName: fileName,
     downloaderHandlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
