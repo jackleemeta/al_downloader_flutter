@@ -22,7 +22,7 @@ abstract class ALDownloaderIsolateLauncher {
 
     Isolate.spawn(ALDownloaderIsolate.doWorkOnALIsolate, message);
 
-    aReveivePort.listen((message) async {
+    aReveivePort.listen((message) {
       if (message is ALDownloaderMessage) {
         final scope = message.scope;
         final action = message.action;

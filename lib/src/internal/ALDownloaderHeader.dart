@@ -23,7 +23,7 @@ abstract class ALDownloaderHeader {
 
   /// Simple, fast generation of RFC4122 UUIDs
   ///
-  /// AlDownloader creates [uuid] by [Uuid.v1].
+  /// AlDownloader creates uuid by [Uuid.v1].
   static final uuid = Uuid();
 
   /// Custom download tasks

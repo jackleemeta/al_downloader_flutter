@@ -16,7 +16,7 @@ import '../internal/ALDownloaderMapExtension.dart';
 import '../internal/ALDownloaderMessage.dart';
 import '../internal/ALDownloaderPrint.dart';
 import '../internal/ALDownloaderPrintConfig.dart';
-import '../internal/ALDownlaoderStringExtension.dart';
+import '../internal/ALDownloaderStringExtension.dart';
 import '../internal/ALDownloaderTask.dart';
 import '../internal/ALDownloaderTaskWaitingPhase.dart';
 import 'ALDownloaderFileManagerIMP.dart';
