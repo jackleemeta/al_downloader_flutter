@@ -1030,10 +1030,8 @@ abstract class ALDownloaderIMP {
   /// The callback binded by [FlutterDownloader]
   @pragma('vm:entry-point')
   static void _downloadCallback(
-      String taskId, DownloadTaskStatus originalStatus, int progress) {
+      String taskId, int originalStatusValue, int progress) {
     final send = IsolateNameServer.lookupPortByName(_kPortForFToAL);
-    final originalStatusValue = originalStatus.value;
-
     send?.send([taskId, originalStatusValue, progress]);
   }
 
