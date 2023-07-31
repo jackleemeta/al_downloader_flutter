@@ -1,3 +1,7 @@
+## 1.7.5
+
+- update dependency
+
 ## 1.7.4
 
 - update dependency
