@@ -1014,7 +1014,7 @@ abstract class ALDownloaderIMP {
         final taskId = data[0];
 
         final originalStatusValue = data[1];
-        final originalStatus = DownloadTaskStatus(originalStatusValue);
+        final originalStatus = DownloadTaskStatus.fromInt(originalStatusValue);
 
         final progress = data[2];
 
