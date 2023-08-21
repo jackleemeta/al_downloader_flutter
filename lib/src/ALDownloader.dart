@@ -21,10 +21,8 @@ abstract class ALDownloader {
   /// **discussion**
   ///
   /// Printing before calling this function applys the default. Default is false.
-  static void configurePrint(
-          {bool enabled = false, bool frequentEnabled = false}) =>
-      ALDownloaderIMP.configurePrint(
-          enabled: enabled, frequentEnabled: frequentEnabled);
+  static void configurePrint(bool enabled, {bool frequentEnabled = false}) =>
+      ALDownloaderIMP.configurePrint(enabled, frequentEnabled: frequentEnabled);
 
   /// Download
   ///

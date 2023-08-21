@@ -47,7 +47,7 @@ ALDownloader.initialize();
 
 #### Configure print
 ```
-ALDownloader.configurePrint(enabled: true, frequentEnabled: false);
+ALDownloader.configurePrint(true, frequentEnabled: false);
 ```
 
 #### Download

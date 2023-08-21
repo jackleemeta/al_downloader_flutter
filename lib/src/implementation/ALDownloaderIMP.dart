@@ -29,8 +29,7 @@ abstract class ALDownloaderIMP {
     }
   }
 
-  static void configurePrint(
-      {bool enabled = false, bool frequentEnabled = false}) {
+  static void configurePrint(bool enabled, {bool frequentEnabled = false}) {
     ALDownloaderPrintConfig.enabled = enabled;
     ALDownloaderPrintConfig.frequentEnabled = frequentEnabled;
 

@@ -174,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ALDownloader.initialize();
 
     /// Configure print
-    ALDownloader.configurePrint(enabled: false, frequentEnabled: false);
+    ALDownloader.configurePrint(false, frequentEnabled: false);
 
     // It is for download. It is a forever interface.
     addForeverDownloaderHandlerInterface();

@@ -45,7 +45,7 @@ ALDownloader.initialize();
 
 #### 配置打印
 ```
-ALDownloader.configurePrint(enabled: true, frequentEnabled: false);
+ALDownloader.configurePrint(true, frequentEnabled: false);
 ```
 
 #### 下载
