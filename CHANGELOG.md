@@ -1,3 +1,7 @@
+## 1.7.6
+
+- modify print parameters
+
 ## 1.7.5
 
 - update dependency
