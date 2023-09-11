@@ -107,7 +107,7 @@ abstract class ALDownloaderHeader {
     portALToRoot?.send(message);
   }
 
-  /// A convenient function that supports to process the progress handler on coming root isolate
+  /// A convenient function that supports to process the file manager handler on coming root isolate
   static void processFileManagerHandlerOnComingRootIsolate(
       String handlerId, dynamic data) {
     final message = ALDownloaderMessage();
