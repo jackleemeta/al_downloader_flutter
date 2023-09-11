@@ -1004,6 +1004,8 @@ abstract class ALDownloaderIMP {
 
   /// Register service which is used for that communication between [FlutterDownloader] isolate and ALDownloader isolate by [IsolateNameServer]
   static void _registerServiceForCommunicationBetweenFAndAL() {
+    IsolateNameServer.removePortNameMapping(_kPortForFToAL);
+
     final receivePort = ReceivePort();
 
     IsolateNameServer.registerPortWithName(
