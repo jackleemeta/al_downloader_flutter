@@ -6,7 +6,7 @@ import '../internal/ALDownloaderDirectoryManager.dart';
 import '../internal/ALDownloaderHeader.dart';
 import '../internal/ALDownloaderMessage.dart';
 import '../internal/ALDownloaderPrint.dart';
-import '../internal/ALDownloaderTask.dart';
+import '../internal/ALDownloaderInnerTask.dart';
 
 /// ALDownloaderFileManagerIMP
 abstract class ALDownloaderFileManagerIMP {
@@ -236,8 +236,8 @@ abstract class ALDownloaderFileManagerIMP {
     ALDownloaderHeader.processFileManagerHandlerOnComingRootIsolate(id, aBool);
   }
 
-  static ALDownloaderTask? _getTaskFromUrl(String url) {
-    ALDownloaderTask? task;
+  static ALDownloaderInnerTask? _getTaskFromUrl(String url) {
+    ALDownloaderInnerTask? task;
     try {
       task =
           ALDownloaderHeader.tasks.firstWhere((element) => url == element.url);

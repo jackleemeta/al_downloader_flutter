@@ -5,7 +5,7 @@ import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
 import 'ALDownloaderConstant.dart';
 import 'ALDownloaderMessage.dart';
-import 'ALDownloaderTask.dart';
+import 'ALDownloaderInnerTask.dart';
 
 /// ALDownloaderHeader
 abstract class ALDownloaderHeader {
@@ -27,7 +27,7 @@ abstract class ALDownloaderHeader {
   static final uuid = Uuid();
 
   /// Custom download tasks
-  static final tasks = <ALDownloaderTask>[];
+  static final tasks = <ALDownloaderInnerTask>[];
 
   /// A reliable way that sends message from root isolate to ALDownloader isolate
   ///
