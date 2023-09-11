@@ -1,3 +1,7 @@
+## 1.7.7
+
+- fix bug
+
 ## 1.7.6
 
 - modify print parameters
