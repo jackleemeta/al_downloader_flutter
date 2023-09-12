@@ -1,3 +1,8 @@
+## 1.7.8
+
+- expose task
+- update dependency
+
 ## 1.7.7
 
 - fix bug
