@@ -1,7 +1,8 @@
+import 'implementation/ALDownloaderIMP.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderStatus.dart';
+import 'ALDownloaderTask.dart';
 import 'ALDownloaderTypeDefine.dart';
-import 'implementation/ALDownloaderIMP.dart';
 
 /// ALDownloader
 abstract class ALDownloader {
@@ -154,6 +155,25 @@ abstract class ALDownloader {
   /// [double] progress
   static Future<double> getProgressForUrl(String url) =>
       ALDownloaderIMP.getProgressForUrl(url);
+
+  /// Get task
+  ///
+  /// **parameters**
+  ///
+  /// [url] url
+  ///
+  /// **return**
+  ///
+  /// [ALDownloaderTask] task
+  static Future<ALDownloaderTask?> getTaskForUrl(String url) =>
+      ALDownloaderIMP.getTaskForUrl(url);
+
+  /// Get tasks
+  ///
+  /// **return**
+  ///
+  /// [List<ALDownloaderTask>] tasks
+  static Future<List<ALDownloaderTask>> get tasks => ALDownloaderIMP.tasks;
 
   /// Pause download
   ///

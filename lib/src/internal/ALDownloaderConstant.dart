@@ -44,11 +44,9 @@ abstract class ALDownloaderConstant {
   static final kGlobalScope = 'globalScope';
   static final kGetStatusForUrl = 'getStatusForUrl';
   static final kGetStatusForUrls = 'getStatusForUrls';
-  static final kStatusHandlerId = 'statusHandlerId';
   static final kCallStatusHandler = 'callStatusHandler';
   static final kGetProgressForUrl = 'getProgressForUrl';
   static final kGetProgressForUrls = 'getProgressForUrls';
-  static final kProgressHandlerId = 'progressHandlerId';
   static final kCallProgressHandler = 'callProgressHandler';
   static final kALDownloaderFileManagerIMP = 'ALDownloaderFileManagerIMP';
   static final kGetPhysicalFileForUrl = 'getPhysicalFileForUrl';
@@ -63,4 +61,10 @@ abstract class ALDownloaderConstant {
   static final kDirectoryPath = 'directoryPath';
   static final kFileName = 'fileName';
   static final kRedownloadIfNeeded = 'redownloadIfNeeded';
+  static final kGetTask = 'getTask';
+  static final kGetTasks = 'getTasks';
+  static final kTasks = 'tasks';
+  static final kCallTaskHandler = 'callTaskHandler';
+  static final kCallTasksHandler = 'callTasksHandler';
+  static final kByQueueOrder = 'byQueueOrder';
 }

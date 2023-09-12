@@ -1,6 +1,7 @@
 import 'dart:async';
 import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
+import '../ALDownloaderTask.dart';
 import '../ALDownloaderTypeDefine.dart';
 import '../chore/ALDownloaderBatcherInputVO.dart';
 import '../internal/ALDownloaderConstant.dart';
@@ -129,7 +130,7 @@ abstract class ALDownloaderBatcherIMP {
     _idDynamicKVs[id] =
         (ALDownloaderStatus status) => aCompleter.complete(status);
 
-    message.content[ALDownloaderConstant.kStatusHandlerId] = id;
+    message.content[ALDownloaderConstant.kHandlerId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
 
@@ -146,7 +147,29 @@ abstract class ALDownloaderBatcherIMP {
 
     final aCompleter = Completer<double>();
     _idDynamicKVs[id] = (double progress) => aCompleter.complete(progress);
-    message.content[ALDownloaderConstant.kProgressHandlerId] = id;
+    message.content[ALDownloaderConstant.kHandlerId] = id;
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return aCompleter.future;
+  }
+
+  static Future<List<ALDownloaderTask>> getTasksForUrls(List<String> urls,
+      {bool byQueueOrder = false}) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderBatcherIMP;
+    message.action = ALDownloaderConstant.kGetTasks;
+    message.content = <String, dynamic>{
+      ALDownloaderConstant.kUrls: urls,
+      ALDownloaderConstant.kByQueueOrder: byQueueOrder
+    };
+
+    final id = ALDownloaderHeader.uuid.v1();
+
+    final aCompleter = Completer<List<ALDownloaderTask>>();
+    _idDynamicKVs[id] =
+        (List<ALDownloaderTask> tasks) => aCompleter.complete(tasks);
+    message.content[ALDownloaderConstant.kHandlerId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
 
@@ -183,7 +206,7 @@ abstract class ALDownloaderBatcherIMP {
 
       if (isNeedRemoveInterface) _idDynamicKVs.remove(id);
     } else if (action == ALDownloaderConstant.kCallStatusHandler) {
-      final id = content[ALDownloaderConstant.kStatusHandlerId];
+      final id = content[ALDownloaderConstant.kHandlerId];
       final status = content[ALDownloaderConstant.kStatus];
       final handler = _idDynamicKVs[id];
 
@@ -191,11 +214,19 @@ abstract class ALDownloaderBatcherIMP {
 
       _idDynamicKVs.remove(id);
     } else if (action == ALDownloaderConstant.kCallProgressHandler) {
-      final id = content[ALDownloaderConstant.kProgressHandlerId];
+      final id = content[ALDownloaderConstant.kHandlerId];
       final progress = content[ALDownloaderConstant.kProgress];
       final handler = _idDynamicKVs[id];
 
       if (handler != null) handler(progress);
+
+      _idDynamicKVs.remove(id);
+    } else if (action == ALDownloaderConstant.kCallTasksHandler) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final tasks = content[ALDownloaderConstant.kTasks];
+      final handler = _idDynamicKVs[id];
+
+      if (handler != null) handler(tasks);
 
       _idDynamicKVs.remove(id);
     }
@@ -250,13 +281,18 @@ abstract class ALDownloaderBatcherIMP {
       final urls = content[ALDownloaderConstant.kUrls];
       _remove(urls);
     } else if (action == ALDownloaderConstant.kGetStatusForUrls) {
-      final id = content[ALDownloaderConstant.kStatusHandlerId];
+      final id = content[ALDownloaderConstant.kHandlerId];
       final urls = content[ALDownloaderConstant.kUrls];
       _getStatusForUrls(id, urls);
     } else if (action == ALDownloaderConstant.kGetProgressForUrls) {
-      final id = content[ALDownloaderConstant.kProgressHandlerId];
+      final id = content[ALDownloaderConstant.kHandlerId];
       final urls = content[ALDownloaderConstant.kUrls];
       _getProgressForUrls(id, urls);
+    } else if (action == ALDownloaderConstant.kGetTasks) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final urls = content[ALDownloaderConstant.kUrls];
+      final byQueueOrder = content[ALDownloaderConstant.kByQueueOrder];
+      _getTasksForUrls(id, urls, byQueueOrder: byQueueOrder);
     }
   }
 
@@ -267,8 +303,7 @@ abstract class ALDownloaderBatcherIMP {
 
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    for (final element in aNonDuplicatedUrls)
-      ALDownloaderIMP.cDownload(element);
+    for (final url in aNonDuplicatedUrls) ALDownloaderIMP.cDownload(url);
   }
 
   static void _downloadUrlsWithVOs(List<ALDownloaderBatcherInputVO> vos,
@@ -470,6 +505,13 @@ abstract class ALDownloaderBatcherIMP {
         progress);
   }
 
+  static void _getTasksForUrls(String tasksHandlerId, List<String> urls,
+      {bool byQueueOrder = false}) {
+    final tasks = _fGetTasksForUrls(urls, byQueueOrder: byQueueOrder);
+    ALDownloaderHeader.processTasksHandlerOnComingRootIsolate(
+        ALDownloaderConstant.kALDownloaderBatcherIMP, tasksHandlerId, tasks);
+  }
+
   static ALDownloaderStatus _fGetStatusForUrls(List<String> urls) {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
@@ -518,6 +560,31 @@ abstract class ALDownloaderBatcherIMP {
     }
 
     return aDouble;
+  }
+
+  static List<ALDownloaderTask> _fGetTasksForUrls(List<String> urls,
+      {bool byQueueOrder = false}) {
+    final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
+
+    final tasks = ALDownloaderIMP.cGetTasks();
+
+    final r = <ALDownloaderTask>[];
+
+    if (byQueueOrder) {
+      for (final task in tasks) {
+        for (final url in aNonDuplicatedUrls) {
+          if (url == task.url) r.add(task);
+        }
+      }
+    } else {
+      for (final url in aNonDuplicatedUrls) {
+        for (final task in tasks) {
+          if (url == task.url) r.add(task);
+        }
+      }
+    }
+
+    return r;
   }
 
   /// Remove duplicated vos

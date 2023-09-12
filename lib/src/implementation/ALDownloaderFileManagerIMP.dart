@@ -4,9 +4,9 @@ import '../chore/ALDownloaderFile.dart';
 import '../internal/ALDownloaderConstant.dart';
 import '../internal/ALDownloaderDirectoryManager.dart';
 import '../internal/ALDownloaderHeader.dart';
+import '../internal/ALDownloaderInnerTask.dart';
 import '../internal/ALDownloaderMessage.dart';
 import '../internal/ALDownloaderPrint.dart';
-import '../internal/ALDownloaderInnerTask.dart';
 
 /// ALDownloaderFileManagerIMP
 abstract class ALDownloaderFileManagerIMP {

@@ -6,7 +6,9 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:queue/queue.dart';
 import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
+import '../ALDownloaderTask.dart';
 import '../ALDownloaderTypeDefine.dart';
+import '../chore/ALDownloaderFile.dart';
 import '../internal/ALDownloaderConstant.dart';
 import '../internal/ALDownloaderFileManagerDefault.dart';
 import '../internal/ALDownloaderHeader.dart';
@@ -198,7 +200,7 @@ abstract class ALDownloaderIMP {
     _idDynamicKVs[id] =
         (ALDownloaderStatus status) => aCompleter.complete(status);
 
-    message.content[ALDownloaderConstant.kStatusHandlerId] = id;
+    message.content[ALDownloaderConstant.kHandlerId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
 
@@ -216,7 +218,44 @@ abstract class ALDownloaderIMP {
     final aCompleter = Completer<double>();
     _idDynamicKVs[id] = (double progress) => aCompleter.complete(progress);
 
-    message.content[ALDownloaderConstant.kProgressHandlerId] = id;
+    message.content[ALDownloaderConstant.kHandlerId] = id;
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return aCompleter.future;
+  }
+
+  static Future<ALDownloaderTask?> getTaskForUrl(String url) async {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderIMP;
+    message.action = ALDownloaderConstant.kGetTask;
+    message.content = <String, dynamic>{ALDownloaderConstant.kUrl: url};
+
+    final id = ALDownloaderHeader.uuid.v1();
+
+    final aCompleter = Completer<ALDownloaderTask?>();
+    _idDynamicKVs[id] = (ALDownloaderTask? task) => aCompleter.complete(task);
+
+    message.content[ALDownloaderConstant.kHandlerId] = id;
+
+    ALDownloaderHeader.sendMessageFromRootToALReliably(message);
+
+    return aCompleter.future;
+  }
+
+  static Future<List<ALDownloaderTask>> get tasks async {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderIMP;
+    message.action = ALDownloaderConstant.kGetTasks;
+    message.content = <String, dynamic>{};
+
+    final id = ALDownloaderHeader.uuid.v1();
+
+    final aCompleter = Completer<List<ALDownloaderTask>>();
+    _idDynamicKVs[id] =
+        (List<ALDownloaderTask> tasks) => aCompleter.complete(tasks);
+
+    message.content[ALDownloaderConstant.kHandlerId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
 
@@ -288,7 +327,11 @@ abstract class ALDownloaderIMP {
   static ALDownloaderStatus cGetStatusForUrl(String url) =>
       _getStatusForUrl(url);
 
-  static void cGetProgressForUrl(String url) => _getProgressForUrl(url);
+  static double cGetProgressForUrl(String url) => _getProgressForUrl(url);
+
+  static ALDownloaderTask? cGetTaskForUrl(String url) => _getTaskForUrl(url);
+
+  static List<ALDownloaderTask> cGetTasks() => _getTasks();
 
   static void _launchALIsolate() =>
       ALDownloaderIsolateLauncher.launchALIsolate();
@@ -437,6 +480,16 @@ abstract class ALDownloaderIMP {
   static void _dGetProgressForUrl(String progressHandlerId, String url) {
     final progress = _getProgressForUrl(url);
     _processProgressHandlerOnComingRootIsolate(progressHandlerId, progress);
+  }
+
+  static void _dGetTaskForUrl(String taskHandlerId, String url) {
+    final task = _getTaskForUrl(url);
+    _processTaskHandlerOnComingRootIsolate(taskHandlerId, task);
+  }
+
+  static void _dGetTasks(String tasksHandlerId) {
+    final tasks = _getTasks();
+    _processTasksHandlerOnComingRootIsolate(tasksHandlerId, tasks);
   }
 
   static Future<void> _initialize() async {
@@ -738,9 +791,15 @@ abstract class ALDownloaderIMP {
   }
 
   static ALDownloaderStatus _getStatusForUrl(String url) {
-    ALDownloaderStatus status;
-
     final task = _getTaskFromUrl(url);
+
+    final status = _getStatusForTask(task);
+
+    return status;
+  }
+
+  static ALDownloaderStatus _getStatusForTask(ALDownloaderInnerTask? task) {
+    ALDownloaderStatus status;
 
     if (task == null) {
       status = ALDownloaderStatus.unstarted;
@@ -778,6 +837,33 @@ abstract class ALDownloaderIMP {
     double double_progress = task == null ? 0 : task.double_progress;
 
     return double_progress;
+  }
+
+  static ALDownloaderTask? _getTaskForUrl(String url) {
+    final task = _getTaskFromUrl(url);
+    if (task == null) return null;
+
+    final r = _generateExportTaskForTask(task);
+
+    return r;
+  }
+
+  static List<ALDownloaderTask> _getTasks() {
+    final r = _tasks.map((task) {
+      final r = _generateExportTaskForTask(task);
+
+      return r;
+    }).toList();
+
+    return r;
+  }
+
+  static ALDownloaderTask _generateExportTaskForTask(
+      ALDownloaderInnerTask task) {
+    final status = _getStatusForTask(task);
+    final file = ALDownloaderFile(task.savedDir ?? '', task.fileName ?? '');
+    final r = ALDownloaderTask(task.url, task.double_progress, status, file);
+    return r;
   }
 
   static Future<List<dynamic>> _generateDownloadConfig(
@@ -896,7 +982,7 @@ abstract class ALDownloaderIMP {
 
       if (isNeedRemoveInterface) _idDynamicKVs.remove(id);
     } else if (action == ALDownloaderConstant.kCallStatusHandler) {
-      final id = content[ALDownloaderConstant.kStatusHandlerId];
+      final id = content[ALDownloaderConstant.kHandlerId];
       final status = content[ALDownloaderConstant.kStatus];
       final handler = _idDynamicKVs[id];
 
@@ -904,11 +990,27 @@ abstract class ALDownloaderIMP {
 
       _idDynamicKVs.remove(id);
     } else if (action == ALDownloaderConstant.kCallProgressHandler) {
-      final id = content[ALDownloaderConstant.kProgressHandlerId];
+      final id = content[ALDownloaderConstant.kHandlerId];
       final progress = content[ALDownloaderConstant.kProgress];
       final handler = _idDynamicKVs[id];
 
       if (handler != null) handler(progress);
+
+      _idDynamicKVs.remove(id);
+    } else if (action == ALDownloaderConstant.kCallTaskHandler) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final task = content[ALDownloaderConstant.kTask];
+      final handler = _idDynamicKVs[id];
+
+      if (handler != null) handler(task);
+
+      _idDynamicKVs.remove(id);
+    } else if (action == ALDownloaderConstant.kCallTasksHandler) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final tasks = content[ALDownloaderConstant.kTasks];
+      final handler = _idDynamicKVs[id];
+
+      if (handler != null) handler(tasks);
 
       _idDynamicKVs.remove(id);
     }
@@ -992,13 +1094,20 @@ abstract class ALDownloaderIMP {
     } else if (action == ALDownloaderConstant.kRemoveAll) {
       _qRemoveAll();
     } else if (action == ALDownloaderConstant.kGetStatusForUrl) {
-      final id = content[ALDownloaderConstant.kStatusHandlerId];
+      final id = content[ALDownloaderConstant.kHandlerId];
       final url = content[ALDownloaderConstant.kUrl];
       _dGetStatusForUrl(id, url);
     } else if (action == ALDownloaderConstant.kGetProgressForUrl) {
-      final id = content[ALDownloaderConstant.kProgressHandlerId];
+      final id = content[ALDownloaderConstant.kHandlerId];
       final url = content[ALDownloaderConstant.kUrl];
       _dGetProgressForUrl(id, url);
+    } else if (action == ALDownloaderConstant.kGetTask) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      final url = content[ALDownloaderConstant.kUrl];
+      _dGetTaskForUrl(id, url);
+    } else if (action == ALDownloaderConstant.kGetTasks) {
+      final id = content[ALDownloaderConstant.kHandlerId];
+      _dGetTasks(id);
     }
   }
 
@@ -1464,6 +1573,18 @@ abstract class ALDownloaderIMP {
       String progressHandlerId, double progress) {
     ALDownloaderHeader.processProgressHandlerOnComingRootIsolate(
         ALDownloaderConstant.kALDownloaderIMP, progressHandlerId, progress);
+  }
+
+  static void _processTaskHandlerOnComingRootIsolate(
+      String taskHandlerId, ALDownloaderTask? task) {
+    ALDownloaderHeader.processTaskHandlerOnComingRootIsolate(
+        taskHandlerId, task);
+  }
+
+  static void _processTasksHandlerOnComingRootIsolate(
+      String tasksHandlerId, List<ALDownloaderTask> tasks) {
+    ALDownloaderHeader.processTasksHandlerOnComingRootIsolate(
+        ALDownloaderConstant.kALDownloaderIMP, tasksHandlerId, tasks);
   }
 
   static void _processDownloaderHandlerInterfaceOnCurrentIsolate(
