@@ -168,7 +168,7 @@ abstract class ALDownloader {
   static Future<ALDownloaderTask?> getTaskForUrl(String url) =>
       ALDownloaderIMP.getTaskForUrl(url);
 
-  /// Get tasks
+  /// Get all tasks
   ///
   /// **return**
   ///

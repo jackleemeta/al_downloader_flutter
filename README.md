@@ -133,6 +133,16 @@ final status = await ALDownloader.getStatusForUrl(url);
 final progress = await ALDownloader.getProgressForUrl(url);
 ```
 
+#### Get task
+```
+final task = await ALDownloader.getTaskForUrl(url);
+```
+
+#### Get all tasks
+```
+final tasks = await ALDownloader.tasks;
+```
+
 ### ALDownloaderBatcher
 
 #### Batch download
@@ -168,6 +178,11 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 #### Get download status for a set of urls
 ```
 final status = await ALDownloaderBatcher.getStatusForUrls(urls);
+```
+
+#### Get tasks
+```
+final tasks = await ALDownloaderBatcher.getTasksForUrls(urls);
 ```
 
 ### ALDownloaderFileManager - A manager that manages file by url

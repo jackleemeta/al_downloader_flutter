@@ -131,6 +131,16 @@ final status = await ALDownloader.getStatusForUrl(url);
 final progress = await ALDownloader.getProgressForUrl(url);
 ```
 
+#### 获取任务
+```
+final task = await ALDownloader.getTaskForUrl(url);
+```
+
+#### 获取全部任务
+```
+final tasks = await ALDownloader.tasks;
+```
+
 ### ALDownloaderBatcher
 
 #### 批量下载
@@ -166,6 +176,11 @@ ALDownloaderBatcher.addDownloaderHandlerInterface(
 #### 获取一组url的下载状态
 ```
 final status = ALDownloaderBatcher.getStatusForUrls(urls);
+```
+
+#### 获取一组任务
+```
+final tasks = await ALDownloaderBatcher.getTasksForUrls(urls);
 ```
 
 ### ALDownloaderFileManager - 基于url的文件管理器
