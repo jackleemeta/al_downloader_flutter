@@ -2,7 +2,7 @@ import 'ALDownloaderInnerStatus.dart';
 import 'ALDownloaderTaskWaitingPhase.dart';
 
 /// A class of custom download task
-class ALDownloaderTask {
+class ALDownloaderInnerTask {
   final String url;
 
   String? savedDir;
@@ -61,5 +61,5 @@ class ALDownloaderTask {
 
   int _progress = 0;
 
-  ALDownloaderTask(this.url);
+  ALDownloaderInnerTask(this.url);
 }

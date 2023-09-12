@@ -2,9 +2,9 @@
 class ALDownloaderFile {
   ALDownloaderFile(this.directoryPath, this.fileName);
 
-  String directoryPath; // file:/a/b/
+  final String directoryPath; // file:/a/b/
 
-  String fileName;
+  final String fileName;
 
   /// Get file path
   /// e.g. file:/a/b/c/d.mp4, file:/a/b/d.mp4

@@ -1,7 +1,7 @@
-import 'ALDownloaderMessage.dart';
 import '../implementation/ALDownloaderBatcherIMP.dart';
 import '../implementation/ALDownloaderFileManagerIMP.dart';
 import '../implementation/ALDownloaderIMP.dart';
+import 'ALDownloaderMessage.dart';
 
 /// ALDownloader work center
 abstract class ALDownloaderWorkCenter {

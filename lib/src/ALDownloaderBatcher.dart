@@ -1,9 +1,10 @@
+import 'chore/ALDownloaderBatcherInputVO.dart';
+import 'implementation/ALDownloaderBatcherIMP.dart';
 import 'ALDownloader.dart';
 import 'ALDownloaderHandlerInterface.dart';
 import 'ALDownloaderStatus.dart';
+import 'ALDownloaderTask.dart';
 import 'ALDownloaderTypeDefine.dart';
-import 'chore/ALDownloaderBatcherInputVO.dart';
-import 'implementation/ALDownloaderBatcherIMP.dart';
 
 /// ALDownloaderBatcher
 ///
@@ -113,6 +114,24 @@ abstract class ALDownloaderBatcher {
   /// [double] progress
   static Future<double> getProgressForUrls(List<String> urls) =>
       ALDownloaderBatcherIMP.getProgressForUrls(urls);
+
+  /// Get tasks
+  ///
+  /// **parameters**
+  ///
+  /// [urls] urls
+  ///
+  /// [byQueueOrder]
+  ///
+  /// If [byQueueOrder] is true, return results in the order of tasks in the download queue,
+  /// otherwise, in the order of [urls]'s order.
+  ///
+  /// **return**
+  ///
+  /// [List<ALDownloaderTask>] tasks
+  static Future<List<ALDownloaderTask>> getTasksForUrls(List<String> urls,
+          {bool byQueueOrder = false}) =>
+      ALDownloaderBatcherIMP.getTasksForUrls(urls, byQueueOrder: byQueueOrder);
 
   /// Pause downloads
   ///

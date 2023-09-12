@@ -3,9 +3,10 @@ import 'dart:isolate';
 import 'package:uuid/uuid.dart';
 import '../ALDownloaderHandlerInterface.dart';
 import '../ALDownloaderStatus.dart';
+import '../ALDownloaderTask.dart';
 import 'ALDownloaderConstant.dart';
 import 'ALDownloaderMessage.dart';
-import 'ALDownloaderTask.dart';
+import 'ALDownloaderInnerTask.dart';
 
 /// ALDownloaderHeader
 abstract class ALDownloaderHeader {
@@ -27,7 +28,7 @@ abstract class ALDownloaderHeader {
   static final uuid = Uuid();
 
   /// Custom download tasks
-  static final tasks = <ALDownloaderTask>[];
+  static final tasks = <ALDownloaderInnerTask>[];
 
   /// A reliable way that sends message from root isolate to ALDownloader isolate
   ///
@@ -86,7 +87,7 @@ abstract class ALDownloaderHeader {
     message.scope = scope;
     message.action = ALDownloaderConstant.kCallStatusHandler;
     message.content = {
-      ALDownloaderConstant.kStatusHandlerId: statusHandlerId,
+      ALDownloaderConstant.kHandlerId: statusHandlerId,
       ALDownloaderConstant.kStatus: status
     };
 
@@ -100,14 +101,14 @@ abstract class ALDownloaderHeader {
     message.scope = scope;
     message.action = ALDownloaderConstant.kCallProgressHandler;
     message.content = {
-      ALDownloaderConstant.kProgressHandlerId: progressHandlerId,
+      ALDownloaderConstant.kHandlerId: progressHandlerId,
       ALDownloaderConstant.kProgress: progress
     };
 
     portALToRoot?.send(message);
   }
 
-  /// A convenient function that supports to process the progress handler on coming root isolate
+  /// A convenient function that supports to process the file manager handler on coming root isolate
   static void processFileManagerHandlerOnComingRootIsolate(
       String handlerId, dynamic data) {
     final message = ALDownloaderMessage();
@@ -116,6 +117,34 @@ abstract class ALDownloaderHeader {
     message.content = {
       ALDownloaderConstant.kHandlerId: handlerId,
       ALDownloaderConstant.kData: data
+    };
+
+    portALToRoot?.send(message);
+  }
+
+  /// A convenient function that supports to process task handler on coming root isolate
+  static void processTaskHandlerOnComingRootIsolate(
+      String handlerId, ALDownloaderTask? task) {
+    final message = ALDownloaderMessage();
+    message.scope = ALDownloaderConstant.kALDownloaderIMP;
+    message.action = ALDownloaderConstant.kCallTaskHandler;
+    message.content = {
+      ALDownloaderConstant.kHandlerId: handlerId,
+      ALDownloaderConstant.kTask: task
+    };
+
+    portALToRoot?.send(message);
+  }
+
+  // A convenient function that supports to process tasks handler on coming root isolate
+  static void processTasksHandlerOnComingRootIsolate(
+      String scope, String handlerId, List<ALDownloaderTask> tasks) {
+    final message = ALDownloaderMessage();
+    message.scope = scope;
+    message.action = ALDownloaderConstant.kCallTasksHandler;
+    message.content = {
+      ALDownloaderConstant.kHandlerId: handlerId,
+      ALDownloaderConstant.kTasks: tasks
     };
 
     portALToRoot?.send(message);
