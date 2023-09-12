@@ -70,6 +70,17 @@ abstract class ALDownloaderFileManagerIMP {
 
   static Future<ALDownloaderFile> cLazyGetFile(
       String directoryPath, String fileName) async {
+    if (Platform.isIOS) {
+      final localDocumentDirectory =
+          await ALDownloaderDirectoryManager.localDocumentDirectory;
+      if (!directoryPath.startsWith(localDocumentDirectory)) {
+        final errorMsg =
+            'ALDownloaderFileManager | cLazyGetFile | error: At present, on iOS, only `Documents` directory is available, because `FlutterDownloader` does not support any other directory.';
+        aldDebugPrint(errorMsg);
+        throw errorMsg;
+      }
+    }
+
     await ALDownloaderDirectoryManager.tryToCreateCustomDirectory(directoryPath,
         recursive: true);
 
