@@ -1,3 +1,7 @@
+## 1.7.9
+
+- optimize getter
+
 ## 1.7.8
 
 - expose task
