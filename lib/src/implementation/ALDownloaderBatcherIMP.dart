@@ -489,15 +489,17 @@ abstract class ALDownloaderBatcherIMP {
     ALDownloaderIMP.cRemoveUrls(aNonDuplicatedUrls);
   }
 
-  static void _getStatusForUrls(String statusHandlerId, List<String> urls) {
-    final status = _fGetStatusForUrls(urls);
+  static Future<void> _getStatusForUrls(
+      String statusHandlerId, List<String> urls) async {
+    final status = await _fGetStatusForUrls(urls);
 
     ALDownloaderHeader.processStatusHandlerOnComingRootIsolate(
         ALDownloaderConstant.kALDownloaderBatcherIMP, statusHandlerId, status);
   }
 
-  static void _getProgressForUrls(String progressHandlerId, List<String> urls) {
-    final progress = _fGetProgressForUrls(urls);
+  static Future<void> _getProgressForUrls(
+      String progressHandlerId, List<String> urls) async {
+    final progress = await _fGetProgressForUrls(urls);
 
     ALDownloaderHeader.processProgressHandlerOnComingRootIsolate(
         ALDownloaderConstant.kALDownloaderBatcherIMP,
@@ -505,20 +507,22 @@ abstract class ALDownloaderBatcherIMP {
         progress);
   }
 
-  static void _getTasksForUrls(String tasksHandlerId, List<String> urls,
-      {bool byQueueOrder = false}) {
-    final tasks = _fGetTasksForUrls(urls, byQueueOrder: byQueueOrder);
+  static Future<void> _getTasksForUrls(String tasksHandlerId, List<String> urls,
+      {bool byQueueOrder = false}) async {
+    final tasks = await _fGetTasksForUrls(urls, byQueueOrder: byQueueOrder);
+
     ALDownloaderHeader.processTasksHandlerOnComingRootIsolate(
         ALDownloaderConstant.kALDownloaderBatcherIMP, tasksHandlerId, tasks);
   }
 
-  static ALDownloaderStatus _fGetStatusForUrls(List<String> urls) {
+  static Future<ALDownloaderStatus> _fGetStatusForUrls(
+      List<String> urls) async {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
     final aMap = <String, ALDownloaderStatus>{};
 
     for (final url in aNonDuplicatedUrls) {
-      final aStatus = ALDownloaderIMP.cGetStatusForUrl(url);
+      final aStatus = await ALDownloaderIMP.cGetStatusForUrl(url);
       if (aStatus == ALDownloaderStatus.unstarted)
         return ALDownloaderStatus.unstarted;
 
@@ -536,11 +540,11 @@ abstract class ALDownloaderBatcherIMP {
     return ALDownloaderStatus.succeeded;
   }
 
-  static double _fGetProgressForUrls(List<String> urls) {
+  static Future<double> _fGetProgressForUrls(List<String> urls) async {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
     int succeededCount = 0;
     for (final url in aNonDuplicatedUrls) {
-      final aStatus = ALDownloaderIMP.cGetStatusForUrl(url);
+      final aStatus = await ALDownloaderIMP.cGetStatusForUrl(url);
       if (aStatus == ALDownloaderStatus.succeeded) succeededCount++;
     }
 
@@ -562,11 +566,11 @@ abstract class ALDownloaderBatcherIMP {
     return aDouble;
   }
 
-  static List<ALDownloaderTask> _fGetTasksForUrls(List<String> urls,
-      {bool byQueueOrder = false}) {
+  static Future<List<ALDownloaderTask>> _fGetTasksForUrls(List<String> urls,
+      {bool byQueueOrder = false}) async {
     final aNonDuplicatedUrls = _getNonDuplicatedUrlsFromUrls(urls);
 
-    final tasks = ALDownloaderIMP.cGetTasks();
+    final tasks = await ALDownloaderIMP.cGetTasks();
 
     final r = <ALDownloaderTask>[];
 
