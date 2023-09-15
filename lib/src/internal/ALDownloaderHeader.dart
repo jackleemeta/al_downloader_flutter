@@ -45,10 +45,10 @@ abstract class ALDownloaderHeader {
     }
   }
 
-  /// A convenient function that supports to process the downloader handler interface on coming root isolate
+  /// A convenient function that supports to process the handler interface on coming root isolate
   static void processDownloaderHandlerInterfaceOnComingRootIsolate(
       String scope,
-      String downloaderHandlerInterfaceId,
+      String handlerInterfaceId,
       bool isNeedCallProgressHandler,
       bool isNeedCallSucceededHandler,
       bool isNeedCallFailedHandler,
@@ -65,8 +65,7 @@ abstract class ALDownloaderHeader {
     message.scope = scope;
     message.action = ALDownloaderConstant.kCallInterface;
     message.content = {
-      ALDownloaderConstant.kDownloaderHandlerInterfaceId:
-          downloaderHandlerInterfaceId,
+      ALDownloaderConstant.kHandlerInterfaceId: handlerInterfaceId,
       ALDownloaderConstant.kIsNeedCallProgressHandler:
           isNeedCallProgressHandler,
       ALDownloaderConstant.kIsNeedCallSucceededHandler:
@@ -82,12 +81,12 @@ abstract class ALDownloaderHeader {
 
   /// A convenient function that supports to process the status handler on coming root isolate
   static void processStatusHandlerOnComingRootIsolate(
-      String scope, String statusHandlerId, ALDownloaderStatus status) {
+      String scope, String handlerId, ALDownloaderStatus status) {
     final message = ALDownloaderMessage();
     message.scope = scope;
     message.action = ALDownloaderConstant.kCallStatusHandler;
     message.content = {
-      ALDownloaderConstant.kHandlerId: statusHandlerId,
+      ALDownloaderConstant.kHandlerId: handlerId,
       ALDownloaderConstant.kStatus: status
     };
 
@@ -96,12 +95,12 @@ abstract class ALDownloaderHeader {
 
   /// A convenient function that supports to process the progress handler on coming root isolate
   static void processProgressHandlerOnComingRootIsolate(
-      String scope, String progressHandlerId, double progress) {
+      String scope, String handlerId, double progress) {
     final message = ALDownloaderMessage();
     message.scope = scope;
     message.action = ALDownloaderConstant.kCallProgressHandler;
     message.content = {
-      ALDownloaderConstant.kHandlerId: progressHandlerId,
+      ALDownloaderConstant.kHandlerId: handlerId,
       ALDownloaderConstant.kProgress: progress
     };
 
@@ -150,33 +149,33 @@ abstract class ALDownloaderHeader {
     portALToRoot?.send(message);
   }
 
-  /// A convenient function that supports to call the downloader handler interface
+  /// A convenient function that supports to call the handler interface
   static void callDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface? downloaderHandlerInterface,
+      ALDownloaderHandlerInterface? handlerInterface,
       bool isNeedCallProgressHandler,
       bool isNeedCallSucceededHandler,
       bool isNeedCallFailedHandler,
       bool isNeedCallPausedHandler,
       double progress) {
-    if (downloaderHandlerInterface == null) return;
+    if (handlerInterface == null) return;
 
     if (isNeedCallProgressHandler) {
-      final f = downloaderHandlerInterface.progressHandler;
+      final f = handlerInterface.progressHandler;
       if (f != null) f(progress);
     }
 
     if (isNeedCallSucceededHandler) {
-      final f = downloaderHandlerInterface.succeededHandler;
+      final f = handlerInterface.succeededHandler;
       if (f != null) f();
     }
 
     if (isNeedCallFailedHandler) {
-      final f = downloaderHandlerInterface.failedHandler;
+      final f = handlerInterface.failedHandler;
       if (f != null) f();
     }
 
     if (isNeedCallPausedHandler) {
-      final f = downloaderHandlerInterface.pausedHandler;
+      final f = handlerInterface.pausedHandler;
       if (f != null) f();
     }
   }

@@ -51,7 +51,7 @@ abstract class ALDownloaderIMP {
       String? fileName,
       Map<String, String>? headers,
       bool redownloadIfNeeded = false,
-      ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
+      ALDownloaderHandlerInterface? handlerInterface}) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
     message.action = ALDownloaderConstant.kDownload;
@@ -64,10 +64,10 @@ abstract class ALDownloaderIMP {
     };
 
     ALDownloaderHandlerInterfaceId? id;
-    if (downloaderHandlerInterface != null) {
+    if (handlerInterface != null) {
       id = ALDownloaderHeader.uuid.v1();
-      _idDynamicKVs[id] = downloaderHandlerInterface;
-      message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
+      _idDynamicKVs[id] = handlerInterface;
+      message.content[ALDownloaderConstant.kHandlerInterfaceId] = id;
     }
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
@@ -75,64 +75,60 @@ abstract class ALDownloaderIMP {
     return id;
   }
 
-  static ALDownloaderHandlerInterfaceId addDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
+  static ALDownloaderHandlerInterfaceId addHandlerInterface(
+      ALDownloaderHandlerInterface handlerInterface, String url) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
-    message.action = ALDownloaderConstant.kAddDownloaderHandlerInterface;
+    message.action = ALDownloaderConstant.kAddHandlerInterface;
     message.content = <String, dynamic>{ALDownloaderConstant.kUrl: url};
 
     final id = ALDownloaderHeader.uuid.v1();
-    _idDynamicKVs[id] = downloaderHandlerInterface;
-    message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
+    _idDynamicKVs[id] = handlerInterface;
+    message.content[ALDownloaderConstant.kHandlerInterfaceId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
 
     return id;
   }
 
-  static ALDownloaderHandlerInterfaceId addForeverDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
+  static ALDownloaderHandlerInterfaceId addForeverHandlerInterface(
+      ALDownloaderHandlerInterface handlerInterface, String url) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
-    message.action = ALDownloaderConstant.kAddForeverDownloaderHandlerInterface;
+    message.action = ALDownloaderConstant.kAddForeverHandlerInterface;
     message.content = <String, dynamic>{ALDownloaderConstant.kUrl: url};
 
     final id = ALDownloaderHeader.uuid.v1();
-    _idDynamicKVs[id] = downloaderHandlerInterface;
-    message.content[ALDownloaderConstant.kDownloaderHandlerInterfaceId] = id;
+    _idDynamicKVs[id] = handlerInterface;
+    message.content[ALDownloaderConstant.kHandlerInterfaceId] = id;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
 
     return id;
   }
 
-  static void removeDownloaderHandlerInterfaceForUrl(String url) {
+  static void removeHandlerInterfaceForUrl(String url) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
-    message.action =
-        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForUrl;
+    message.action = ALDownloaderConstant.kRemoveHandlerInterfaceForUrl;
     message.content = {ALDownloaderConstant.kUrl: url};
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
-  static void removeDownloaderHandlerInterfaceForId(
-      ALDownloaderHandlerInterfaceId id) {
+  static void removeHandlerInterfaceForId(ALDownloaderHandlerInterfaceId id) {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
-    message.action =
-        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForId;
-    message.content = {ALDownloaderConstant.kDownloaderHandlerInterfaceId: id};
+    message.action = ALDownloaderConstant.kRemoveHandlerInterfaceForId;
+    message.content = {ALDownloaderConstant.kHandlerInterfaceId: id};
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
 
-  static void removeDownloaderHandlerInterfaceForAll() {
+  static void removeHandlerInterfaceForAll() {
     final message = ALDownloaderMessage();
     message.scope = ALDownloaderConstant.kALDownloaderIMP;
-    message.action =
-        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForAll;
+    message.action = ALDownloaderConstant.kRemoveHandlerInterfaceForAll;
 
     ALDownloaderHeader.sendMessageFromRootToALReliably(message);
   }
@@ -267,11 +263,11 @@ abstract class ALDownloaderIMP {
       String? fileName,
       Map<String, String>? headers,
       bool redownloadIfNeeded = false,
-      ALDownloaderHandlerInterface? downloaderHandlerInterface}) {
+      ALDownloaderHandlerInterface? handlerInterface}) {
     String? id;
-    if (downloaderHandlerInterface != null) {
+    if (handlerInterface != null) {
       id = ALDownloaderHeader.uuid.v1();
-      _idDynamicKVs[id] = downloaderHandlerInterface;
+      _idDynamicKVs[id] = handlerInterface;
     }
 
     _qDownload(url,
@@ -279,32 +275,31 @@ abstract class ALDownloaderIMP {
         fileName: fileName,
         headers: headers,
         redownloadIfNeeded: redownloadIfNeeded,
-        downloaderHandlerInterfaceId: id);
+        handlerInterfaceId: id);
   }
 
-  static ALDownloaderHandlerInterfaceId cAddDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
+  static ALDownloaderHandlerInterfaceId cAddHandlerInterface(
+      ALDownloaderHandlerInterface handlerInterface, String url) {
     final id = ALDownloaderHeader.uuid.v1();
-    _idDynamicKVs[id] = downloaderHandlerInterface;
+    _idDynamicKVs[id] = handlerInterface;
 
-    _qAddDownloaderHandlerInterface(id, url, isInner: false);
+    _qAddHandlerInterface(id, url, isInner: false);
 
     return id;
   }
 
-  static void cAddForeverDownloaderHandlerInterface(
-      ALDownloaderHandlerInterface downloaderHandlerInterface, String url) {
+  static void caddForeverHandlerInterface(
+      ALDownloaderHandlerInterface handlerInterface, String url) {
     final id = ALDownloaderHeader.uuid.v1();
-    _idDynamicKVs[id] = downloaderHandlerInterface;
-    _qAddForeverDownloaderHandlerInterface(id, url);
+    _idDynamicKVs[id] = handlerInterface;
+    _qaddForeverHandlerInterface(id, url);
   }
 
-  static void cRemoveDownloaderHandlerInterfaceForUrl(String url) =>
-      _qRemoveDownloaderHandlerInterfaceForUrl(url);
+  static void cremoveHandlerInterfaceForUrl(String url) =>
+      _qremoveHandlerInterfaceForUrl(url);
 
-  static void cRemoveDownloaderHandlerInterfaceForId(
-          ALDownloaderHandlerInterfaceId id) =>
-      _qRemoveDownloaderHandlerInterfaceForId(id);
+  static void cRemoveHandlerInterfaceForId(ALDownloaderHandlerInterfaceId id) =>
+      _qRemoveHandlerInterfaceForId(id);
 
   static void cPause(String url) => _qPause(url);
 
@@ -350,40 +345,37 @@ abstract class ALDownloaderIMP {
       String? fileName,
       Map<String, String>? headers,
       bool redownloadIfNeeded = false,
-      String? downloaderHandlerInterfaceId,
+      String? handlerInterfaceId,
       bool isNeedUpdateInputs = true}) {
     _queue.add(() => _download(url,
         directoryPath: directoryPath,
         fileName: fileName,
         headers: headers,
         redownloadIfNeeded: redownloadIfNeeded,
-        downloaderHandlerInterfaceId: downloaderHandlerInterfaceId,
+        handlerInterfaceId: handlerInterfaceId,
         isNeedUpdateInputs: isNeedUpdateInputs));
   }
 
-  static void _qAddDownloaderHandlerInterface(
-      String downloaderHandlerInterfaceId, String url,
+  static void _qAddHandlerInterface(String handlerInterfaceId, String url,
       {bool isInner = true}) {
     _queue.add(() async {
-      final aBinder =
-          _ALDownloaderBinder(url, downloaderHandlerInterfaceId, false);
+      final aBinder = _ALDownloaderBinder(url, handlerInterfaceId, false);
       aBinder.isInner = isInner;
 
       _addBinder(url, aBinder);
     });
   }
 
-  static void _qAddForeverDownloaderHandlerInterface(
-      String downloaderHandlerInterfaceId, String url) {
+  static void _qaddForeverHandlerInterface(
+      String handlerInterfaceId, String url) {
     _queue.add(() async {
-      final aBinder =
-          _ALDownloaderBinder(url, downloaderHandlerInterfaceId, true);
+      final aBinder = _ALDownloaderBinder(url, handlerInterfaceId, true);
 
       _addBinder(url, aBinder);
     });
   }
 
-  static void _qRemoveDownloaderHandlerInterfaceForUrl(String url) {
+  static void _qremoveHandlerInterfaceForUrl(String url) {
     _queue.add(() async {
       final binders = _urlBinderKVs[url];
       if (binders == null) return;
@@ -392,8 +384,8 @@ abstract class ALDownloaderIMP {
       aList.addAll(binders);
       for (final element in aList) {
         if (element.isInner && element.url == url) {
-          _callInterface(element.downloaderHandlerInterfaceId, false, false,
-              false, false, 0,
+          _callInterface(
+              element.handlerInterfaceId, false, false, false, false, 0,
               isNeedRemoveInterface: true);
           binders.remove(element);
         }
@@ -403,8 +395,7 @@ abstract class ALDownloaderIMP {
     });
   }
 
-  static void _qRemoveDownloaderHandlerInterfaceForId(
-      ALDownloaderHandlerInterfaceId id) {
+  static void _qRemoveHandlerInterfaceForId(ALDownloaderHandlerInterfaceId id) {
     _queue.add(() async {
       final aMap = <String, List<_ALDownloaderBinder>>{};
       aMap.addAll(_urlBinderKVs);
@@ -416,9 +407,9 @@ abstract class ALDownloaderIMP {
         aList.addAll(element);
 
         for (final element1 in aList) {
-          if (element1.downloaderHandlerInterfaceId == id) {
-            _callInterface(element1.downloaderHandlerInterfaceId, false, false,
-                false, false, 0,
+          if (element1.handlerInterfaceId == id) {
+            _callInterface(
+                element1.handlerInterfaceId, false, false, false, false, 0,
                 isNeedRemoveInterface: true);
             element.remove(element1);
             if (element.length == 0) _urlBinderKVs.remove(key);
@@ -429,7 +420,7 @@ abstract class ALDownloaderIMP {
     });
   }
 
-  static void _qRemoveDownloaderHandlerInterfaceForAll() {
+  static void _qRemoveHandlerInterfaceForAll() {
     _queue.add(() async {
       final aMap = <String, List<_ALDownloaderBinder>>{};
       aMap.addAll(_urlBinderKVs);
@@ -442,8 +433,8 @@ abstract class ALDownloaderIMP {
 
         for (final element1 in aList) {
           if (element1.isInner) {
-            _callInterface(element1.downloaderHandlerInterfaceId, false, false,
-                false, false, 0,
+            _callInterface(
+                element1.handlerInterfaceId, false, false, false, false, 0,
                 isNeedRemoveInterface: true);
             element.remove(element1);
             if (element.length == 0) _urlBinderKVs.remove(key);
@@ -474,26 +465,24 @@ abstract class ALDownloaderIMP {
 
   static void _qRemoveAll() => _queue.add(() => _removeAll());
 
-  static Future<void> _qGetStatusForUrl(
-      String statusHandlerId, String url) async {
+  static Future<void> _qGetStatusForUrl(String handlerId, String url) async {
     final status = await _qGetStatusPurelyForUrl(url);
-    _processStatusHandlerOnComingRootIsolate(statusHandlerId, status);
+    _processStatusHandlerOnComingRootIsolate(handlerId, status);
   }
 
-  static Future<void> _qGetProgressForUrl(
-      String progressHandlerId, String url) async {
+  static Future<void> _qGetProgressForUrl(String handlerId, String url) async {
     final progress = await _qGetProgressPurelyForUrl(url);
-    _processProgressHandlerOnComingRootIsolate(progressHandlerId, progress);
+    _processProgressHandlerOnComingRootIsolate(handlerId, progress);
   }
 
-  static Future<void> _qGetTaskForUrl(String taskHandlerId, String url) async {
+  static Future<void> _qGetTaskForUrl(String handlerId, String url) async {
     final task = await _qGetTaskPurelyForUrl(url);
-    _processTaskHandlerOnComingRootIsolate(taskHandlerId, task);
+    _processTaskHandlerOnComingRootIsolate(handlerId, task);
   }
 
-  static Future<void> _qGetTasks(String tasksHandlerId) async {
+  static Future<void> _qGetTasks(String handlerId) async {
     final tasks = await _qGetTasksPurely();
-    _processTasksHandlerOnComingRootIsolate(tasksHandlerId, tasks);
+    _processTasksHandlerOnComingRootIsolate(handlerId, tasks);
   }
 
   static Future<void> _initialize() async {
@@ -516,11 +505,10 @@ abstract class ALDownloaderIMP {
       String? fileName,
       Map<String, String>? headers,
       bool redownloadIfNeeded = false,
-      String? downloaderHandlerInterfaceId,
+      String? handlerInterfaceId,
       bool isNeedUpdateInputs = true}) async {
-    if (downloaderHandlerInterfaceId != null) {
-      final aBinder =
-          _ALDownloaderBinder(url, downloaderHandlerInterfaceId, false);
+    if (handlerInterfaceId != null) {
+      final aBinder = _ALDownloaderBinder(url, handlerInterfaceId, false);
       _addBinder(url, aBinder);
     }
 
@@ -971,7 +959,7 @@ abstract class ALDownloaderIMP {
     final action = message.action;
     final content = message.content;
     if (action == ALDownloaderConstant.kCallInterface) {
-      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
+      final id = content[ALDownloaderConstant.kHandlerInterfaceId];
       final isNeedCallProgressHandler =
           content[ALDownloaderConstant.kIsNeedCallProgressHandler];
       final isNeedCallSucceededHandler =
@@ -1041,26 +1029,22 @@ abstract class ALDownloaderIMP {
       final frequentEnabled = content[ALDownloaderConstant.kFrequentEnabled];
       ALDownloaderPrintConfig.enabled = enabled;
       ALDownloaderPrintConfig.frequentEnabled = frequentEnabled;
-    } else if (action == ALDownloaderConstant.kAddDownloaderHandlerInterface) {
+    } else if (action == ALDownloaderConstant.kAddHandlerInterface) {
       final url = content[ALDownloaderConstant.kUrl];
-      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
-      _qAddDownloaderHandlerInterface(id, url);
-    } else if (action ==
-        ALDownloaderConstant.kAddForeverDownloaderHandlerInterface) {
+      final id = content[ALDownloaderConstant.kHandlerInterfaceId];
+      _qAddHandlerInterface(id, url);
+    } else if (action == ALDownloaderConstant.kAddForeverHandlerInterface) {
       final url = content[ALDownloaderConstant.kUrl];
-      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
-      _qAddForeverDownloaderHandlerInterface(id, url);
-    } else if (action ==
-        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForUrl) {
+      final id = content[ALDownloaderConstant.kHandlerInterfaceId];
+      _qaddForeverHandlerInterface(id, url);
+    } else if (action == ALDownloaderConstant.kRemoveHandlerInterfaceForUrl) {
       final url = content[ALDownloaderConstant.kUrl];
-      _qRemoveDownloaderHandlerInterfaceForUrl(url);
-    } else if (action ==
-        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForId) {
-      final id = content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
-      _qRemoveDownloaderHandlerInterfaceForId(id);
-    } else if (action ==
-        ALDownloaderConstant.kRemoveDownloaderHandlerInterfaceForAll) {
-      _qRemoveDownloaderHandlerInterfaceForAll();
+      _qremoveHandlerInterfaceForUrl(url);
+    } else if (action == ALDownloaderConstant.kRemoveHandlerInterfaceForId) {
+      final id = content[ALDownloaderConstant.kHandlerInterfaceId];
+      _qRemoveHandlerInterfaceForId(id);
+    } else if (action == ALDownloaderConstant.kRemoveHandlerInterfaceForAll) {
+      _qRemoveHandlerInterfaceForAll();
     } else {
       if (ALDownloaderHeader.initializedCompleter.isCompleted) {
         _doWorkWhichMustBeAfterInitializedOnALIsolate(message);
@@ -1078,8 +1062,8 @@ abstract class ALDownloaderIMP {
 
     if (action == ALDownloaderConstant.kDownload) {
       final url = content[ALDownloaderConstant.kUrl];
-      final downloaderHandlerInterfaceId =
-          content[ALDownloaderConstant.kDownloaderHandlerInterfaceId];
+      final handlerInterfaceId =
+          content[ALDownloaderConstant.kHandlerInterfaceId];
       final directoryPath = content[ALDownloaderConstant.kDirectoryPath];
       final fileName = content[ALDownloaderConstant.kFileName];
       final headers = content[ALDownloaderConstant.kHeaders];
@@ -1090,7 +1074,7 @@ abstract class ALDownloaderIMP {
           fileName: fileName,
           headers: headers,
           redownloadIfNeeded: redownloadIfNeeded,
-          downloaderHandlerInterfaceId: downloaderHandlerInterfaceId);
+          handlerInterfaceId: handlerInterfaceId);
     } else if (action == ALDownloaderConstant.kPause) {
       final url = content[ALDownloaderConstant.kUrl];
       _qPause(url);
@@ -1491,9 +1475,8 @@ abstract class ALDownloaderIMP {
     if (binders == null) return;
 
     for (final element in binders) {
-      final downloaderHandlerInterfaceId = element.downloaderHandlerInterfaceId;
-      _callInterface(
-          downloaderHandlerInterfaceId, true, false, false, false, progress);
+      final handlerInterfaceId = element.handlerInterfaceId;
+      _callInterface(handlerInterfaceId, true, false, false, false, progress);
     }
   }
 
@@ -1505,9 +1488,8 @@ abstract class ALDownloaderIMP {
     aList.addAll(binders);
 
     for (final element in aList) {
-      final downloaderHandlerInterfaceId = element.downloaderHandlerInterfaceId;
-      _callInterface(
-          downloaderHandlerInterfaceId, true, true, false, false, progress,
+      final handlerInterfaceId = element.handlerInterfaceId;
+      _callInterface(handlerInterfaceId, true, true, false, false, progress,
           isNeedRemoveInterface: !element.isForever);
       if (!element.isForever) binders.remove(element);
     }
@@ -1523,9 +1505,8 @@ abstract class ALDownloaderIMP {
     aList.addAll(binders);
 
     for (final element in aList) {
-      final downloaderHandlerInterfaceId = element.downloaderHandlerInterfaceId;
-      _callInterface(
-          downloaderHandlerInterfaceId, true, false, true, false, progress,
+      final handlerInterfaceId = element.handlerInterfaceId;
+      _callInterface(handlerInterfaceId, true, false, true, false, progress,
           isNeedRemoveInterface: !element.isForever);
       if (!element.isForever) binders.remove(element);
     }
@@ -1538,17 +1519,17 @@ abstract class ALDownloaderIMP {
     if (binders == null) return;
 
     for (final element in binders) {
-      final downloaderHandlerInterfaceId = element.downloaderHandlerInterfaceId;
+      final handlerInterfaceId = element.handlerInterfaceId;
       bool isNeedCallProgressHandler = progress > -0.01;
 
-      _callInterface(downloaderHandlerInterfaceId, isNeedCallProgressHandler,
-          false, false, true, progress);
+      _callInterface(handlerInterfaceId, isNeedCallProgressHandler, false,
+          false, true, progress);
     }
   }
 
   /// Call interface for all isolates
   static void _callInterface(
-      String downloaderHandlerInterfaceId,
+      String handlerInterfaceId,
       bool isNeedCallProgressHandler,
       bool isNeedCallSucceededHandler,
       bool isNeedCallFailedHandler,
@@ -1558,7 +1539,7 @@ abstract class ALDownloaderIMP {
     // Call interface for root isolate
     ALDownloaderHeader.processDownloaderHandlerInterfaceOnComingRootIsolate(
         ALDownloaderConstant.kALDownloaderIMP,
-        downloaderHandlerInterfaceId,
+        handlerInterfaceId,
         isNeedCallProgressHandler,
         isNeedCallSucceededHandler,
         isNeedCallFailedHandler,
@@ -1568,7 +1549,7 @@ abstract class ALDownloaderIMP {
 
     // Call interface for current isolate
     _processDownloaderHandlerInterfaceOnCurrentIsolate(
-        downloaderHandlerInterfaceId,
+        handlerInterfaceId,
         isNeedCallProgressHandler,
         isNeedCallSucceededHandler,
         isNeedCallFailedHandler,
@@ -1577,40 +1558,38 @@ abstract class ALDownloaderIMP {
   }
 
   static void _processStatusHandlerOnComingRootIsolate(
-      String statusHandlerId, ALDownloaderStatus status) {
+      String handlerId, ALDownloaderStatus status) {
     ALDownloaderHeader.processStatusHandlerOnComingRootIsolate(
-        ALDownloaderConstant.kALDownloaderIMP, statusHandlerId, status);
+        ALDownloaderConstant.kALDownloaderIMP, handlerId, status);
   }
 
   static void _processProgressHandlerOnComingRootIsolate(
-      String progressHandlerId, double progress) {
+      String handlerId, double progress) {
     ALDownloaderHeader.processProgressHandlerOnComingRootIsolate(
-        ALDownloaderConstant.kALDownloaderIMP, progressHandlerId, progress);
+        ALDownloaderConstant.kALDownloaderIMP, handlerId, progress);
   }
 
   static void _processTaskHandlerOnComingRootIsolate(
-      String taskHandlerId, ALDownloaderTask? task) {
-    ALDownloaderHeader.processTaskHandlerOnComingRootIsolate(
-        taskHandlerId, task);
+      String handlerId, ALDownloaderTask? task) {
+    ALDownloaderHeader.processTaskHandlerOnComingRootIsolate(handlerId, task);
   }
 
   static void _processTasksHandlerOnComingRootIsolate(
-      String tasksHandlerId, List<ALDownloaderTask> tasks) {
+      String handlerId, List<ALDownloaderTask> tasks) {
     ALDownloaderHeader.processTasksHandlerOnComingRootIsolate(
-        ALDownloaderConstant.kALDownloaderIMP, tasksHandlerId, tasks);
+        ALDownloaderConstant.kALDownloaderIMP, handlerId, tasks);
   }
 
   static void _processDownloaderHandlerInterfaceOnCurrentIsolate(
-      String downloaderHandlerInterfaceId,
+      String handlerInterfaceId,
       bool isNeedCallProgressHandler,
       bool isNeedCallSucceededHandler,
       bool isNeedCallFailedHandler,
       bool isNeedCallPausedHandler,
       double progress) {
-    final downloaderHandlerInterface =
-        _idDynamicKVs[downloaderHandlerInterfaceId];
+    final handlerInterface = _idDynamicKVs[handlerInterfaceId];
     ALDownloaderHeader.callDownloaderHandlerInterface(
-        downloaderHandlerInterface,
+        handlerInterface,
         isNeedCallProgressHandler,
         isNeedCallSucceededHandler,
         isNeedCallFailedHandler,
@@ -1757,17 +1736,16 @@ abstract class ALDownloaderIMP {
   ALDownloaderIMP._();
 }
 
-/// A binder for binding some elements such as [url], [downloaderHandlerInterfaceId] and more
+/// A binder for binding some elements such as [url], [handlerInterfaceId] and more
 class _ALDownloaderBinder {
   final String url;
 
-  final ALDownloaderHandlerInterfaceId downloaderHandlerInterfaceId;
+  final ALDownloaderHandlerInterfaceId handlerInterfaceId;
 
   final bool isForever;
 
   /// Whether [_ALDownloaderBinder] generates by ALDownloader inner
   bool isInner = true;
 
-  _ALDownloaderBinder(
-      this.url, this.downloaderHandlerInterfaceId, this.isForever);
+  _ALDownloaderBinder(this.url, this.handlerInterfaceId, this.isForever);
 }

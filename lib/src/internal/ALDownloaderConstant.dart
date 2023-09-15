@@ -1,17 +1,14 @@
 abstract class ALDownloaderConstant {
   static final kInitiallize = 'initialize';
   static final kDownload = 'download';
-  static final kDownloaderHandlerInterfaceId = 'downloaderHandlerInterfaceId';
+  static final kHandlerInterfaceId = 'handlerInterfaceId';
   static final kHeaders = 'headers';
   static final kUrl = 'url';
   static final kUrls = 'urls';
-  static final kAddDownloaderHandlerInterface = 'addDownloaderHandlerInterface';
-  static final kAddForeverDownloaderHandlerInterface =
-      'addForeverDownloaderHandlerInterface';
-  static final kRemoveDownloaderHandlerInterfaceForUrl =
-      'removeDownloaderHandlerInterfaceForUrl';
-  static final kRemoveDownloaderHandlerInterfaceForAll =
-      'removeDownloaderHandlerInterfaceForAll';
+  static final kAddHandlerInterface = 'addHandlerInterface';
+  static final kAddForeverHandlerInterface = 'addForeverHandlerInterface';
+  static final kRemoveHandlerInterfaceForUrl = 'removeHandlerInterfaceForUrl';
+  static final kRemoveHandlerInterfaceForAll = 'removeHandlerInterfaceForAll';
   static final kPause = 'pause';
   static final kPauseAll = 'pauseAll';
   static final kCancel = 'cancel';
@@ -39,8 +36,7 @@ abstract class ALDownloaderConstant {
   static final kALDownloaderBatcherIMP = 'ALDownloaderBatcherIMP';
   static final kDownloadUrlsWithVOs = 'downloadUrlsWithVOs';
   static final kALDownloaderBatcherInputVOs = 'ALDownloaderBatcherInputVOs';
-  static final kRemoveDownloaderHandlerInterfaceForId =
-      'removeDownloaderHandlerInterfaceForId';
+  static final kRemoveHandlerInterfaceForId = 'removeHandlerInterfaceForId';
   static final kGlobalScope = 'globalScope';
   static final kGetStatusForUrl = 'getStatusForUrl';
   static final kGetStatusForUrls = 'getStatusForUrls';
