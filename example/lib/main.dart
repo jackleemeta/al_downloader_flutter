@@ -177,17 +177,17 @@ class _MyHomePageState extends State<MyHomePage> {
     ALDownloader.configurePrint(false, frequentEnabled: false);
 
     // It is for download. It is a forever interface.
-    addForeverDownloaderHandlerInterface();
+    addForeverHandlerInterface();
 
     // It is for batch download. It is an one-off interface.
-    addBatchDownloaderHandlerInterface();
+    addHandlerInterfaceForBatch();
   }
 
   /// Batch download
   void batchDownload() {
     final urls = models.map((e) => e.url).toList();
     final id = ALDownloaderBatcher.download(urls,
-        downloaderHandlerInterface:
+        handlerInterface:
             ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint('ALDownloader | batch | download progress = $progress\n');
         }, succeededHandler: () {
@@ -198,14 +198,14 @@ class _MyHomePageState extends State<MyHomePage> {
           debugPrint('ALDownloader | batch | download paused\n');
         }));
 
-    if (id != null) _batchDownloaderHandlerInterfaceIds.add(id);
+    if (id != null) _handlerInterfaceIdsForBatch.add(id);
   }
 
-  /// Add a forever downloader handler interface
-  void addForeverDownloaderHandlerInterface() {
+  /// Add a forever handler interface
+  void addForeverHandlerInterface() {
     for (final model in models) {
       final url = model.url;
-      final id = ALDownloader.addForeverDownloaderHandlerInterface(
+      final id = ALDownloader.addForeverHandlerInterface(
           ALDownloaderHandlerInterface(progressHandler: (progress) {
             debugPrint(
                 'ALDownloader | download progress = $progress, url = $url\n');
@@ -236,14 +236,14 @@ class _MyHomePageState extends State<MyHomePage> {
           }),
           url);
 
-      _downloaderHandlerInterfaceIds.add(id);
+      _handlerInterfaceIds.add(id);
     }
   }
 
-  /// Add a downloader handler interface for batch
-  void addBatchDownloaderHandlerInterface() {
+  /// Add a handler interface for batch
+  void addHandlerInterfaceForBatch() {
     final urls = models.map((e) => e.url).toList();
-    final id = ALDownloaderBatcher.addDownloaderHandlerInterface(
+    final id = ALDownloaderBatcher.addHandlerInterface(
         ALDownloaderHandlerInterface(progressHandler: (progress) {
           debugPrint('ALDownloader | batch | download progress = $progress\n');
         }, succeededHandler: () {
@@ -255,24 +255,23 @@ class _MyHomePageState extends State<MyHomePage> {
         }),
         urls);
 
-    _batchDownloaderHandlerInterfaceIds.add(id);
+    _handlerInterfaceIdsForBatch.add(id);
   }
 
-  /// Remove downloader handler interface for batch
-  void removeBatchDownloaderHandlerInterface() {
-    for (final element in _batchDownloaderHandlerInterfaceIds) {
-      ALDownloaderBatcher.removeDownloaderHandlerInterfaceForId(element);
+  /// Remove handler interface for batch
+  void removeHandlerInterfaceForBatch() {
+    for (final element in _handlerInterfaceIdsForBatch) {
+      ALDownloaderBatcher.removeHandlerInterfaceForId(element);
     }
 
-    _batchDownloaderHandlerInterfaceIds.clear();
+    _handlerInterfaceIdsForBatch.clear();
   }
 
   /// Manage [ALDownloaderHandlerInterface] by [ALDownloaderHandlerInterfaceId]
-  final _downloaderHandlerInterfaceIds = <ALDownloaderHandlerInterfaceId>[];
+  final _handlerInterfaceIds = <ALDownloaderHandlerInterfaceId>[];
 
   /// Manage batch [ALDownloaderHandlerInterface] by [ALDownloaderHandlerInterfaceId]
-  final _batchDownloaderHandlerInterfaceIds =
-      <ALDownloaderHandlerInterfaceId>[];
+  final _handlerInterfaceIdsForBatch = <ALDownloaderHandlerInterfaceId>[];
 }
 
 /* ----------------------------------------------Model class---------------------------------------------- */

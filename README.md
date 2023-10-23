@@ -55,7 +55,7 @@ ALDownloader.configurePrint(true, frequentEnabled: false);
 ALDownloader.download(url,
     directoryPath: directoryPath,
     fileName: fileName,
-    downloaderHandlerInterface:
+    handlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
           'ALDownloader | download progress = $progress, url = $url\n');
@@ -68,9 +68,9 @@ ALDownloader.download(url,
     }));
 ```
 
-#### Add a downloader handler interface
+#### Add a handler interface
 ```
-ALDownloader.addDownloaderHandlerInterface(
+ALDownloader.addHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
           'ALDownloader | download progress = $progress, url = $url\n');
@@ -84,9 +84,9 @@ ALDownloader.addDownloaderHandlerInterface(
     url);
 ```
 
-#### Add a forever downloader handler interface
+#### Add a forever handler interface
 ```
-ALDownloader.addForeverDownloaderHandlerInterface(
+ALDownloader.addForeverHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
           'ALDownloader | download progress = $progress, url = $url\n');
@@ -100,9 +100,9 @@ ALDownloader.addForeverDownloaderHandlerInterface(
     url);
 ```
 
-#### Remove downloader handler interface
+#### Remove handler interface
 ```
-ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
+ALDownloader.removeHandlerInterfaceForUrl(url);
 ```
 
 #### Pause download
@@ -148,7 +148,7 @@ final tasks = await ALDownloader.tasks;
 #### Batch download
 ```
 ALDownloaderBatcher.download(urls,
-    downloaderHandlerInterface:
+    handlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint('ALDownloader | batch | download progress = $progress\n');
     }, succeededHandler: () {
@@ -160,9 +160,9 @@ ALDownloaderBatcher.download(urls,
     }));
 ```
 
-#### Add a downloader handler interface for batch
+#### Add a handler interface for batch
 ```
-ALDownloaderBatcher.addDownloaderHandlerInterface(
+ALDownloaderBatcher.addHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint('ALDownloader | batch | download progress = $progress\n');
     }, succeededHandler: () {

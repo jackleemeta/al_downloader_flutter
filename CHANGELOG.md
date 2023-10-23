@@ -213,7 +213,7 @@
 
 ## 1.3.2
 
-- optimize downloader handler
+- optimize handler
 - optimize example
 - fix bug
 

@@ -53,7 +53,7 @@ ALDownloader.configurePrint(true, frequentEnabled: false);
 ALDownloader.download(url,
     directoryPath: directoryPath,
     fileName: fileName,
-    downloaderHandlerInterface:
+    handlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
           'ALDownloader | 下载进度 = $progress, url = $url\n');
@@ -68,7 +68,7 @@ ALDownloader.download(url,
 
 #### 添加一个下载句柄池
 ```
-ALDownloader.addDownloaderHandlerInterface(
+ALDownloader.addHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
           'ALDownloader | 下载进度 = $progress, url = $url\n');
@@ -84,7 +84,7 @@ ALDownloader.addDownloaderHandlerInterface(
 
 #### 添加一个持久下载句柄池
 ```
-ALDownloader.addForeverDownloaderHandlerInterface(
+ALDownloader.addForeverHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint(
           'ALDownloader | 下载进度 = $progress, url = $url\n');
@@ -100,7 +100,7 @@ ALDownloader.addForeverDownloaderHandlerInterface(
 
 #### 移除下载句柄池
 ```
-ALDownloader.removeDownloaderHandlerInterfaceForUrl(url);
+ALDownloader.removeHandlerInterfaceForUrl(url);
 ```
 
 #### 暂停下载
@@ -146,7 +146,7 @@ final tasks = await ALDownloader.tasks;
 #### 批量下载
 ```
 ALDownloaderBatcher.download(urls,
-    downloaderHandlerInterface:
+    handlerInterface:
         ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint('ALDownloader | 批量 | 下载进度 = $progress\n');
     }, succeededHandler: () {
@@ -160,7 +160,7 @@ ALDownloaderBatcher.download(urls,
 
 #### 对批量下载添加一个下载句柄池
 ```
-ALDownloaderBatcher.addDownloaderHandlerInterface(
+ALDownloaderBatcher.addHandlerInterface(
     ALDownloaderHandlerInterface(progressHandler: (progress) {
       debugPrint('ALDownloader | 批量 | 下载进度 = $progress\n');
     }, succeededHandler: () {
