@@ -1,3 +1,7 @@
+## 1.8.0
+
+- update dependency
+
 ## 1.7.9
 
 - optimize getter
