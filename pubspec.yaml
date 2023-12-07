@@ -1,7 +1,7 @@
 name: al_downloader
 description: >-
   A URL-based flutter downloader that supports to download any type of file and automatically manages a lot of things.
-version: 1.8.2
+version: 1.8.3
 homepage: https://github.com/jackleemeta/al_downloader_flutter
 maintainer: jackleemeta (jackleemeta@outlook.com)
 
@@ -14,7 +14,7 @@ dependencies:
     sdk: flutter
   convert: ^3.0.1
   crypto: ^3.0.1
-  flutter_downloader: ^1.11.5
+  flutter_downloader: ">=1.10.2 <=1.11.1"
   path: ^1.8.0
   path_provider: ^2.0.9
   queue: ^3.1.0+2

@@ -23,7 +23,7 @@ If you need Chinese Document, click [here](README_CN.md).
 add the following line to your pubspec.yaml
 ```
 dependencies:
-  al_downloader: ^1.8.2
+  al_downloader: ^1.8.3
 ```
 
 run the following line with your command line
