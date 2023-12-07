@@ -1,3 +1,7 @@
+## 1.8.3
+
+- update dependency
+
 ## 1.8.2
 
 - update dependency
