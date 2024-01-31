@@ -514,7 +514,7 @@ abstract class ALDownloaderIMP {
 
     ALDownloaderInnerTask? task = _getTaskFromUrl(url);
 
-    if (task == null)
+    if (task == null || task.innerStatus == ALDownloaderInnerStatus.deprecated)
       task = _addOrUpdateTaskForUrl(url, '', ALDownloaderInnerStatus.prepared,
           0, null, null, ALDownloaderTaskWaitingPhase.unwaiting);
 
