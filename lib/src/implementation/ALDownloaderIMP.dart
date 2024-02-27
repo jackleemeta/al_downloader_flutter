@@ -514,12 +514,13 @@ abstract class ALDownloaderIMP {
 
     ALDownloaderInnerTask? task = _getTaskFromUrl(url);
 
-    if (task == null || task.innerStatus == ALDownloaderInnerStatus.deprecated)
+    if (task == null)
       task = _addOrUpdateTaskForUrl(url, '', ALDownloaderInnerStatus.prepared,
           0, null, null, ALDownloaderTaskWaitingPhase.unwaiting);
 
     if (isNeedUpdateInputs &&
         (task.innerStatus == ALDownloaderInnerStatus.prepared ||
+            task.innerStatus == ALDownloaderInnerStatus.deprecated ||
             redownloadIfNeeded)) {
       task.willParameters = {
         'headers': headers,
