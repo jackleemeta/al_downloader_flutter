@@ -1,3 +1,7 @@
+## 1.8.4
+
+- fix bug
+
 ## 1.8.3
 
 - update dependency
