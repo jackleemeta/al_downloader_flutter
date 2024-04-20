@@ -502,6 +502,7 @@ abstract class ALDownloaderIMP {
 
   static Future<void> _download(String url,
       {String? directoryPath,
+      String customData = '',
       String? fileName,
       Map<String, String>? headers,
       bool redownloadIfNeeded = false,
@@ -515,8 +516,15 @@ abstract class ALDownloaderIMP {
     ALDownloaderInnerTask? task = _getTaskFromUrl(url);
 
     if (task == null)
-      task = _addOrUpdateTaskForUrl(url, '', ALDownloaderInnerStatus.prepared,
-          0, null, null, ALDownloaderTaskWaitingPhase.unwaiting);
+      task = _addOrUpdateTaskForUrl(
+          url,
+          customData,
+          '',
+          ALDownloaderInnerStatus.prepared,
+          0,
+          null,
+          null,
+          ALDownloaderTaskWaitingPhase.unwaiting);
 
     if (isNeedUpdateInputs &&
         (task.innerStatus == ALDownloaderInnerStatus.prepared ||
@@ -597,8 +605,15 @@ abstract class ALDownloaderIMP {
         aldDebugPrint(
             'ALDownloader | try to download url, a download task of url generates succeeded, url = $url, taskId = $taskId, innerStatus = enqueued');
 
-        _addOrUpdateTaskForUrl(url, taskId, ALDownloaderInnerStatus.enqueued, 0,
-            fSavedDir, fFileName, task.waitingPhase);
+        _addOrUpdateTaskForUrl(
+            url,
+            customData,
+            taskId,
+            ALDownloaderInnerStatus.enqueued,
+            0,
+            fSavedDir,
+            fFileName,
+            task.waitingPhase);
         task.headers = fHeaders;
         task.redownloadIfNeeded = redownloadIfNeededInConsumable;
 
@@ -624,6 +639,7 @@ abstract class ALDownloaderIMP {
 
         _addOrUpdateTaskForUrl(
             url,
+            customData,
             taskIdForRetry,
             ALDownloaderInnerStatus.enqueued,
             progress,
@@ -650,6 +666,7 @@ abstract class ALDownloaderIMP {
 
         _addOrUpdateTaskForUrl(
             url,
+            customData,
             taskIdForResumption,
             Platform.isAndroid
                 ? ALDownloaderInnerStatus.paused
@@ -832,7 +849,8 @@ abstract class ALDownloaderIMP {
       ALDownloaderInnerTask task) {
     final status = _getStatusForTask(task);
     final file = ALDownloaderFile(task.savedDir ?? '', task.fileName ?? '');
-    final r = ALDownloaderTask(task.url, status, task.double_progress, file);
+    final r = ALDownloaderTask(
+        task.url, status, task.double_progress, file, task.customData);
     return r;
   }
 
@@ -909,6 +927,7 @@ abstract class ALDownloaderIMP {
   /// Add or update the task for [url].
   static ALDownloaderInnerTask _addOrUpdateTaskForUrl(
       String? url,
+      String customData,
       String taskId,
       ALDownloaderInnerStatus innerStatus,
       int progress,
@@ -933,7 +952,7 @@ abstract class ALDownloaderIMP {
     }
 
     if (task == null) {
-      task = ALDownloaderInnerTask(url);
+      task = ALDownloaderInnerTask(url, customData);
       task.savedDir = savedDir;
       task.fileName = fileName;
       task.taskId = taskId;
@@ -1170,8 +1189,8 @@ abstract class ALDownloaderIMP {
 
     final url = task.url;
 
-    _addOrUpdateTaskForUrl(url, taskId, innerStatus, progress, task.savedDir,
-        task.fileName, task.waitingPhase);
+    _addOrUpdateTaskForUrl(url, task.customData, taskId, innerStatus, progress,
+        task.savedDir, task.fileName, task.waitingPhase);
 
     _callHandlerForBusiness1(task);
 
@@ -1205,7 +1224,7 @@ abstract class ALDownloaderIMP {
         aldDebugPrint(
             'ALDownloader | _loadTasks, original url = $originalUrl, original taskId = $originalTaskId, original status = $originalStatus');
 
-        final task = ALDownloaderInnerTask(originalUrl);
+        final task = ALDownloaderInnerTask(originalUrl, '');
         task.taskId = originalTaskId;
 
         if (originalSavedDir.endsWith('/')) {
@@ -1405,6 +1424,7 @@ abstract class ALDownloaderIMP {
 
     _addOrUpdateTaskForUrl(
         task.url,
+        task.customData,
         taskId,
         ALDownloaderInnerStatus.pretendedPaused,
         0,
@@ -1430,8 +1450,8 @@ abstract class ALDownloaderIMP {
   static Future<void> _removeTask(ALDownloaderInnerTask task) async {
     final taskId = task.taskId;
 
-    _addOrUpdateTaskForUrl(task.url, taskId, ALDownloaderInnerStatus.deprecated,
-        0, null, null, task.waitingPhase);
+    _addOrUpdateTaskForUrl(task.url, task.customData, taskId,
+        ALDownloaderInnerStatus.deprecated, 0, null, null, task.waitingPhase);
 
     task.willParameters = null;
     task.headers = null;
@@ -1642,8 +1662,15 @@ abstract class ALDownloaderIMP {
       ALDownloaderInnerTask? task, ALDownloaderTaskWaitingPhase waitingPhase) {
     if (task == null) return;
 
-    _addOrUpdateTaskForUrl(task.url, task.taskId, task.innerStatus,
-        task.progress, task.savedDir, task.fileName, waitingPhase);
+    _addOrUpdateTaskForUrl(
+        task.url,
+        task.customData,
+        task.taskId,
+        task.innerStatus,
+        task.progress,
+        task.savedDir,
+        task.fileName,
+        waitingPhase);
 
     switch (waitingPhase) {
       case ALDownloaderTaskWaitingPhase.waiting:

@@ -5,6 +5,8 @@ import 'ALDownloaderTaskWaitingPhase.dart';
 class ALDownloaderInnerTask {
   final String url;
 
+  final String customData;
+
   String? savedDir;
 
   String? fileName;
@@ -61,5 +63,5 @@ class ALDownloaderInnerTask {
 
   int _progress = 0;
 
-  ALDownloaderInnerTask(this.url);
+  ALDownloaderInnerTask(this.url, this.customData);
 }

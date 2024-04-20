@@ -5,6 +5,8 @@ import 'ALDownloaderStatus.dart';
 class ALDownloaderTask {
   final String url;
 
+  final String customData;
+
   final ALDownloaderStatus status;
 
   final double progress;
@@ -12,5 +14,6 @@ class ALDownloaderTask {
   /// The physical path to [file] may not exist. If to check the physical path, use [ALDownloaderFileManager].
   final ALDownloaderFile file;
 
-  ALDownloaderTask(this.url, this.status, this.progress, this.file);
+  ALDownloaderTask(
+      this.url, this.status, this.progress, this.file, this.customData);
 }
