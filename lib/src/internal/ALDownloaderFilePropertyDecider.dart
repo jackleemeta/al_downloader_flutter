@@ -1,5 +1,7 @@
 import 'dart:io';
+
 import 'package:path/path.dart';
+
 import 'ALDownloaderPrint.dart';
 
 /// A file property decider
@@ -8,6 +10,9 @@ import 'ALDownloaderPrint.dart';
 ///
 /// Decide component directory path by type for file.
 abstract class ALDownloaderFilePropertyDecider {
+  /// Privatize constructor
+  ALDownloaderFilePropertyDecider._();
+
   /// Get file type model for url
   ///
   /// **parameters**
@@ -35,9 +40,6 @@ abstract class ALDownloaderFilePropertyDecider {
 
     return ALDownloaderFileTypeModel(ALDownloaderFileType.unknown, anExtension);
   }
-
-  /// Privatize constructor
-  ALDownloaderFilePropertyDecider._();
 }
 
 /// An enumeration of file type
@@ -48,35 +50,20 @@ enum ALDownloaderFileType {
   image,
   audio,
   video,
+  archive,
   other
-}
-
-/// An enumeration extension of file type
-extension ALDownloaderFileTypeExtension on ALDownloaderFileType {
-  /// Component directory path for file type
-  String? get componentDirectoryPath => _ALDownloaderFilePropertyDeciderConstant
-      .fileTypeComponentDirectoryPathKVs[this];
-
-  /// Component directory path for file type with [kComponentUnknownDirectoryPath] as placeholder
-  String get componentDirectoryPathWithUnknownAsPlaceholder =>
-      componentDirectoryPath ??
-      _ALDownloaderFilePropertyDeciderConstant.kComponentUnknownDirectoryPath;
-
-  /// File extension for file type
-  List<String>? get _typeExtensions =>
-      _ALDownloaderFilePropertyDeciderConstant.fileTypeExtensionsKVs[this];
 }
 
 /// A class of file type model
 class ALDownloaderFileTypeModel {
-  ALDownloaderFileTypeModel(this.type, this.description);
-
   ALDownloaderFileType type = ALDownloaderFileType.unknown;
 
   /// Description
   ///
   /// e.g. mp4 json webp wav
   String? description;
+
+  ALDownloaderFileTypeModel(this.type, this.description);
 }
 
 abstract class _ALDownloaderFilePropertyDeciderConstant {
@@ -87,6 +74,7 @@ abstract class _ALDownloaderFilePropertyDeciderConstant {
     ALDownloaderFileType.image: kComponentImageDirectoryPath,
     ALDownloaderFileType.audio: kComponentAudioDirectoryPath,
     ALDownloaderFileType.video: kComponentVideoDirectoryPath,
+    ALDownloaderFileType.archive: kComponentArchiveDirectoryPath,
     ALDownloaderFileType.other: kComponentOtherDirectoryPath
   };
 
@@ -97,6 +85,7 @@ abstract class _ALDownloaderFilePropertyDeciderConstant {
     ALDownloaderFileType.image: images,
     ALDownloaderFileType.audio: audios,
     ALDownloaderFileType.video: videos,
+    ALDownloaderFileType.archive: archives,
     ALDownloaderFileType.other: others
   };
 
@@ -136,6 +125,26 @@ abstract class _ALDownloaderFilePropertyDeciderConstant {
     '.bmp',
     '.pjpeg',
     '.avif'
+  ];
+
+  static final archives = [
+    '.zip',
+    '.rar',
+    '.7z',
+    '.tar',
+    '.gz',
+    '.bz2',
+    '.xz',
+    '.iso',
+    '.dmg',
+    '.lzma',
+    '.cab',
+    '.z',
+    '.jar',
+    '.war',
+    '.tar.gz',
+    '.tar.bz2',
+    '.tar.xz'
   ];
 
   static final audios = [
@@ -181,27 +190,46 @@ abstract class _ALDownloaderFilePropertyDeciderConstant {
 
   static final others = <String>[];
 
+  static final kComponentArchiveDirectoryPath =
+      kComponentParentDirectoryPath + 'archive' + '/';
+
   static final kComponentUnknownDirectoryPath =
-      kComponentParentDirectoryPath + 'al_unknown' + '/';
+      kComponentParentDirectoryPath + 'unknown' + '/';
 
   static final kComponentCommonDirectoryPath =
-      kComponentParentDirectoryPath + 'al_common' + '/';
+      kComponentParentDirectoryPath + 'common' + '/';
 
   static final kComponentDocumentDirectoryPath =
-      kComponentParentDirectoryPath + 'al_document' + '/';
+      kComponentParentDirectoryPath + 'document' + '/';
 
   static final kComponentImageDirectoryPath =
-      kComponentParentDirectoryPath + 'al_image' + '/';
+      kComponentParentDirectoryPath + 'image' + '/';
 
   static final kComponentAudioDirectoryPath =
-      kComponentParentDirectoryPath + 'al_audio' + '/';
+      kComponentParentDirectoryPath + 'audio' + '/';
 
   static final kComponentVideoDirectoryPath =
-      kComponentParentDirectoryPath + 'al_video' + '/';
+      kComponentParentDirectoryPath + 'video' + '/';
 
   static final kComponentOtherDirectoryPath =
-      kComponentParentDirectoryPath + 'al_other' + '/';
+      kComponentParentDirectoryPath + 'other' + '/';
 
   /// Component parent directory path
-  static final kComponentParentDirectoryPath = '/al_flutter/';
+  static final kComponentParentDirectoryPath = '/resource/';
+}
+
+/// An enumeration extension of file type
+extension ALDownloaderFileTypeExtension on ALDownloaderFileType {
+  /// Component directory path for file type
+  String? get componentDirectoryPath => _ALDownloaderFilePropertyDeciderConstant
+      .fileTypeComponentDirectoryPathKVs[this];
+
+  /// Component directory path for file type with [kComponentUnknownDirectoryPath] as placeholder
+  String get componentDirectoryPathWithUnknownAsPlaceholder =>
+      componentDirectoryPath ??
+      _ALDownloaderFilePropertyDeciderConstant.kComponentUnknownDirectoryPath;
+
+  /// File extension for file type
+  List<String>? get _typeExtensions =>
+      _ALDownloaderFilePropertyDeciderConstant.fileTypeExtensionsKVs[this];
 }
